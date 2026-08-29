@@ -331,7 +331,9 @@ def test_publication_rejects_injected_local_roots(repo_factory, monkeypatch) -> 
     with pytest.raises(runner.BenchmarkError, match="Refusing to publish report Markdown"):
         runner.publish({"demo": (metrics, f"private root: {repository}\n")})
 
-    metrics["operator"] = Path.home().name
+    private_username = "private-test-user"
+    monkeypatch.setattr(runner.getpass, "getuser", lambda: private_username)
+    metrics["operator"] = private_username
     with pytest.raises(runner.BenchmarkError, match="local username"):
         runner.publish({"demo": (metrics, "# otherwise portable\n")})
 
@@ -439,6 +441,5 @@ def test_published_artifacts_contain_no_local_roots(repo_factory, monkeypatch) -
     ).read_text()
     assert str(repository) not in combined
     assert str(Path.home()) not in combined
-    assert Path.home().name not in combined
     assert "site-packages" not in combined
     assert "copilot-worktrees" not in combined

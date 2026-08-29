@@ -1,0 +1,2339 @@
+{
+  "acquisition": {
+    "acquired_at_utc": "2026-08-29T13:35:23.809565+00:00",
+    "acquisition_wall_seconds": 0.060830167,
+    "commits": {
+      "base": "7f7bbe4569ea68e8dabee232eade069ef3310aea",
+      "head": "91de59c6c8abc8251e7af551cd4546cc964288af"
+    },
+    "inventory": {
+      "added_lines": 49,
+      "deleted_lines": 3,
+      "files": 3,
+      "hunks": 5,
+      "raw_patch_bytes": 3672
+    },
+    "licenses": [
+      {
+        "bytes": 1475,
+        "path": "LICENSE.txt",
+        "sha256": "9a8ad106a394e853bfe21f42f4e72d592819a22805d991b5f3275029292b658d",
+        "spdx": "BSD-3-Clause"
+      }
+    ],
+    "remote_verified": true,
+    "repository": "https://github.com/pallets/click.git",
+    "scenario_id": "click-optional-flag-value",
+    "schema": "shiftory.benchmark-acquisition/v1"
+  },
+  "environment": {
+    "dependencies": {
+      "graphora-kg": "0.2.1",
+      "jsonschema": "4.24.0",
+      "platformdirs": "4.3.7",
+      "shiftory": "0.1.0",
+      "tree-sitter": "0.25.2"
+    },
+    "executed_package_code_sha256": "e9279689384c1e9779fec8c85d19811b7d0bab64a360c56bcd1b425c135fe764",
+    "git": "git version 2.53.0",
+    "logical_cpu_count": 8,
+    "machine": "arm64",
+    "memory_bytes": 25769803776,
+    "os": "macOS-15.6.1-arm64-arm-64bit",
+    "processor": "arm",
+    "python": "3.11.6 (main, Jan 28 2025, 18:28:48) [Clang 16.0.0 (clang-1600.0.26.6)]",
+    "recorded_at_utc": "2026-08-29T13:35:29.190541+00:00",
+    "shiftory": "shiftory 0.1.0",
+    "shiftory_commit": "42e96ba5977b17fc0cfe9cc34e4de88ffb83ebf9",
+    "shiftory_distribution": "shiftory",
+    "shiftory_module": "src/shiftory/__init__.py",
+    "shiftory_worktree_dirty": false
+  },
+  "evidence_markdown_renderer": {
+    "distribution": "shiftory",
+    "module": "shiftory.render.evidence",
+    "module_file": "src/shiftory/render/evidence.py",
+    "module_sha256": "aca36323dfd709308c375325bc52544073cc06fd7162f098f0fc6cbab6b23f00",
+    "package_code_sha256": "e9279689384c1e9779fec8c85d19811b7d0bab64a360c56bcd1b425c135fe764",
+    "schema": "shiftory.benchmark-renderer/v1"
+  },
+  "execution": {
+    "distribution": "shiftory",
+    "import_root": "repository:src",
+    "module_file": "src/shiftory/__init__.py",
+    "package_code": {
+      "files": [
+        {
+          "bytes": 439,
+          "path": "shiftory/__init__.py",
+          "sha256": "61b8890fa18f809e9b658ebb78a6f0fc0329e89c8ab7eb398515f79a6d7ef992"
+        },
+        {
+          "bytes": 160,
+          "path": "shiftory/cache/__init__.py",
+          "sha256": "af5e3167b3dd6bbcbb49079ec5c3963aad74fa991436eba718fcb48fc9330996"
+        },
+        {
+          "bytes": 5148,
+          "path": "shiftory/cache/store.py",
+          "sha256": "4851cfc03a44a72c0c0c4f57cf206412ecb6a70a6d10bafec1c33acfdc4fd25d"
+        },
+        {
+          "bytes": 79,
+          "path": "shiftory/classify/__init__.py",
+          "sha256": "4fc70d52ca226081aad389f067c955f7b30c5e00ad7a8257f2b2ea083c5b61dc"
+        },
+        {
+          "bytes": 3046,
+          "path": "shiftory/classify/rules.py",
+          "sha256": "412b738927c7566271c02808c1c48c99557813390ae7fff44decf0262a05f574"
+        },
+        {
+          "bytes": 21931,
+          "path": "shiftory/cli.py",
+          "sha256": "8a2b251afcb0ce60324e851a44c209e3233e211653393ab5de1a33dec778541a"
+        },
+        {
+          "bytes": 72,
+          "path": "shiftory/diff/__init__.py",
+          "sha256": "982dc016b89cebf16bf68cf3f6a41ba261d43a59dde29d569aff5d99047e7dcb"
+        },
+        {
+          "bytes": 555,
+          "path": "shiftory/diff/identity.py",
+          "sha256": "c590ad5edb36628f8dbcecc2f2882563e088d8794eb4b7166c086c4cd8dae3ae"
+        },
+        {
+          "bytes": 26011,
+          "path": "shiftory/diff/parser.py",
+          "sha256": "3c3b3791811af03798080e41a33892e3f91e6de8f14210ba76ee206d5ac22c9f"
+        },
+        {
+          "bytes": 1671,
+          "path": "shiftory/errors.py",
+          "sha256": "6e79c8ed2b6d6d0e6e14555f04104faa89cc68d71b5c648c6cdf12b934e0fb2a"
+        },
+        {
+          "bytes": 137,
+          "path": "shiftory/evidence/__init__.py",
+          "sha256": "41292efa0ba4d2279ac94aef1e69fe5242ef92b1b998d83eb87c0e295f692581"
+        },
+        {
+          "bytes": 25540,
+          "path": "shiftory/evidence/builder.py",
+          "sha256": "5764fdf81b77000f9eb7c90beed5701631bf31189eafc1501f3563562e8d9059"
+        },
+        {
+          "bytes": 134,
+          "path": "shiftory/explain/__init__.py",
+          "sha256": "b17c156d020c9912df02483cb6b0cbcb73f786aa632a38e20e7d297a8299973a"
+        },
+        {
+          "bytes": 36564,
+          "path": "shiftory/explain/validator.py",
+          "sha256": "53ba3a4a073f5889ac9b77f1cf0c0de136d9c89b5a1d6dabe51b95ffa4e71c69"
+        },
+        {
+          "bytes": 208,
+          "path": "shiftory/git/__init__.py",
+          "sha256": "b68c3635337c8be6e860c320ec88acc2b30f32d8cbb69c056ac56660394e1d3e"
+        },
+        {
+          "bytes": 27023,
+          "path": "shiftory/git/repository.py",
+          "sha256": "affc6cfdbda35dee6ad176a6c12cd2a015dbf81a96f45c0d1d84d9de6048677a"
+        },
+        {
+          "bytes": 12378,
+          "path": "shiftory/git/source.py",
+          "sha256": "1992c7e31324392ab3c8b0a252623cc00320a4530e8c1768ac8f8c031d7f4d28"
+        },
+        {
+          "bytes": 167,
+          "path": "shiftory/graph/__init__.py",
+          "sha256": "fdb3dd351b898c6253312511a645b9c5394df96d23915d9c9b93c6f30d467092"
+        },
+        {
+          "bytes": 51103,
+          "path": "shiftory/graph/provider.py",
+          "sha256": "dd6b4744dd30d920564bc0ea60d3b7a3d7509b68b5e4c845fb01eaec1e07dac2"
+        },
+        {
+          "bytes": 9673,
+          "path": "shiftory/graph/worker.py",
+          "sha256": "56727cdcd059bf6efec14cae182b4a613f8b668b63623e1ea04fee73ab689da6"
+        },
+        {
+          "bytes": 394,
+          "path": "shiftory/models/__init__.py",
+          "sha256": "2ac8aac2e44818f6015a9be2c4a2326db7245efd87699d942ac49ab4428c9067"
+        },
+        {
+          "bytes": 3715,
+          "path": "shiftory/models/core.py",
+          "sha256": "313138ca110de3531c5f30c13988367125027e73d7aca08092397de66ab5df29"
+        },
+        {
+          "bytes": 601,
+          "path": "shiftory/models/json.py",
+          "sha256": "144c215f8d9f6fab5bc2c9c1285ea5fb2b906deae4ee1cf7eda9f73708bdbdb0"
+        },
+        {
+          "bytes": 267,
+          "path": "shiftory/render/__init__.py",
+          "sha256": "5e5ced22076e1672aaea267e560baeeaa33141ee61ec9528a9ea4a80015a1d5c"
+        },
+        {
+          "bytes": 5633,
+          "path": "shiftory/render/evidence.py",
+          "sha256": "aca36323dfd709308c375325bc52544073cc06fd7162f098f0fc6cbab6b23f00"
+        },
+        {
+          "bytes": 4535,
+          "path": "shiftory/render/report.py",
+          "sha256": "89e3b0997bb94dff9a8e83eea71c2e132c764f7f400f501d2d83bd2de8cb4fc1"
+        },
+        {
+          "bytes": 443,
+          "path": "shiftory/schemas/__init__.py",
+          "sha256": "709ea81f5bb035d73ccc641c496074403fcf0a3ce5b3d7788cc669fb57288086"
+        },
+        {
+          "bytes": 0,
+          "path": "shiftory/skills/__init__.py",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 0,
+          "path": "shiftory/skills/shiftory/__init__.py",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "sha256": "e9279689384c1e9779fec8c85d19811b7d0bab64a360c56bcd1b425c135fe764"
+    },
+    "schema": "shiftory.benchmark-execution/v1"
+  },
+  "implementation": {
+    "golden_inputs_sha256": "f1fd72c75085f3a989cb9b11438baa764a103eece3148e9b55ccc062866a25ac",
+    "manifest": {
+      "files": [
+        {
+          "bytes": 1130,
+          "committed_blob": "d86be4209d6ac70cdebc727787be874e04fce0d6",
+          "path": "benchmarks/fixtures/offline-smoke/assertions.json",
+          "sha256": "c928db428fbb3f6e977aec606bf8acd0cce6ba60c4643aa76e718b71a3727147"
+        },
+        {
+          "bytes": 1351,
+          "committed_blob": "a126bfbd0b24e6afb1afd5521ec442bfc035d8c3",
+          "path": "benchmarks/fixtures/offline-smoke/explanation-template.json",
+          "sha256": "3c8198d40abdc0e39523629769fb9258af08605343f93897c6437663584dbe8f"
+        },
+        {
+          "bytes": 817,
+          "committed_blob": "e2cbadf201e3a902031f5d45eb682a3fb095df7c",
+          "path": "benchmarks/fixtures/offline-smoke/history.fast-import",
+          "sha256": "9ea85279a5c3dd393fe8c38174f9695bad6f769ae7d9bcc4f9436d114a7cba1a"
+        },
+        {
+          "bytes": 705,
+          "committed_blob": "7ccf278471b12aa6857542c2d9ea352fb2a45813",
+          "path": "benchmarks/fixtures/offline-smoke/metadata.json",
+          "sha256": "4edd4debd35eb06c95b7b6015fe02d405698b7378cf9f44e6e2e2c20d78fab3f"
+        },
+        {
+          "bytes": 4793,
+          "committed_blob": "a356ef0a497c84bde70c015e19392fd0741f2898",
+          "path": "benchmarks/golden/axios/assertions.json",
+          "sha256": "40a1a994afb3867e0723886ed8f663926a4097dc9c03b830bad040bdef204ce2"
+        },
+        {
+          "bytes": 6831,
+          "committed_blob": "d510037d65188456ad0a8f777b4e14e7e5d0c6f2",
+          "path": "benchmarks/golden/axios/explanation-template.json",
+          "sha256": "407013f775589c3f0392674617b697186d2ad8a6e990c6c5dec990ac134e4662"
+        },
+        {
+          "bytes": 1946,
+          "committed_blob": "962c415f800d47c5741cd934a42d2193e806078f",
+          "path": "benchmarks/golden/click/assertions.json",
+          "sha256": "f1ad1757df80a8cb930908e7a10512c55c5a2e3206ae20b0dbf126ef9d6a337d"
+        },
+        {
+          "bytes": 2751,
+          "committed_blob": "70a23d61cb53e8844ff81f9a6cb826ef1dab8522",
+          "path": "benchmarks/golden/click/explanation-template.json",
+          "sha256": "0ed1fa5a05dcccc8dff7913410705586dd5710c15c289880cc8e306c1cba2384"
+        },
+        {
+          "bytes": 2320,
+          "committed_blob": "4d2f7cac204ee3960b67d1aa6fd9d98c973118ed",
+          "path": "benchmarks/golden/ripgrep/assertions.json",
+          "sha256": "97aefd01b63e6a1db8e8509c7c6e5c971c94530a69d3ea79fbd49d8f1f70b602"
+        },
+        {
+          "bytes": 4179,
+          "committed_blob": "3725642779f6987904ae8e83edffb8b7dc7fbb34",
+          "path": "benchmarks/golden/ripgrep/explanation-template.json",
+          "sha256": "57c8335080a3dedb14daef74ad593217798ee4bf949e8c47ea83ccc62bbfceb7"
+        },
+        {
+          "bytes": 66022,
+          "committed_blob": "5cb0403871b08bd94ef97d16da12799b84d76f33",
+          "path": "benchmarks/runner.py",
+          "sha256": "172249864800dc2f72951d879fbde0e7fe30b96c18308514e9200e5cddcf2dd4"
+        },
+        {
+          "bytes": 2009,
+          "committed_blob": "b4dcc84c27ca8585654ec259cf5536b469549187",
+          "path": "benchmarks/scenarios.toml",
+          "sha256": "4b9782418039d55e0b54886891921a061015f595a8572bb5c54d43b249f4c327"
+        },
+        {
+          "bytes": 334,
+          "committed_blob": "b5011acd8d2081d6b095d838bcfc06b2e4634f26",
+          "path": "constraints-dev.txt",
+          "sha256": "8ca206dfba00c5a8c518e1b13012da5f35d463f5ba3a2a5c0a3bad6df0525f17"
+        },
+        {
+          "bytes": 1408,
+          "committed_blob": "3e10704411b410f88a6f608d16bd4a2ce6825de1",
+          "path": "pyproject.toml",
+          "sha256": "3b04328f54d2016abc67fc27c526d3b43d75eedac01dbd6eca2c3ea6c690c3b0"
+        },
+        {
+          "bytes": 439,
+          "committed_blob": "0f1ab158dff68df71cea9d885076e8180e439506",
+          "path": "src/shiftory/__init__.py",
+          "sha256": "61b8890fa18f809e9b658ebb78a6f0fc0329e89c8ab7eb398515f79a6d7ef992"
+        },
+        {
+          "bytes": 160,
+          "committed_blob": "ff341747c44f7fc9fd2b1f6647706688314229c2",
+          "path": "src/shiftory/cache/__init__.py",
+          "sha256": "af5e3167b3dd6bbcbb49079ec5c3963aad74fa991436eba718fcb48fc9330996"
+        },
+        {
+          "bytes": 5148,
+          "committed_blob": "c28dc4753dd127d0a4f1079d2868c77a9905a6da",
+          "path": "src/shiftory/cache/store.py",
+          "sha256": "4851cfc03a44a72c0c0c4f57cf206412ecb6a70a6d10bafec1c33acfdc4fd25d"
+        },
+        {
+          "bytes": 79,
+          "committed_blob": "23f570d1087db7a86b3c1d2ad4908d7b5ccc9d96",
+          "path": "src/shiftory/classify/__init__.py",
+          "sha256": "4fc70d52ca226081aad389f067c955f7b30c5e00ad7a8257f2b2ea083c5b61dc"
+        },
+        {
+          "bytes": 3046,
+          "committed_blob": "b1eb320d895edb5877e27e9f0532f2efb3559ea5",
+          "path": "src/shiftory/classify/rules.py",
+          "sha256": "412b738927c7566271c02808c1c48c99557813390ae7fff44decf0262a05f574"
+        },
+        {
+          "bytes": 21931,
+          "committed_blob": "45181ffa59c518e1f717009f9a39ad31f6cb305a",
+          "path": "src/shiftory/cli.py",
+          "sha256": "8a2b251afcb0ce60324e851a44c209e3233e211653393ab5de1a33dec778541a"
+        },
+        {
+          "bytes": 72,
+          "committed_blob": "e63f2674823445ba3de3a3ce9c8ba87ddd201d70",
+          "path": "src/shiftory/diff/__init__.py",
+          "sha256": "982dc016b89cebf16bf68cf3f6a41ba261d43a59dde29d569aff5d99047e7dcb"
+        },
+        {
+          "bytes": 555,
+          "committed_blob": "3a707551307c7386785d35eb2cfdf360e8829f69",
+          "path": "src/shiftory/diff/identity.py",
+          "sha256": "c590ad5edb36628f8dbcecc2f2882563e088d8794eb4b7166c086c4cd8dae3ae"
+        },
+        {
+          "bytes": 26011,
+          "committed_blob": "9b08173a46d314fb6da3654a462b1b0df5a08d29",
+          "path": "src/shiftory/diff/parser.py",
+          "sha256": "3c3b3791811af03798080e41a33892e3f91e6de8f14210ba76ee206d5ac22c9f"
+        },
+        {
+          "bytes": 1671,
+          "committed_blob": "451247fc428336907aac483f8ddb727bc2f00632",
+          "path": "src/shiftory/errors.py",
+          "sha256": "6e79c8ed2b6d6d0e6e14555f04104faa89cc68d71b5c648c6cdf12b934e0fb2a"
+        },
+        {
+          "bytes": 137,
+          "committed_blob": "361baea9420e761f2e9349e5e5207341cd7706f5",
+          "path": "src/shiftory/evidence/__init__.py",
+          "sha256": "41292efa0ba4d2279ac94aef1e69fe5242ef92b1b998d83eb87c0e295f692581"
+        },
+        {
+          "bytes": 25540,
+          "committed_blob": "706be4f16daa1396955f291a79d3f547f8b946bb",
+          "path": "src/shiftory/evidence/builder.py",
+          "sha256": "5764fdf81b77000f9eb7c90beed5701631bf31189eafc1501f3563562e8d9059"
+        },
+        {
+          "bytes": 134,
+          "committed_blob": "61e5dc2f385c457db3edf0c15098bb1d45ac23a8",
+          "path": "src/shiftory/explain/__init__.py",
+          "sha256": "b17c156d020c9912df02483cb6b0cbcb73f786aa632a38e20e7d297a8299973a"
+        },
+        {
+          "bytes": 36564,
+          "committed_blob": "03726142f609709e5eafa5499928f4885960518a",
+          "path": "src/shiftory/explain/validator.py",
+          "sha256": "53ba3a4a073f5889ac9b77f1cf0c0de136d9c89b5a1d6dabe51b95ffa4e71c69"
+        },
+        {
+          "bytes": 208,
+          "committed_blob": "ca579a4663f57c6b013295792c5ed4274a8166d3",
+          "path": "src/shiftory/git/__init__.py",
+          "sha256": "b68c3635337c8be6e860c320ec88acc2b30f32d8cbb69c056ac56660394e1d3e"
+        },
+        {
+          "bytes": 27023,
+          "committed_blob": "d8aadc4cc3c05dca1ce4e0a2927d7768d96ab6e5",
+          "path": "src/shiftory/git/repository.py",
+          "sha256": "affc6cfdbda35dee6ad176a6c12cd2a015dbf81a96f45c0d1d84d9de6048677a"
+        },
+        {
+          "bytes": 12378,
+          "committed_blob": "253021da2663abc05e85ea90ede7ca9480d7f4cd",
+          "path": "src/shiftory/git/source.py",
+          "sha256": "1992c7e31324392ab3c8b0a252623cc00320a4530e8c1768ac8f8c031d7f4d28"
+        },
+        {
+          "bytes": 167,
+          "committed_blob": "521d5d598d5e68b40773f62931254c74711a9a84",
+          "path": "src/shiftory/graph/__init__.py",
+          "sha256": "fdb3dd351b898c6253312511a645b9c5394df96d23915d9c9b93c6f30d467092"
+        },
+        {
+          "bytes": 51103,
+          "committed_blob": "add24de314990b531beba791921664bfc2989c71",
+          "path": "src/shiftory/graph/provider.py",
+          "sha256": "dd6b4744dd30d920564bc0ea60d3b7a3d7509b68b5e4c845fb01eaec1e07dac2"
+        },
+        {
+          "bytes": 9673,
+          "committed_blob": "63defcaf744e55af9bc61b8fa4150c0c9ad052a4",
+          "path": "src/shiftory/graph/worker.py",
+          "sha256": "56727cdcd059bf6efec14cae182b4a613f8b668b63623e1ea04fee73ab689da6"
+        },
+        {
+          "bytes": 394,
+          "committed_blob": "5c4a8285e384a793964e1c9db61c41d82ba46787",
+          "path": "src/shiftory/models/__init__.py",
+          "sha256": "2ac8aac2e44818f6015a9be2c4a2326db7245efd87699d942ac49ab4428c9067"
+        },
+        {
+          "bytes": 3715,
+          "committed_blob": "993487839fcb47d9f564c8889e3d9180af05d3e9",
+          "path": "src/shiftory/models/core.py",
+          "sha256": "313138ca110de3531c5f30c13988367125027e73d7aca08092397de66ab5df29"
+        },
+        {
+          "bytes": 601,
+          "committed_blob": "ac55074742f81e0b4f5766bae3d0be642fedc6f9",
+          "path": "src/shiftory/models/json.py",
+          "sha256": "144c215f8d9f6fab5bc2c9c1285ea5fb2b906deae4ee1cf7eda9f73708bdbdb0"
+        },
+        {
+          "bytes": 0,
+          "committed_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "path": "src/shiftory/py.typed",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 267,
+          "committed_blob": "979c90d3f24b148315c3dddcad50f8e8b86c4862",
+          "path": "src/shiftory/render/__init__.py",
+          "sha256": "5e5ced22076e1672aaea267e560baeeaa33141ee61ec9528a9ea4a80015a1d5c"
+        },
+        {
+          "bytes": 5633,
+          "committed_blob": "18ab04f403bac7e58c6927ff1e21cb50609cd2ba",
+          "path": "src/shiftory/render/evidence.py",
+          "sha256": "aca36323dfd709308c375325bc52544073cc06fd7162f098f0fc6cbab6b23f00"
+        },
+        {
+          "bytes": 4535,
+          "committed_blob": "29a4676f13b063db3d1b2bbdac3e6e6fbbbba76f",
+          "path": "src/shiftory/render/report.py",
+          "sha256": "89e3b0997bb94dff9a8e83eea71c2e132c764f7f400f501d2d83bd2de8cb4fc1"
+        },
+        {
+          "bytes": 443,
+          "committed_blob": "94a5a359658243c03b7e69eec0e913161fb0c24d",
+          "path": "src/shiftory/schemas/__init__.py",
+          "sha256": "709ea81f5bb035d73ccc641c496074403fcf0a3ce5b3d7788cc669fb57288086"
+        },
+        {
+          "bytes": 10858,
+          "committed_blob": "84f8722940160fbb5e6f02cffef2ab0b252de644",
+          "path": "src/shiftory/schemas/evidence-v1.json",
+          "sha256": "b0a5d6f0c61f3aa77571df05a982798b26467b4d85ed6b9bd8ea0334550e14e3"
+        },
+        {
+          "bytes": 4905,
+          "committed_blob": "8166afdb0b54ab076455b4a0958aceba46872f3e",
+          "path": "src/shiftory/schemas/explanation-v1.json",
+          "sha256": "93db4b4280f0db99c1ca6c2de4b756fde00ff772859c70dc3f8e62380c1355c6"
+        },
+        {
+          "bytes": 5093,
+          "committed_blob": "c304b504adbf4d3d944af82b6e551302cf644adb",
+          "path": "src/shiftory/schemas/report-v1.json",
+          "sha256": "bb1a7940040ebc192d08c1b8c1582c68f9c3e50317adbffca4d0ec3f100b7773"
+        },
+        {
+          "bytes": 0,
+          "committed_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "path": "src/shiftory/skills/__init__.py",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 1601,
+          "committed_blob": "31fe20372708af13c5dd095e4fae27bd6ad43cd0",
+          "path": "src/shiftory/skills/shiftory/SKILL.md",
+          "sha256": "0f7ddbe349e93b68924c2665f06e015114130083841702ce14c8c650b99c5be0"
+        },
+        {
+          "bytes": 0,
+          "committed_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "path": "src/shiftory/skills/shiftory/__init__.py",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "selection": [
+        "src/shiftory/",
+        "benchmarks/runner.py",
+        "benchmarks/scenarios.toml",
+        "benchmarks/golden/",
+        "benchmarks/fixtures/",
+        "pyproject.toml",
+        "constraints-dev.txt"
+      ],
+      "sha256": "edaa36712710d2c59ec68cc7d2102dbad31612d382f72a71a5f2f4779d69415f"
+    },
+    "package": {
+      "dependencies": [
+        "graphora-kg==0.2.1",
+        "jsonschema>=4.23,<5",
+        "platformdirs>=4.3,<5"
+      ],
+      "installed_distributions": {
+        "graphora-kg": "0.2.1",
+        "jsonschema": "4.24.0",
+        "platformdirs": "4.3.7",
+        "shiftory": "0.1.0",
+        "tree-sitter": "0.25.2"
+      },
+      "name": "shiftory",
+      "requires_python": ">=3.10",
+      "version": "0.1.0"
+    },
+    "package_code": {
+      "files": [
+        {
+          "bytes": 439,
+          "path": "shiftory/__init__.py",
+          "sha256": "61b8890fa18f809e9b658ebb78a6f0fc0329e89c8ab7eb398515f79a6d7ef992"
+        },
+        {
+          "bytes": 160,
+          "path": "shiftory/cache/__init__.py",
+          "sha256": "af5e3167b3dd6bbcbb49079ec5c3963aad74fa991436eba718fcb48fc9330996"
+        },
+        {
+          "bytes": 5148,
+          "path": "shiftory/cache/store.py",
+          "sha256": "4851cfc03a44a72c0c0c4f57cf206412ecb6a70a6d10bafec1c33acfdc4fd25d"
+        },
+        {
+          "bytes": 79,
+          "path": "shiftory/classify/__init__.py",
+          "sha256": "4fc70d52ca226081aad389f067c955f7b30c5e00ad7a8257f2b2ea083c5b61dc"
+        },
+        {
+          "bytes": 3046,
+          "path": "shiftory/classify/rules.py",
+          "sha256": "412b738927c7566271c02808c1c48c99557813390ae7fff44decf0262a05f574"
+        },
+        {
+          "bytes": 21931,
+          "path": "shiftory/cli.py",
+          "sha256": "8a2b251afcb0ce60324e851a44c209e3233e211653393ab5de1a33dec778541a"
+        },
+        {
+          "bytes": 72,
+          "path": "shiftory/diff/__init__.py",
+          "sha256": "982dc016b89cebf16bf68cf3f6a41ba261d43a59dde29d569aff5d99047e7dcb"
+        },
+        {
+          "bytes": 555,
+          "path": "shiftory/diff/identity.py",
+          "sha256": "c590ad5edb36628f8dbcecc2f2882563e088d8794eb4b7166c086c4cd8dae3ae"
+        },
+        {
+          "bytes": 26011,
+          "path": "shiftory/diff/parser.py",
+          "sha256": "3c3b3791811af03798080e41a33892e3f91e6de8f14210ba76ee206d5ac22c9f"
+        },
+        {
+          "bytes": 1671,
+          "path": "shiftory/errors.py",
+          "sha256": "6e79c8ed2b6d6d0e6e14555f04104faa89cc68d71b5c648c6cdf12b934e0fb2a"
+        },
+        {
+          "bytes": 137,
+          "path": "shiftory/evidence/__init__.py",
+          "sha256": "41292efa0ba4d2279ac94aef1e69fe5242ef92b1b998d83eb87c0e295f692581"
+        },
+        {
+          "bytes": 25540,
+          "path": "shiftory/evidence/builder.py",
+          "sha256": "5764fdf81b77000f9eb7c90beed5701631bf31189eafc1501f3563562e8d9059"
+        },
+        {
+          "bytes": 134,
+          "path": "shiftory/explain/__init__.py",
+          "sha256": "b17c156d020c9912df02483cb6b0cbcb73f786aa632a38e20e7d297a8299973a"
+        },
+        {
+          "bytes": 36564,
+          "path": "shiftory/explain/validator.py",
+          "sha256": "53ba3a4a073f5889ac9b77f1cf0c0de136d9c89b5a1d6dabe51b95ffa4e71c69"
+        },
+        {
+          "bytes": 208,
+          "path": "shiftory/git/__init__.py",
+          "sha256": "b68c3635337c8be6e860c320ec88acc2b30f32d8cbb69c056ac56660394e1d3e"
+        },
+        {
+          "bytes": 27023,
+          "path": "shiftory/git/repository.py",
+          "sha256": "affc6cfdbda35dee6ad176a6c12cd2a015dbf81a96f45c0d1d84d9de6048677a"
+        },
+        {
+          "bytes": 12378,
+          "path": "shiftory/git/source.py",
+          "sha256": "1992c7e31324392ab3c8b0a252623cc00320a4530e8c1768ac8f8c031d7f4d28"
+        },
+        {
+          "bytes": 167,
+          "path": "shiftory/graph/__init__.py",
+          "sha256": "fdb3dd351b898c6253312511a645b9c5394df96d23915d9c9b93c6f30d467092"
+        },
+        {
+          "bytes": 51103,
+          "path": "shiftory/graph/provider.py",
+          "sha256": "dd6b4744dd30d920564bc0ea60d3b7a3d7509b68b5e4c845fb01eaec1e07dac2"
+        },
+        {
+          "bytes": 9673,
+          "path": "shiftory/graph/worker.py",
+          "sha256": "56727cdcd059bf6efec14cae182b4a613f8b668b63623e1ea04fee73ab689da6"
+        },
+        {
+          "bytes": 394,
+          "path": "shiftory/models/__init__.py",
+          "sha256": "2ac8aac2e44818f6015a9be2c4a2326db7245efd87699d942ac49ab4428c9067"
+        },
+        {
+          "bytes": 3715,
+          "path": "shiftory/models/core.py",
+          "sha256": "313138ca110de3531c5f30c13988367125027e73d7aca08092397de66ab5df29"
+        },
+        {
+          "bytes": 601,
+          "path": "shiftory/models/json.py",
+          "sha256": "144c215f8d9f6fab5bc2c9c1285ea5fb2b906deae4ee1cf7eda9f73708bdbdb0"
+        },
+        {
+          "bytes": 267,
+          "path": "shiftory/render/__init__.py",
+          "sha256": "5e5ced22076e1672aaea267e560baeeaa33141ee61ec9528a9ea4a80015a1d5c"
+        },
+        {
+          "bytes": 5633,
+          "path": "shiftory/render/evidence.py",
+          "sha256": "aca36323dfd709308c375325bc52544073cc06fd7162f098f0fc6cbab6b23f00"
+        },
+        {
+          "bytes": 4535,
+          "path": "shiftory/render/report.py",
+          "sha256": "89e3b0997bb94dff9a8e83eea71c2e132c764f7f400f501d2d83bd2de8cb4fc1"
+        },
+        {
+          "bytes": 443,
+          "path": "shiftory/schemas/__init__.py",
+          "sha256": "709ea81f5bb035d73ccc641c496074403fcf0a3ce5b3d7788cc669fb57288086"
+        },
+        {
+          "bytes": 0,
+          "path": "shiftory/skills/__init__.py",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 0,
+          "path": "shiftory/skills/shiftory/__init__.py",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "sha256": "e9279689384c1e9779fec8c85d19811b7d0bab64a360c56bcd1b425c135fe764"
+    },
+    "runner_sha256": "172249864800dc2f72951d879fbde0e7fe30b96c18308514e9200e5cddcf2dd4",
+    "schema": "shiftory.benchmark-implementation/v1",
+    "shiftory_commit": "42e96ba5977b17fc0cfe9cc34e4de88ffb83ebf9",
+    "shiftory_tree": "bb1ecc5fe9010c11f72dbd0122a213989fc0c826",
+    "shiftory_worktree_clean": true
+  },
+  "input": {
+    "added_lines": 49,
+    "changed_lines": 52,
+    "deleted_lines": 3,
+    "files": 3,
+    "hunks": 5,
+    "raw_hunk_patch_bytes": 3095,
+    "raw_patch_bytes": 3672,
+    "spans": 8
+  },
+  "limitations": [
+    "Coverage is accounting, not a semantic-correctness score.",
+    "Golden assertions verify selected observable facts, not complete behavior.",
+    "Wall times describe only the recorded machine and environment."
+  ],
+  "repeatability": {
+    "cold_sha256": "af148f84a10f5638323bab5c0b5399d9811a50d7ef23c20b5d1dba3ae9757134",
+    "excluded_envelopes": [
+      "environment",
+      "acquisition timing",
+      "run timing",
+      "local and installation paths"
+    ],
+    "passed": true,
+    "schema": "shiftory.benchmark-repeatability/v1",
+    "warm_sha256": "af148f84a10f5638323bab5c0b5399d9811a50d7ef23c20b5d1dba3ae9757134"
+  },
+  "runs": [
+    {
+      "artifact_sha256": {
+        "assertions_json": "df81ffd3d10cee3ce162292d024f2653158329ef58cd8faae0f64c722044cb34",
+        "evidence_json": "812b518537c9a3a500c60ac626a830c75d53a951d950f94acdf737c5eee470d5",
+        "evidence_markdown": "7c79cc35fc13f4b10c2f8843fe7ec2c0a233fb583989c5d023d88d550992bf4c",
+        "explanation_json": "41ff6e8f57234956d89ec925f85fe3d377c03c3ea71325130f7b483d574d3dc3",
+        "report_json": "43848adfbb00cb739757419dea0f4e7e78c44f003d2a18ab76bb352f813678c0",
+        "report_markdown": "c1bf5f73f7e68a5054fb21b93103d6c2af94dce5337ac8aef3ec3a49f380e414",
+        "verify_json": "2dd8d6bca43345eb25c4cbfee4d154df76de632ec3586d7c691ed0eb0b944dcd"
+      },
+      "assertions": {
+        "counts": {
+          "fail": 0,
+          "pass": 31,
+          "skip": 0
+        },
+        "passed": true,
+        "results": [
+          {
+            "detail": "7f7bbe4569ea68e8dabee232eade069ef3310aea",
+            "domain": "evidence",
+            "id": "evidence-base-sha",
+            "status": "pass",
+            "target": "$.comparison.base_sha"
+          },
+          {
+            "detail": "91de59c6c8abc8251e7af551cd4546cc964288af",
+            "domain": "evidence",
+            "id": "evidence-head-sha",
+            "status": "pass",
+            "target": "$.comparison.head_sha"
+          },
+          {
+            "detail": "valid=True",
+            "domain": "report",
+            "id": "verify-valid",
+            "status": "pass",
+            "target": "$.verify.valid"
+          },
+          {
+            "detail": "expected=3, actual=3",
+            "domain": "evidence",
+            "id": "evidence-inventory-files",
+            "status": "pass",
+            "target": "$.metrics.files"
+          },
+          {
+            "detail": "expected=5, actual=5",
+            "domain": "evidence",
+            "id": "evidence-inventory-hunks",
+            "status": "pass",
+            "target": "$.metrics.hunks"
+          },
+          {
+            "detail": "expected=49, actual=49",
+            "domain": "evidence",
+            "id": "evidence-inventory-added_lines",
+            "status": "pass",
+            "target": "$.metrics.added_lines"
+          },
+          {
+            "detail": "expected=3, actual=3",
+            "domain": "evidence",
+            "id": "evidence-inventory-deleted_lines",
+            "status": "pass",
+            "target": "$.metrics.deleted_lines"
+          },
+          {
+            "detail": "expected=True, actual=True",
+            "domain": "before-source",
+            "id": "optional-value-decision:before:file-exists",
+            "status": "pass",
+            "target": "src/click/core.py"
+          },
+          {
+            "detail": "contains 'self._flag_needs_value = self.default is UNSET'",
+            "domain": "before-source",
+            "id": "optional-value-decision:before:contains:1",
+            "status": "pass",
+            "target": "src/click/core.py"
+          },
+          {
+            "detail": "does not contain 'self._flag_needs_value = flag_value is not UNSET or self.default is UNSET'",
+            "domain": "before-source",
+            "id": "optional-value-decision:before:not-contains:1",
+            "status": "pass",
+            "target": "src/click/core.py"
+          },
+          {
+            "detail": "expected=True, actual=True",
+            "domain": "after-source",
+            "id": "optional-value-decision:after:file-exists",
+            "status": "pass",
+            "target": "src/click/core.py"
+          },
+          {
+            "detail": "contains 'self._flag_needs_value = flag_value is not UNSET or self.default is UNSET'",
+            "domain": "after-source",
+            "id": "optional-value-decision:after:contains:1",
+            "status": "pass",
+            "target": "src/click/core.py"
+          },
+          {
+            "detail": "does not contain 'self._flag_needs_value = self.default is UNSET'",
+            "domain": "after-source",
+            "id": "optional-value-decision:after:not-contains:1",
+            "status": "pass",
+            "target": "src/click/core.py"
+          },
+          {
+            "detail": "behavior item exists and all citations resolve",
+            "domain": "evidence",
+            "id": "optional-value-decision:evidence-citations",
+            "status": "pass",
+            "target": "optional-value-parsing"
+          },
+          {
+            "detail": "expected=behavioral, actual=behavioral",
+            "domain": "report",
+            "id": "optional-value-decision:report-section",
+            "status": "pass",
+            "target": "optional-value-parsing"
+          },
+          {
+            "detail": "expected=True, actual=True",
+            "domain": "before-source",
+            "id": "optional-value-contract-test:before:file-exists",
+            "status": "pass",
+            "target": "tests/test_options.py"
+          },
+          {
+            "detail": "contains 'assert result.stdout == \"frozenset()\"'",
+            "domain": "before-source",
+            "id": "optional-value-contract-test:before:contains:1",
+            "status": "pass",
+            "target": "tests/test_options.py"
+          },
+          {
+            "detail": "does not contain 'def test_flag_value_optional_behavior():'",
+            "domain": "before-source",
+            "id": "optional-value-contract-test:before:not-contains:1",
+            "status": "pass",
+            "target": "tests/test_options.py"
+          },
+          {
+            "detail": "expected=True, actual=True",
+            "domain": "after-source",
+            "id": "optional-value-contract-test:after:file-exists",
+            "status": "pass",
+            "target": "tests/test_options.py"
+          },
+          {
+            "detail": "contains 'def test_flag_value_optional_behavior():'",
+            "domain": "after-source",
+            "id": "optional-value-contract-test:after:contains:1",
+            "status": "pass",
+            "target": "tests/test_options.py"
+          },
+          {
+            "detail": "contains 'assert result.output == \"Hello, Flag!\\\\n\"'",
+            "domain": "after-source",
+            "id": "optional-value-contract-test:after:contains:2",
+            "status": "pass",
+            "target": "tests/test_options.py"
+          },
+          {
+            "detail": "behavior item exists and all citations resolve",
+            "domain": "evidence",
+            "id": "optional-value-contract-test:evidence-citations",
+            "status": "pass",
+            "target": "optional-value-contract"
+          },
+          {
+            "detail": "expected=observer, actual=observer",
+            "domain": "report",
+            "id": "optional-value-contract-test:report-section",
+            "status": "pass",
+            "target": "optional-value-contract"
+          },
+          {
+            "detail": "expected=True, actual=True",
+            "domain": "before-source",
+            "id": "optional-value-type-conversion:before:file-exists",
+            "status": "pass",
+            "target": "tests/test_options.py"
+          },
+          {
+            "detail": "does not contain 'def test_flag_value_with_type_conversion():'",
+            "domain": "before-source",
+            "id": "optional-value-type-conversion:before:not-contains:1",
+            "status": "pass",
+            "target": "tests/test_options.py"
+          },
+          {
+            "detail": "expected=True, actual=True",
+            "domain": "after-source",
+            "id": "optional-value-type-conversion:after:file-exists",
+            "status": "pass",
+            "target": "tests/test_options.py"
+          },
+          {
+            "detail": "contains 'def test_flag_value_with_type_conversion():'",
+            "domain": "after-source",
+            "id": "optional-value-type-conversion:after:contains:1",
+            "status": "pass",
+            "target": "tests/test_options.py"
+          },
+          {
+            "detail": "contains '@click.option(\"--count\", is_flag=False, flag_value=\"1\", type=int, default=0)'",
+            "domain": "after-source",
+            "id": "optional-value-type-conversion:after:contains:2",
+            "status": "pass",
+            "target": "tests/test_options.py"
+          },
+          {
+            "detail": "behavior item exists and all citations resolve",
+            "domain": "evidence",
+            "id": "optional-value-type-conversion:evidence-citations",
+            "status": "pass",
+            "target": "optional-value-contract"
+          },
+          {
+            "detail": "expected=observer, actual=observer",
+            "domain": "report",
+            "id": "optional-value-type-conversion:report-section",
+            "status": "pass",
+            "target": "optional-value-contract"
+          },
+          {
+            "detail": "facts=192",
+            "domain": "graph",
+            "id": "graph-fact-integrity",
+            "status": "pass",
+            "target": "$.graph.facts"
+          }
+        ],
+        "scenario_id": "click-optional-flag-value",
+        "schema": "shiftory.benchmark-assertion-results/v1"
+      },
+      "cache": {
+        "after": {
+          "exists": true,
+          "file_count": 294,
+          "files": [
+            "graphora/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/c06a163c869a8ef962d3007dcf04c6e89a0a04bc3b2299af5e55037104d69035/manifest.json",
+            "graphora/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/c06a163c869a8ef962d3007dcf04c6e89a0a04bc3b2299af5e55037104d69035/shiftory-c06a163c869a8ef962d3007dcf04c6e89a0a04bc3b2299af5e55037104d69035.json",
+            "graphora/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/ddca7758aa649a4b95c1bb702ac0a72a5852a94fdd6e3a7c93b561fc25648397/manifest.json",
+            "graphora/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/ddca7758aa649a4b95c1bb702ac0a72a5852a94fdd6e3a7c93b561fc25648397/shiftory-ddca7758aa649a4b95c1bb702ac0a72a5852a94fdd6e3a7c93b561fc25648397.json",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/manifest.json",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.devcontainer/devcontainer.json",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.devcontainer/on-create-command.sh",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.editorconfig",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.github/ISSUE_TEMPLATE/bug-report.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.github/ISSUE_TEMPLATE/config.yml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.github/ISSUE_TEMPLATE/feature-request.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.github/pull_request_template.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.github/workflows/lock.yaml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.github/workflows/pre-commit.yaml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.github/workflows/publish.yaml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.github/workflows/tests.yaml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.gitignore",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.pre-commit-config.yaml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.readthedocs.yaml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/CHANGES.rst",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/LICENSE.txt",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/README.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/_static/click-icon.svg",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/_static/click-logo.svg",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/_static/click-name.svg",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/advanced.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/api.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/arguments.rst",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/changes.rst",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/click-concepts.rst",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/command-line-reference.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/commands-and-groups.rst",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/commands.rst",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/complex.rst",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/conf.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/contrib.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/design-opinions.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/documentation.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/entry-points.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/exceptions.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/extending-click.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/faqs.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/handling-files.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/index.rst",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/license.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/option-decorators.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/options.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/parameter-types.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/parameters.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/prompts.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/quickstart.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/setuptools.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/shell-completion.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/support-multiple-versions.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/testing.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/unicode-support.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/utils.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/virtualenv.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/why.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/wincmd.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/README",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/aliases/README",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/aliases/aliases.ini",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/aliases/aliases.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/aliases/pyproject.toml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/colors/README",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/colors/colors.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/colors/pyproject.toml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/completion/README",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/completion/completion.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/completion/pyproject.toml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/complex/README",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/complex/complex/__init__.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/complex/complex/cli.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/complex/complex/commands/__init__.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/complex/complex/commands/cmd_init.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/complex/complex/commands/cmd_status.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/complex/pyproject.toml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/imagepipe/.gitignore",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/imagepipe/README",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/imagepipe/example01.jpg",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/imagepipe/example02.jpg",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/imagepipe/imagepipe.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/imagepipe/pyproject.toml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/inout/README",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/inout/inout.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/inout/pyproject.toml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/naval/README",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/naval/naval.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/naval/pyproject.toml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/repo/README",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/repo/pyproject.toml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/repo/repo.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/termui/README",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/termui/pyproject.toml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/termui/termui.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/validation/README",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/validation/pyproject.toml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/validation/validation.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/pyproject.toml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/__init__.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/_compat.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/_termui_impl.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/_textwrap.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/_utils.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/_winconsole.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/core.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/decorators.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/exceptions.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/formatting.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/globals.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/parser.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/py.typed",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/shell_completion.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/termui.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/testing.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/types.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/utils.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/conftest.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_arguments.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_basic.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_chain.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_command_decorators.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_commands.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_compat.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_context.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_custom_classes.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_defaults.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_formatting.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_imports.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_info_dict.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_normalization.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_options.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_parser.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_shell_completion.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_termui.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_testing.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_types.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_utils.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/typing/typing_aliased_group.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/typing/typing_confirmation_option.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/typing/typing_group_kw_options.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/typing/typing_help_option.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/typing/typing_options.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/typing/typing_password_option.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/typing/typing_progressbar.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/typing/typing_simple_example.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/typing/typing_version_option.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/uv.lock",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/manifest.json",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.devcontainer/devcontainer.json",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.devcontainer/on-create-command.sh",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.editorconfig",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.github/ISSUE_TEMPLATE/bug-report.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.github/ISSUE_TEMPLATE/config.yml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.github/ISSUE_TEMPLATE/feature-request.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.github/pull_request_template.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.github/workflows/lock.yaml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.github/workflows/pre-commit.yaml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.github/workflows/publish.yaml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.github/workflows/tests.yaml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.gitignore",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.pre-commit-config.yaml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.readthedocs.yaml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/CHANGES.rst",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/LICENSE.txt",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/README.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/_static/click-icon.svg",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/_static/click-logo.svg",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/_static/click-name.svg",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/advanced.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/api.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/arguments.rst",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/changes.rst",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/click-concepts.rst",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/command-line-reference.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/commands-and-groups.rst",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/commands.rst",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/complex.rst",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/conf.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/contrib.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/design-opinions.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/documentation.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/entry-points.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/exceptions.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/extending-click.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/faqs.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/handling-files.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/index.rst",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/license.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/option-decorators.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/options.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/parameter-types.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/parameters.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/prompts.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/quickstart.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/setuptools.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/shell-completion.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/support-multiple-versions.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/testing.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/unicode-support.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/utils.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/virtualenv.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/why.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/wincmd.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/README",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/aliases/README",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/aliases/aliases.ini",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/aliases/aliases.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/aliases/pyproject.toml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/colors/README",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/colors/colors.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/colors/pyproject.toml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/completion/README",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/completion/completion.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/completion/pyproject.toml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/complex/README",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/complex/complex/__init__.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/complex/complex/cli.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/complex/complex/commands/__init__.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/complex/complex/commands/cmd_init.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/complex/complex/commands/cmd_status.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/complex/pyproject.toml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/imagepipe/.gitignore",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/imagepipe/README",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/imagepipe/example01.jpg",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/imagepipe/example02.jpg",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/imagepipe/imagepipe.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/imagepipe/pyproject.toml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/inout/README",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/inout/inout.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/inout/pyproject.toml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/naval/README",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/naval/naval.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/naval/pyproject.toml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/repo/README",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/repo/pyproject.toml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/repo/repo.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/termui/README",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/termui/pyproject.toml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/termui/termui.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/validation/README",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/validation/pyproject.toml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/validation/validation.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/pyproject.toml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/__init__.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/_compat.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/_termui_impl.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/_textwrap.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/_utils.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/_winconsole.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/core.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/decorators.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/exceptions.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/formatting.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/globals.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/parser.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/py.typed",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/shell_completion.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/termui.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/testing.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/types.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/utils.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/conftest.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_arguments.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_basic.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_chain.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_command_decorators.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_commands.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_compat.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_context.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_custom_classes.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_defaults.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_formatting.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_imports.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_info_dict.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_normalization.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_options.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_parser.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_shell_completion.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_termui.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_testing.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_types.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_utils.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/typing/typing_aliased_group.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/typing/typing_confirmation_option.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/typing/typing_group_kw_options.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/typing/typing_help_option.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/typing/typing_options.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/typing/typing_password_option.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/typing/typing_progressbar.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/typing/typing_simple_example.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/typing/typing_version_option.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/uv.lock"
+          ]
+        },
+        "before": {
+          "exists": false,
+          "file_count": 0,
+          "files": []
+        },
+        "graph_cache_key": "c06a163c869a8ef962d3007dcf04c6e89a0a04bc3b2299af5e55037104d69035:ddca7758aa649a4b95c1bb702ac0a72a5852a94fdd6e3a7c93b561fc25648397",
+        "graph_status": "available"
+      },
+      "canonical_output_sha256": "af148f84a10f5638323bab5c0b5399d9811a50d7ef23c20b5d1dba3ae9757134",
+      "commands": [
+        [
+          "shiftory",
+          "analyze",
+          "--repo",
+          "<repository>",
+          "--range",
+          "7f7bbe4569ea68e8dabee232eade069ef3310aea..91de59c6c8abc8251e7af551cd4546cc964288af",
+          "--graphora",
+          "auto",
+          "--cache-dir",
+          "<scenario-cache>",
+          "--output",
+          "<run>/evidence.json"
+        ],
+        [
+          "shiftory-python",
+          "render-evidence-markdown",
+          "--evidence",
+          "<run>/evidence.json"
+        ],
+        [
+          "benchmark-runner",
+          "instantiate-manifest"
+        ],
+        [
+          "shiftory",
+          "verify",
+          "--evidence",
+          "<run>/evidence.json",
+          "--explanation",
+          "<run>/explanation.json"
+        ],
+        [
+          "shiftory",
+          "render",
+          "--format",
+          "json",
+          "--evidence",
+          "<run>/evidence.json",
+          "--explanation",
+          "<run>/explanation.json"
+        ],
+        [
+          "shiftory",
+          "render",
+          "--format",
+          "markdown",
+          "--evidence",
+          "<run>/evidence.json",
+          "--explanation",
+          "<run>/explanation.json"
+        ]
+      ],
+      "coverage": {
+        "citation_count": 5,
+        "hunk_coverage_ratio": 1.0,
+        "hunk_covered": 5,
+        "hunk_total": 5,
+        "line_coverage_ratio": 1.0,
+        "line_owned": 52,
+        "line_total": 52,
+        "span_coverage_ratio": 1.0,
+        "span_owned": 8,
+        "span_total": 8,
+        "unit_coverage_ratio": 1.0,
+        "unit_covered": 3,
+        "unit_total": 3
+      },
+      "evidence_markdown_renderer": {
+        "distribution": "shiftory",
+        "module": "shiftory.render.evidence",
+        "module_file": "src/shiftory/render/evidence.py",
+        "module_sha256": "aca36323dfd709308c375325bc52544073cc06fd7162f098f0fc6cbab6b23f00",
+        "package_code_sha256": "e9279689384c1e9779fec8c85d19811b7d0bab64a360c56bcd1b425c135fe764",
+        "schema": "shiftory.benchmark-renderer/v1"
+      },
+      "label": "cold",
+      "paths": {
+        "assertions_json": "runs/click-optional-flag-value/cold/assertions.json",
+        "evidence_json": "runs/click-optional-flag-value/cold/evidence.json",
+        "evidence_markdown": "runs/click-optional-flag-value/cold/evidence.md",
+        "explanation_json": "runs/click-optional-flag-value/cold/explanation.json",
+        "report_json": "runs/click-optional-flag-value/cold/shiftory-report.json",
+        "report_markdown": "runs/click-optional-flag-value/cold/shiftory-report.md",
+        "verify_json": "runs/click-optional-flag-value/cold/verify.json"
+      },
+      "sizes": {
+        "assertions_json_bytes": 5524,
+        "evidence_json_bytes": 67082,
+        "evidence_markdown_bytes": 33774,
+        "explanation_json_bytes": 6101,
+        "report_json_bytes": 8584,
+        "report_markdown_bytes": 5320,
+        "verify_json_bytes": 366
+      },
+      "wall_seconds": {
+        "complete_path": 3.286228583,
+        "phases": {
+          "analyze": 2.848941333,
+          "instantiate_manifest": 0.000340417,
+          "render_evidence_markdown": 0.05941075,
+          "render_json": 0.117401458,
+          "render_markdown": 0.117470917,
+          "verify": 0.114895917
+        }
+      }
+    },
+    {
+      "artifact_sha256": {
+        "assertions_json": "df81ffd3d10cee3ce162292d024f2653158329ef58cd8faae0f64c722044cb34",
+        "evidence_json": "812b518537c9a3a500c60ac626a830c75d53a951d950f94acdf737c5eee470d5",
+        "evidence_markdown": "7c79cc35fc13f4b10c2f8843fe7ec2c0a233fb583989c5d023d88d550992bf4c",
+        "explanation_json": "41ff6e8f57234956d89ec925f85fe3d377c03c3ea71325130f7b483d574d3dc3",
+        "report_json": "43848adfbb00cb739757419dea0f4e7e78c44f003d2a18ab76bb352f813678c0",
+        "report_markdown": "c1bf5f73f7e68a5054fb21b93103d6c2af94dce5337ac8aef3ec3a49f380e414",
+        "verify_json": "2dd8d6bca43345eb25c4cbfee4d154df76de632ec3586d7c691ed0eb0b944dcd"
+      },
+      "assertions": {
+        "counts": {
+          "fail": 0,
+          "pass": 31,
+          "skip": 0
+        },
+        "passed": true,
+        "results": [
+          {
+            "detail": "7f7bbe4569ea68e8dabee232eade069ef3310aea",
+            "domain": "evidence",
+            "id": "evidence-base-sha",
+            "status": "pass",
+            "target": "$.comparison.base_sha"
+          },
+          {
+            "detail": "91de59c6c8abc8251e7af551cd4546cc964288af",
+            "domain": "evidence",
+            "id": "evidence-head-sha",
+            "status": "pass",
+            "target": "$.comparison.head_sha"
+          },
+          {
+            "detail": "valid=True",
+            "domain": "report",
+            "id": "verify-valid",
+            "status": "pass",
+            "target": "$.verify.valid"
+          },
+          {
+            "detail": "expected=3, actual=3",
+            "domain": "evidence",
+            "id": "evidence-inventory-files",
+            "status": "pass",
+            "target": "$.metrics.files"
+          },
+          {
+            "detail": "expected=5, actual=5",
+            "domain": "evidence",
+            "id": "evidence-inventory-hunks",
+            "status": "pass",
+            "target": "$.metrics.hunks"
+          },
+          {
+            "detail": "expected=49, actual=49",
+            "domain": "evidence",
+            "id": "evidence-inventory-added_lines",
+            "status": "pass",
+            "target": "$.metrics.added_lines"
+          },
+          {
+            "detail": "expected=3, actual=3",
+            "domain": "evidence",
+            "id": "evidence-inventory-deleted_lines",
+            "status": "pass",
+            "target": "$.metrics.deleted_lines"
+          },
+          {
+            "detail": "expected=True, actual=True",
+            "domain": "before-source",
+            "id": "optional-value-decision:before:file-exists",
+            "status": "pass",
+            "target": "src/click/core.py"
+          },
+          {
+            "detail": "contains 'self._flag_needs_value = self.default is UNSET'",
+            "domain": "before-source",
+            "id": "optional-value-decision:before:contains:1",
+            "status": "pass",
+            "target": "src/click/core.py"
+          },
+          {
+            "detail": "does not contain 'self._flag_needs_value = flag_value is not UNSET or self.default is UNSET'",
+            "domain": "before-source",
+            "id": "optional-value-decision:before:not-contains:1",
+            "status": "pass",
+            "target": "src/click/core.py"
+          },
+          {
+            "detail": "expected=True, actual=True",
+            "domain": "after-source",
+            "id": "optional-value-decision:after:file-exists",
+            "status": "pass",
+            "target": "src/click/core.py"
+          },
+          {
+            "detail": "contains 'self._flag_needs_value = flag_value is not UNSET or self.default is UNSET'",
+            "domain": "after-source",
+            "id": "optional-value-decision:after:contains:1",
+            "status": "pass",
+            "target": "src/click/core.py"
+          },
+          {
+            "detail": "does not contain 'self._flag_needs_value = self.default is UNSET'",
+            "domain": "after-source",
+            "id": "optional-value-decision:after:not-contains:1",
+            "status": "pass",
+            "target": "src/click/core.py"
+          },
+          {
+            "detail": "behavior item exists and all citations resolve",
+            "domain": "evidence",
+            "id": "optional-value-decision:evidence-citations",
+            "status": "pass",
+            "target": "optional-value-parsing"
+          },
+          {
+            "detail": "expected=behavioral, actual=behavioral",
+            "domain": "report",
+            "id": "optional-value-decision:report-section",
+            "status": "pass",
+            "target": "optional-value-parsing"
+          },
+          {
+            "detail": "expected=True, actual=True",
+            "domain": "before-source",
+            "id": "optional-value-contract-test:before:file-exists",
+            "status": "pass",
+            "target": "tests/test_options.py"
+          },
+          {
+            "detail": "contains 'assert result.stdout == \"frozenset()\"'",
+            "domain": "before-source",
+            "id": "optional-value-contract-test:before:contains:1",
+            "status": "pass",
+            "target": "tests/test_options.py"
+          },
+          {
+            "detail": "does not contain 'def test_flag_value_optional_behavior():'",
+            "domain": "before-source",
+            "id": "optional-value-contract-test:before:not-contains:1",
+            "status": "pass",
+            "target": "tests/test_options.py"
+          },
+          {
+            "detail": "expected=True, actual=True",
+            "domain": "after-source",
+            "id": "optional-value-contract-test:after:file-exists",
+            "status": "pass",
+            "target": "tests/test_options.py"
+          },
+          {
+            "detail": "contains 'def test_flag_value_optional_behavior():'",
+            "domain": "after-source",
+            "id": "optional-value-contract-test:after:contains:1",
+            "status": "pass",
+            "target": "tests/test_options.py"
+          },
+          {
+            "detail": "contains 'assert result.output == \"Hello, Flag!\\\\n\"'",
+            "domain": "after-source",
+            "id": "optional-value-contract-test:after:contains:2",
+            "status": "pass",
+            "target": "tests/test_options.py"
+          },
+          {
+            "detail": "behavior item exists and all citations resolve",
+            "domain": "evidence",
+            "id": "optional-value-contract-test:evidence-citations",
+            "status": "pass",
+            "target": "optional-value-contract"
+          },
+          {
+            "detail": "expected=observer, actual=observer",
+            "domain": "report",
+            "id": "optional-value-contract-test:report-section",
+            "status": "pass",
+            "target": "optional-value-contract"
+          },
+          {
+            "detail": "expected=True, actual=True",
+            "domain": "before-source",
+            "id": "optional-value-type-conversion:before:file-exists",
+            "status": "pass",
+            "target": "tests/test_options.py"
+          },
+          {
+            "detail": "does not contain 'def test_flag_value_with_type_conversion():'",
+            "domain": "before-source",
+            "id": "optional-value-type-conversion:before:not-contains:1",
+            "status": "pass",
+            "target": "tests/test_options.py"
+          },
+          {
+            "detail": "expected=True, actual=True",
+            "domain": "after-source",
+            "id": "optional-value-type-conversion:after:file-exists",
+            "status": "pass",
+            "target": "tests/test_options.py"
+          },
+          {
+            "detail": "contains 'def test_flag_value_with_type_conversion():'",
+            "domain": "after-source",
+            "id": "optional-value-type-conversion:after:contains:1",
+            "status": "pass",
+            "target": "tests/test_options.py"
+          },
+          {
+            "detail": "contains '@click.option(\"--count\", is_flag=False, flag_value=\"1\", type=int, default=0)'",
+            "domain": "after-source",
+            "id": "optional-value-type-conversion:after:contains:2",
+            "status": "pass",
+            "target": "tests/test_options.py"
+          },
+          {
+            "detail": "behavior item exists and all citations resolve",
+            "domain": "evidence",
+            "id": "optional-value-type-conversion:evidence-citations",
+            "status": "pass",
+            "target": "optional-value-contract"
+          },
+          {
+            "detail": "expected=observer, actual=observer",
+            "domain": "report",
+            "id": "optional-value-type-conversion:report-section",
+            "status": "pass",
+            "target": "optional-value-contract"
+          },
+          {
+            "detail": "facts=192",
+            "domain": "graph",
+            "id": "graph-fact-integrity",
+            "status": "pass",
+            "target": "$.graph.facts"
+          }
+        ],
+        "scenario_id": "click-optional-flag-value",
+        "schema": "shiftory.benchmark-assertion-results/v1"
+      },
+      "cache": {
+        "after": {
+          "exists": true,
+          "file_count": 294,
+          "files": [
+            "graphora/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/c06a163c869a8ef962d3007dcf04c6e89a0a04bc3b2299af5e55037104d69035/manifest.json",
+            "graphora/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/c06a163c869a8ef962d3007dcf04c6e89a0a04bc3b2299af5e55037104d69035/shiftory-c06a163c869a8ef962d3007dcf04c6e89a0a04bc3b2299af5e55037104d69035.json",
+            "graphora/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/ddca7758aa649a4b95c1bb702ac0a72a5852a94fdd6e3a7c93b561fc25648397/manifest.json",
+            "graphora/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/ddca7758aa649a4b95c1bb702ac0a72a5852a94fdd6e3a7c93b561fc25648397/shiftory-ddca7758aa649a4b95c1bb702ac0a72a5852a94fdd6e3a7c93b561fc25648397.json",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/manifest.json",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.devcontainer/devcontainer.json",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.devcontainer/on-create-command.sh",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.editorconfig",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.github/ISSUE_TEMPLATE/bug-report.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.github/ISSUE_TEMPLATE/config.yml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.github/ISSUE_TEMPLATE/feature-request.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.github/pull_request_template.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.github/workflows/lock.yaml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.github/workflows/pre-commit.yaml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.github/workflows/publish.yaml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.github/workflows/tests.yaml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.gitignore",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.pre-commit-config.yaml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.readthedocs.yaml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/CHANGES.rst",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/LICENSE.txt",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/README.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/_static/click-icon.svg",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/_static/click-logo.svg",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/_static/click-name.svg",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/advanced.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/api.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/arguments.rst",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/changes.rst",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/click-concepts.rst",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/command-line-reference.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/commands-and-groups.rst",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/commands.rst",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/complex.rst",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/conf.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/contrib.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/design-opinions.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/documentation.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/entry-points.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/exceptions.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/extending-click.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/faqs.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/handling-files.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/index.rst",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/license.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/option-decorators.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/options.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/parameter-types.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/parameters.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/prompts.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/quickstart.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/setuptools.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/shell-completion.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/support-multiple-versions.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/testing.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/unicode-support.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/utils.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/virtualenv.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/why.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/wincmd.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/README",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/aliases/README",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/aliases/aliases.ini",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/aliases/aliases.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/aliases/pyproject.toml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/colors/README",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/colors/colors.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/colors/pyproject.toml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/completion/README",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/completion/completion.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/completion/pyproject.toml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/complex/README",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/complex/complex/__init__.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/complex/complex/cli.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/complex/complex/commands/__init__.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/complex/complex/commands/cmd_init.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/complex/complex/commands/cmd_status.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/complex/pyproject.toml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/imagepipe/.gitignore",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/imagepipe/README",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/imagepipe/example01.jpg",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/imagepipe/example02.jpg",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/imagepipe/imagepipe.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/imagepipe/pyproject.toml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/inout/README",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/inout/inout.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/inout/pyproject.toml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/naval/README",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/naval/naval.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/naval/pyproject.toml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/repo/README",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/repo/pyproject.toml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/repo/repo.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/termui/README",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/termui/pyproject.toml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/termui/termui.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/validation/README",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/validation/pyproject.toml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/validation/validation.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/pyproject.toml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/__init__.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/_compat.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/_termui_impl.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/_textwrap.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/_utils.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/_winconsole.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/core.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/decorators.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/exceptions.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/formatting.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/globals.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/parser.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/py.typed",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/shell_completion.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/termui.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/testing.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/types.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/utils.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/conftest.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_arguments.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_basic.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_chain.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_command_decorators.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_commands.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_compat.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_context.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_custom_classes.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_defaults.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_formatting.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_imports.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_info_dict.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_normalization.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_options.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_parser.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_shell_completion.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_termui.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_testing.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_types.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_utils.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/typing/typing_aliased_group.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/typing/typing_confirmation_option.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/typing/typing_group_kw_options.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/typing/typing_help_option.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/typing/typing_options.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/typing/typing_password_option.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/typing/typing_progressbar.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/typing/typing_simple_example.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/typing/typing_version_option.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/uv.lock",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/manifest.json",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.devcontainer/devcontainer.json",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.devcontainer/on-create-command.sh",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.editorconfig",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.github/ISSUE_TEMPLATE/bug-report.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.github/ISSUE_TEMPLATE/config.yml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.github/ISSUE_TEMPLATE/feature-request.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.github/pull_request_template.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.github/workflows/lock.yaml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.github/workflows/pre-commit.yaml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.github/workflows/publish.yaml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.github/workflows/tests.yaml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.gitignore",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.pre-commit-config.yaml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.readthedocs.yaml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/CHANGES.rst",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/LICENSE.txt",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/README.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/_static/click-icon.svg",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/_static/click-logo.svg",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/_static/click-name.svg",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/advanced.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/api.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/arguments.rst",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/changes.rst",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/click-concepts.rst",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/command-line-reference.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/commands-and-groups.rst",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/commands.rst",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/complex.rst",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/conf.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/contrib.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/design-opinions.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/documentation.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/entry-points.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/exceptions.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/extending-click.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/faqs.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/handling-files.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/index.rst",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/license.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/option-decorators.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/options.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/parameter-types.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/parameters.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/prompts.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/quickstart.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/setuptools.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/shell-completion.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/support-multiple-versions.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/testing.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/unicode-support.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/utils.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/virtualenv.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/why.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/wincmd.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/README",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/aliases/README",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/aliases/aliases.ini",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/aliases/aliases.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/aliases/pyproject.toml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/colors/README",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/colors/colors.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/colors/pyproject.toml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/completion/README",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/completion/completion.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/completion/pyproject.toml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/complex/README",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/complex/complex/__init__.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/complex/complex/cli.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/complex/complex/commands/__init__.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/complex/complex/commands/cmd_init.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/complex/complex/commands/cmd_status.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/complex/pyproject.toml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/imagepipe/.gitignore",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/imagepipe/README",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/imagepipe/example01.jpg",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/imagepipe/example02.jpg",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/imagepipe/imagepipe.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/imagepipe/pyproject.toml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/inout/README",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/inout/inout.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/inout/pyproject.toml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/naval/README",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/naval/naval.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/naval/pyproject.toml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/repo/README",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/repo/pyproject.toml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/repo/repo.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/termui/README",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/termui/pyproject.toml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/termui/termui.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/validation/README",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/validation/pyproject.toml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/validation/validation.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/pyproject.toml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/__init__.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/_compat.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/_termui_impl.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/_textwrap.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/_utils.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/_winconsole.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/core.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/decorators.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/exceptions.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/formatting.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/globals.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/parser.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/py.typed",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/shell_completion.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/termui.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/testing.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/types.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/utils.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/conftest.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_arguments.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_basic.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_chain.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_command_decorators.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_commands.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_compat.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_context.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_custom_classes.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_defaults.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_formatting.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_imports.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_info_dict.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_normalization.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_options.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_parser.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_shell_completion.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_termui.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_testing.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_types.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_utils.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/typing/typing_aliased_group.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/typing/typing_confirmation_option.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/typing/typing_group_kw_options.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/typing/typing_help_option.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/typing/typing_options.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/typing/typing_password_option.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/typing/typing_progressbar.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/typing/typing_simple_example.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/typing/typing_version_option.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/uv.lock"
+          ]
+        },
+        "before": {
+          "exists": true,
+          "file_count": 294,
+          "files": [
+            "graphora/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/c06a163c869a8ef962d3007dcf04c6e89a0a04bc3b2299af5e55037104d69035/manifest.json",
+            "graphora/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/c06a163c869a8ef962d3007dcf04c6e89a0a04bc3b2299af5e55037104d69035/shiftory-c06a163c869a8ef962d3007dcf04c6e89a0a04bc3b2299af5e55037104d69035.json",
+            "graphora/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/ddca7758aa649a4b95c1bb702ac0a72a5852a94fdd6e3a7c93b561fc25648397/manifest.json",
+            "graphora/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/ddca7758aa649a4b95c1bb702ac0a72a5852a94fdd6e3a7c93b561fc25648397/shiftory-ddca7758aa649a4b95c1bb702ac0a72a5852a94fdd6e3a7c93b561fc25648397.json",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/manifest.json",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.devcontainer/devcontainer.json",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.devcontainer/on-create-command.sh",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.editorconfig",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.github/ISSUE_TEMPLATE/bug-report.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.github/ISSUE_TEMPLATE/config.yml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.github/ISSUE_TEMPLATE/feature-request.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.github/pull_request_template.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.github/workflows/lock.yaml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.github/workflows/pre-commit.yaml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.github/workflows/publish.yaml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.github/workflows/tests.yaml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.gitignore",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.pre-commit-config.yaml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/.readthedocs.yaml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/CHANGES.rst",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/LICENSE.txt",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/README.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/_static/click-icon.svg",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/_static/click-logo.svg",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/_static/click-name.svg",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/advanced.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/api.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/arguments.rst",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/changes.rst",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/click-concepts.rst",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/command-line-reference.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/commands-and-groups.rst",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/commands.rst",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/complex.rst",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/conf.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/contrib.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/design-opinions.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/documentation.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/entry-points.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/exceptions.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/extending-click.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/faqs.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/handling-files.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/index.rst",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/license.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/option-decorators.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/options.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/parameter-types.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/parameters.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/prompts.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/quickstart.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/setuptools.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/shell-completion.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/support-multiple-versions.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/testing.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/unicode-support.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/utils.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/virtualenv.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/why.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/docs/wincmd.md",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/README",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/aliases/README",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/aliases/aliases.ini",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/aliases/aliases.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/aliases/pyproject.toml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/colors/README",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/colors/colors.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/colors/pyproject.toml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/completion/README",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/completion/completion.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/completion/pyproject.toml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/complex/README",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/complex/complex/__init__.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/complex/complex/cli.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/complex/complex/commands/__init__.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/complex/complex/commands/cmd_init.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/complex/complex/commands/cmd_status.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/complex/pyproject.toml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/imagepipe/.gitignore",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/imagepipe/README",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/imagepipe/example01.jpg",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/imagepipe/example02.jpg",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/imagepipe/imagepipe.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/imagepipe/pyproject.toml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/inout/README",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/inout/inout.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/inout/pyproject.toml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/naval/README",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/naval/naval.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/naval/pyproject.toml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/repo/README",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/repo/pyproject.toml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/repo/repo.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/termui/README",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/termui/pyproject.toml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/termui/termui.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/validation/README",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/validation/pyproject.toml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/examples/validation/validation.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/pyproject.toml",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/__init__.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/_compat.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/_termui_impl.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/_textwrap.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/_utils.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/_winconsole.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/core.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/decorators.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/exceptions.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/formatting.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/globals.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/parser.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/py.typed",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/shell_completion.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/termui.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/testing.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/types.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/src/click/utils.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/conftest.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_arguments.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_basic.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_chain.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_command_decorators.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_commands.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_compat.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_context.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_custom_classes.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_defaults.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_formatting.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_imports.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_info_dict.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_normalization.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_options.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_parser.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_shell_completion.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_termui.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_testing.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_types.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/test_utils.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/typing/typing_aliased_group.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/typing/typing_confirmation_option.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/typing/typing_group_kw_options.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/typing/typing_help_option.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/typing/typing_options.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/typing/typing_password_option.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/typing/typing_progressbar.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/typing/typing_simple_example.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/tests/typing/typing_version_option.py",
+            "sources/6904f4d8f698cbbcf1f30106e6a5d8bf9c4dd2e67cbbe7c42feafb6ede130094/tree/uv.lock",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/manifest.json",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.devcontainer/devcontainer.json",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.devcontainer/on-create-command.sh",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.editorconfig",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.github/ISSUE_TEMPLATE/bug-report.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.github/ISSUE_TEMPLATE/config.yml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.github/ISSUE_TEMPLATE/feature-request.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.github/pull_request_template.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.github/workflows/lock.yaml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.github/workflows/pre-commit.yaml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.github/workflows/publish.yaml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.github/workflows/tests.yaml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.gitignore",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.pre-commit-config.yaml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/.readthedocs.yaml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/CHANGES.rst",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/LICENSE.txt",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/README.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/_static/click-icon.svg",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/_static/click-logo.svg",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/_static/click-name.svg",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/advanced.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/api.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/arguments.rst",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/changes.rst",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/click-concepts.rst",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/command-line-reference.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/commands-and-groups.rst",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/commands.rst",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/complex.rst",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/conf.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/contrib.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/design-opinions.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/documentation.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/entry-points.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/exceptions.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/extending-click.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/faqs.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/handling-files.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/index.rst",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/license.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/option-decorators.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/options.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/parameter-types.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/parameters.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/prompts.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/quickstart.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/setuptools.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/shell-completion.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/support-multiple-versions.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/testing.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/unicode-support.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/utils.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/virtualenv.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/why.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/docs/wincmd.md",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/README",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/aliases/README",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/aliases/aliases.ini",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/aliases/aliases.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/aliases/pyproject.toml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/colors/README",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/colors/colors.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/colors/pyproject.toml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/completion/README",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/completion/completion.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/completion/pyproject.toml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/complex/README",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/complex/complex/__init__.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/complex/complex/cli.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/complex/complex/commands/__init__.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/complex/complex/commands/cmd_init.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/complex/complex/commands/cmd_status.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/complex/pyproject.toml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/imagepipe/.gitignore",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/imagepipe/README",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/imagepipe/example01.jpg",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/imagepipe/example02.jpg",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/imagepipe/imagepipe.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/imagepipe/pyproject.toml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/inout/README",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/inout/inout.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/inout/pyproject.toml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/naval/README",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/naval/naval.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/naval/pyproject.toml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/repo/README",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/repo/pyproject.toml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/repo/repo.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/termui/README",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/termui/pyproject.toml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/termui/termui.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/validation/README",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/validation/pyproject.toml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/examples/validation/validation.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/pyproject.toml",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/__init__.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/_compat.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/_termui_impl.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/_textwrap.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/_utils.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/_winconsole.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/core.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/decorators.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/exceptions.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/formatting.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/globals.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/parser.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/py.typed",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/shell_completion.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/termui.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/testing.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/types.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/src/click/utils.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/conftest.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_arguments.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_basic.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_chain.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_command_decorators.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_commands.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_compat.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_context.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_custom_classes.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_defaults.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_formatting.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_imports.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_info_dict.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_normalization.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_options.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_parser.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_shell_completion.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_termui.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_testing.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_types.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/test_utils.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/typing/typing_aliased_group.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/typing/typing_confirmation_option.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/typing/typing_group_kw_options.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/typing/typing_help_option.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/typing/typing_options.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/typing/typing_password_option.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/typing/typing_progressbar.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/typing/typing_simple_example.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/tests/typing/typing_version_option.py",
+            "sources/b5570f681bfd30121b574a429f27f46e79b94a040675b976b753972c16b39e01/tree/uv.lock"
+          ]
+        },
+        "graph_cache_key": "c06a163c869a8ef962d3007dcf04c6e89a0a04bc3b2299af5e55037104d69035:ddca7758aa649a4b95c1bb702ac0a72a5852a94fdd6e3a7c93b561fc25648397",
+        "graph_status": "available"
+      },
+      "canonical_output_sha256": "af148f84a10f5638323bab5c0b5399d9811a50d7ef23c20b5d1dba3ae9757134",
+      "commands": [
+        [
+          "shiftory",
+          "analyze",
+          "--repo",
+          "<repository>",
+          "--range",
+          "7f7bbe4569ea68e8dabee232eade069ef3310aea..91de59c6c8abc8251e7af551cd4546cc964288af",
+          "--graphora",
+          "auto",
+          "--cache-dir",
+          "<scenario-cache>",
+          "--output",
+          "<run>/evidence.json"
+        ],
+        [
+          "shiftory-python",
+          "render-evidence-markdown",
+          "--evidence",
+          "<run>/evidence.json"
+        ],
+        [
+          "benchmark-runner",
+          "instantiate-manifest"
+        ],
+        [
+          "shiftory",
+          "verify",
+          "--evidence",
+          "<run>/evidence.json",
+          "--explanation",
+          "<run>/explanation.json"
+        ],
+        [
+          "shiftory",
+          "render",
+          "--format",
+          "json",
+          "--evidence",
+          "<run>/evidence.json",
+          "--explanation",
+          "<run>/explanation.json"
+        ],
+        [
+          "shiftory",
+          "render",
+          "--format",
+          "markdown",
+          "--evidence",
+          "<run>/evidence.json",
+          "--explanation",
+          "<run>/explanation.json"
+        ]
+      ],
+      "coverage": {
+        "citation_count": 5,
+        "hunk_coverage_ratio": 1.0,
+        "hunk_covered": 5,
+        "hunk_total": 5,
+        "line_coverage_ratio": 1.0,
+        "line_owned": 52,
+        "line_total": 52,
+        "span_coverage_ratio": 1.0,
+        "span_owned": 8,
+        "span_total": 8,
+        "unit_coverage_ratio": 1.0,
+        "unit_covered": 3,
+        "unit_total": 3
+      },
+      "evidence_markdown_renderer": {
+        "distribution": "shiftory",
+        "module": "shiftory.render.evidence",
+        "module_file": "src/shiftory/render/evidence.py",
+        "module_sha256": "aca36323dfd709308c375325bc52544073cc06fd7162f098f0fc6cbab6b23f00",
+        "package_code_sha256": "e9279689384c1e9779fec8c85d19811b7d0bab64a360c56bcd1b425c135fe764",
+        "schema": "shiftory.benchmark-renderer/v1"
+      },
+      "label": "warm",
+      "paths": {
+        "assertions_json": "runs/click-optional-flag-value/warm/assertions.json",
+        "evidence_json": "runs/click-optional-flag-value/warm/evidence.json",
+        "evidence_markdown": "runs/click-optional-flag-value/warm/evidence.md",
+        "explanation_json": "runs/click-optional-flag-value/warm/explanation.json",
+        "report_json": "runs/click-optional-flag-value/warm/shiftory-report.json",
+        "report_markdown": "runs/click-optional-flag-value/warm/shiftory-report.md",
+        "verify_json": "runs/click-optional-flag-value/warm/verify.json"
+      },
+      "sizes": {
+        "assertions_json_bytes": 5524,
+        "evidence_json_bytes": 67082,
+        "evidence_markdown_bytes": 33774,
+        "explanation_json_bytes": 6101,
+        "report_json_bytes": 8584,
+        "report_markdown_bytes": 5320,
+        "verify_json_bytes": 366
+      },
+      "wall_seconds": {
+        "complete_path": 1.2336745,
+        "phases": {
+          "analyze": 0.7507155,
+          "instantiate_manifest": 0.000343541,
+          "render_evidence_markdown": 0.066690875,
+          "render_json": 0.129136125,
+          "render_markdown": 0.1223305,
+          "verify": 0.134072625
+        }
+      }
+    }
+  ],
+  "scenario": {
+    "base": "7f7bbe4569ea68e8dabee232eade069ef3310aea",
+    "head": "91de59c6c8abc8251e7af551cd4546cc964288af",
+    "id": "click-optional-flag-value",
+    "name": "Click optional values for non-flag options",
+    "repository": "https://github.com/pallets/click.git"
+  },
+  "schema": "shiftory.benchmark-metrics/v1"
+}

@@ -1,0 +1,2315 @@
+{
+  "acquisition": {
+    "acquired_at_utc": "2026-08-29T13:35:29.405138+00:00",
+    "acquisition_wall_seconds": 0.065166042,
+    "commits": {
+      "base": "c8e755f11f31b6da04329cdc7433747bba70150f",
+      "head": "d83bab4d3f29a0176a20ea004c2cba44058d4210"
+    },
+    "inventory": {
+      "added_lines": 1470,
+      "deleted_lines": 556,
+      "files": 2,
+      "hunks": 14,
+      "raw_patch_bytes": 89361
+    },
+    "licenses": [
+      {
+        "bytes": 1081,
+        "path": "LICENSE-MIT",
+        "sha256": "0f96a83840e146e43c0ec96a22ec1f392e0680e6c1226e6f3ba87e0740af850f",
+        "spdx": "MIT"
+      },
+      {
+        "bytes": 1211,
+        "path": "UNLICENSE",
+        "sha256": "7e12e5df4bae12cb21581ba157ced20e1986a0508dd10d0e8a4ab9a4cf94e85c",
+        "spdx": "Unlicense"
+      }
+    ],
+    "remote_verified": true,
+    "repository": "https://github.com/BurntSushi/ripgrep.git",
+    "scenario_id": "ripgrep-repeated-flags",
+    "schema": "shiftory.benchmark-acquisition/v1"
+  },
+  "environment": {
+    "dependencies": {
+      "graphora-kg": "0.2.1",
+      "jsonschema": "4.24.0",
+      "platformdirs": "4.3.7",
+      "shiftory": "0.1.0",
+      "tree-sitter": "0.25.2"
+    },
+    "executed_package_code_sha256": "e9279689384c1e9779fec8c85d19811b7d0bab64a360c56bcd1b425c135fe764",
+    "git": "git version 2.53.0",
+    "logical_cpu_count": 8,
+    "machine": "arm64",
+    "memory_bytes": 25769803776,
+    "os": "macOS-15.6.1-arm64-arm-64bit",
+    "processor": "arm",
+    "python": "3.11.6 (main, Jan 28 2025, 18:28:48) [Clang 16.0.0 (clang-1600.0.26.6)]",
+    "recorded_at_utc": "2026-08-29T13:35:37.801753+00:00",
+    "shiftory": "shiftory 0.1.0",
+    "shiftory_commit": "42e96ba5977b17fc0cfe9cc34e4de88ffb83ebf9",
+    "shiftory_distribution": "shiftory",
+    "shiftory_module": "src/shiftory/__init__.py",
+    "shiftory_worktree_dirty": false
+  },
+  "evidence_markdown_renderer": {
+    "distribution": "shiftory",
+    "module": "shiftory.render.evidence",
+    "module_file": "src/shiftory/render/evidence.py",
+    "module_sha256": "aca36323dfd709308c375325bc52544073cc06fd7162f098f0fc6cbab6b23f00",
+    "package_code_sha256": "e9279689384c1e9779fec8c85d19811b7d0bab64a360c56bcd1b425c135fe764",
+    "schema": "shiftory.benchmark-renderer/v1"
+  },
+  "execution": {
+    "distribution": "shiftory",
+    "import_root": "repository:src",
+    "module_file": "src/shiftory/__init__.py",
+    "package_code": {
+      "files": [
+        {
+          "bytes": 439,
+          "path": "shiftory/__init__.py",
+          "sha256": "61b8890fa18f809e9b658ebb78a6f0fc0329e89c8ab7eb398515f79a6d7ef992"
+        },
+        {
+          "bytes": 160,
+          "path": "shiftory/cache/__init__.py",
+          "sha256": "af5e3167b3dd6bbcbb49079ec5c3963aad74fa991436eba718fcb48fc9330996"
+        },
+        {
+          "bytes": 5148,
+          "path": "shiftory/cache/store.py",
+          "sha256": "4851cfc03a44a72c0c0c4f57cf206412ecb6a70a6d10bafec1c33acfdc4fd25d"
+        },
+        {
+          "bytes": 79,
+          "path": "shiftory/classify/__init__.py",
+          "sha256": "4fc70d52ca226081aad389f067c955f7b30c5e00ad7a8257f2b2ea083c5b61dc"
+        },
+        {
+          "bytes": 3046,
+          "path": "shiftory/classify/rules.py",
+          "sha256": "412b738927c7566271c02808c1c48c99557813390ae7fff44decf0262a05f574"
+        },
+        {
+          "bytes": 21931,
+          "path": "shiftory/cli.py",
+          "sha256": "8a2b251afcb0ce60324e851a44c209e3233e211653393ab5de1a33dec778541a"
+        },
+        {
+          "bytes": 72,
+          "path": "shiftory/diff/__init__.py",
+          "sha256": "982dc016b89cebf16bf68cf3f6a41ba261d43a59dde29d569aff5d99047e7dcb"
+        },
+        {
+          "bytes": 555,
+          "path": "shiftory/diff/identity.py",
+          "sha256": "c590ad5edb36628f8dbcecc2f2882563e088d8794eb4b7166c086c4cd8dae3ae"
+        },
+        {
+          "bytes": 26011,
+          "path": "shiftory/diff/parser.py",
+          "sha256": "3c3b3791811af03798080e41a33892e3f91e6de8f14210ba76ee206d5ac22c9f"
+        },
+        {
+          "bytes": 1671,
+          "path": "shiftory/errors.py",
+          "sha256": "6e79c8ed2b6d6d0e6e14555f04104faa89cc68d71b5c648c6cdf12b934e0fb2a"
+        },
+        {
+          "bytes": 137,
+          "path": "shiftory/evidence/__init__.py",
+          "sha256": "41292efa0ba4d2279ac94aef1e69fe5242ef92b1b998d83eb87c0e295f692581"
+        },
+        {
+          "bytes": 25540,
+          "path": "shiftory/evidence/builder.py",
+          "sha256": "5764fdf81b77000f9eb7c90beed5701631bf31189eafc1501f3563562e8d9059"
+        },
+        {
+          "bytes": 134,
+          "path": "shiftory/explain/__init__.py",
+          "sha256": "b17c156d020c9912df02483cb6b0cbcb73f786aa632a38e20e7d297a8299973a"
+        },
+        {
+          "bytes": 36564,
+          "path": "shiftory/explain/validator.py",
+          "sha256": "53ba3a4a073f5889ac9b77f1cf0c0de136d9c89b5a1d6dabe51b95ffa4e71c69"
+        },
+        {
+          "bytes": 208,
+          "path": "shiftory/git/__init__.py",
+          "sha256": "b68c3635337c8be6e860c320ec88acc2b30f32d8cbb69c056ac56660394e1d3e"
+        },
+        {
+          "bytes": 27023,
+          "path": "shiftory/git/repository.py",
+          "sha256": "affc6cfdbda35dee6ad176a6c12cd2a015dbf81a96f45c0d1d84d9de6048677a"
+        },
+        {
+          "bytes": 12378,
+          "path": "shiftory/git/source.py",
+          "sha256": "1992c7e31324392ab3c8b0a252623cc00320a4530e8c1768ac8f8c031d7f4d28"
+        },
+        {
+          "bytes": 167,
+          "path": "shiftory/graph/__init__.py",
+          "sha256": "fdb3dd351b898c6253312511a645b9c5394df96d23915d9c9b93c6f30d467092"
+        },
+        {
+          "bytes": 51103,
+          "path": "shiftory/graph/provider.py",
+          "sha256": "dd6b4744dd30d920564bc0ea60d3b7a3d7509b68b5e4c845fb01eaec1e07dac2"
+        },
+        {
+          "bytes": 9673,
+          "path": "shiftory/graph/worker.py",
+          "sha256": "56727cdcd059bf6efec14cae182b4a613f8b668b63623e1ea04fee73ab689da6"
+        },
+        {
+          "bytes": 394,
+          "path": "shiftory/models/__init__.py",
+          "sha256": "2ac8aac2e44818f6015a9be2c4a2326db7245efd87699d942ac49ab4428c9067"
+        },
+        {
+          "bytes": 3715,
+          "path": "shiftory/models/core.py",
+          "sha256": "313138ca110de3531c5f30c13988367125027e73d7aca08092397de66ab5df29"
+        },
+        {
+          "bytes": 601,
+          "path": "shiftory/models/json.py",
+          "sha256": "144c215f8d9f6fab5bc2c9c1285ea5fb2b906deae4ee1cf7eda9f73708bdbdb0"
+        },
+        {
+          "bytes": 267,
+          "path": "shiftory/render/__init__.py",
+          "sha256": "5e5ced22076e1672aaea267e560baeeaa33141ee61ec9528a9ea4a80015a1d5c"
+        },
+        {
+          "bytes": 5633,
+          "path": "shiftory/render/evidence.py",
+          "sha256": "aca36323dfd709308c375325bc52544073cc06fd7162f098f0fc6cbab6b23f00"
+        },
+        {
+          "bytes": 4535,
+          "path": "shiftory/render/report.py",
+          "sha256": "89e3b0997bb94dff9a8e83eea71c2e132c764f7f400f501d2d83bd2de8cb4fc1"
+        },
+        {
+          "bytes": 443,
+          "path": "shiftory/schemas/__init__.py",
+          "sha256": "709ea81f5bb035d73ccc641c496074403fcf0a3ce5b3d7788cc669fb57288086"
+        },
+        {
+          "bytes": 0,
+          "path": "shiftory/skills/__init__.py",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 0,
+          "path": "shiftory/skills/shiftory/__init__.py",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "sha256": "e9279689384c1e9779fec8c85d19811b7d0bab64a360c56bcd1b425c135fe764"
+    },
+    "schema": "shiftory.benchmark-execution/v1"
+  },
+  "implementation": {
+    "golden_inputs_sha256": "f1fd72c75085f3a989cb9b11438baa764a103eece3148e9b55ccc062866a25ac",
+    "manifest": {
+      "files": [
+        {
+          "bytes": 1130,
+          "committed_blob": "d86be4209d6ac70cdebc727787be874e04fce0d6",
+          "path": "benchmarks/fixtures/offline-smoke/assertions.json",
+          "sha256": "c928db428fbb3f6e977aec606bf8acd0cce6ba60c4643aa76e718b71a3727147"
+        },
+        {
+          "bytes": 1351,
+          "committed_blob": "a126bfbd0b24e6afb1afd5521ec442bfc035d8c3",
+          "path": "benchmarks/fixtures/offline-smoke/explanation-template.json",
+          "sha256": "3c8198d40abdc0e39523629769fb9258af08605343f93897c6437663584dbe8f"
+        },
+        {
+          "bytes": 817,
+          "committed_blob": "e2cbadf201e3a902031f5d45eb682a3fb095df7c",
+          "path": "benchmarks/fixtures/offline-smoke/history.fast-import",
+          "sha256": "9ea85279a5c3dd393fe8c38174f9695bad6f769ae7d9bcc4f9436d114a7cba1a"
+        },
+        {
+          "bytes": 705,
+          "committed_blob": "7ccf278471b12aa6857542c2d9ea352fb2a45813",
+          "path": "benchmarks/fixtures/offline-smoke/metadata.json",
+          "sha256": "4edd4debd35eb06c95b7b6015fe02d405698b7378cf9f44e6e2e2c20d78fab3f"
+        },
+        {
+          "bytes": 4793,
+          "committed_blob": "a356ef0a497c84bde70c015e19392fd0741f2898",
+          "path": "benchmarks/golden/axios/assertions.json",
+          "sha256": "40a1a994afb3867e0723886ed8f663926a4097dc9c03b830bad040bdef204ce2"
+        },
+        {
+          "bytes": 6831,
+          "committed_blob": "d510037d65188456ad0a8f777b4e14e7e5d0c6f2",
+          "path": "benchmarks/golden/axios/explanation-template.json",
+          "sha256": "407013f775589c3f0392674617b697186d2ad8a6e990c6c5dec990ac134e4662"
+        },
+        {
+          "bytes": 1946,
+          "committed_blob": "962c415f800d47c5741cd934a42d2193e806078f",
+          "path": "benchmarks/golden/click/assertions.json",
+          "sha256": "f1ad1757df80a8cb930908e7a10512c55c5a2e3206ae20b0dbf126ef9d6a337d"
+        },
+        {
+          "bytes": 2751,
+          "committed_blob": "70a23d61cb53e8844ff81f9a6cb826ef1dab8522",
+          "path": "benchmarks/golden/click/explanation-template.json",
+          "sha256": "0ed1fa5a05dcccc8dff7913410705586dd5710c15c289880cc8e306c1cba2384"
+        },
+        {
+          "bytes": 2320,
+          "committed_blob": "4d2f7cac204ee3960b67d1aa6fd9d98c973118ed",
+          "path": "benchmarks/golden/ripgrep/assertions.json",
+          "sha256": "97aefd01b63e6a1db8e8509c7c6e5c971c94530a69d3ea79fbd49d8f1f70b602"
+        },
+        {
+          "bytes": 4179,
+          "committed_blob": "3725642779f6987904ae8e83edffb8b7dc7fbb34",
+          "path": "benchmarks/golden/ripgrep/explanation-template.json",
+          "sha256": "57c8335080a3dedb14daef74ad593217798ee4bf949e8c47ea83ccc62bbfceb7"
+        },
+        {
+          "bytes": 66022,
+          "committed_blob": "5cb0403871b08bd94ef97d16da12799b84d76f33",
+          "path": "benchmarks/runner.py",
+          "sha256": "172249864800dc2f72951d879fbde0e7fe30b96c18308514e9200e5cddcf2dd4"
+        },
+        {
+          "bytes": 2009,
+          "committed_blob": "b4dcc84c27ca8585654ec259cf5536b469549187",
+          "path": "benchmarks/scenarios.toml",
+          "sha256": "4b9782418039d55e0b54886891921a061015f595a8572bb5c54d43b249f4c327"
+        },
+        {
+          "bytes": 334,
+          "committed_blob": "b5011acd8d2081d6b095d838bcfc06b2e4634f26",
+          "path": "constraints-dev.txt",
+          "sha256": "8ca206dfba00c5a8c518e1b13012da5f35d463f5ba3a2a5c0a3bad6df0525f17"
+        },
+        {
+          "bytes": 1408,
+          "committed_blob": "3e10704411b410f88a6f608d16bd4a2ce6825de1",
+          "path": "pyproject.toml",
+          "sha256": "3b04328f54d2016abc67fc27c526d3b43d75eedac01dbd6eca2c3ea6c690c3b0"
+        },
+        {
+          "bytes": 439,
+          "committed_blob": "0f1ab158dff68df71cea9d885076e8180e439506",
+          "path": "src/shiftory/__init__.py",
+          "sha256": "61b8890fa18f809e9b658ebb78a6f0fc0329e89c8ab7eb398515f79a6d7ef992"
+        },
+        {
+          "bytes": 160,
+          "committed_blob": "ff341747c44f7fc9fd2b1f6647706688314229c2",
+          "path": "src/shiftory/cache/__init__.py",
+          "sha256": "af5e3167b3dd6bbcbb49079ec5c3963aad74fa991436eba718fcb48fc9330996"
+        },
+        {
+          "bytes": 5148,
+          "committed_blob": "c28dc4753dd127d0a4f1079d2868c77a9905a6da",
+          "path": "src/shiftory/cache/store.py",
+          "sha256": "4851cfc03a44a72c0c0c4f57cf206412ecb6a70a6d10bafec1c33acfdc4fd25d"
+        },
+        {
+          "bytes": 79,
+          "committed_blob": "23f570d1087db7a86b3c1d2ad4908d7b5ccc9d96",
+          "path": "src/shiftory/classify/__init__.py",
+          "sha256": "4fc70d52ca226081aad389f067c955f7b30c5e00ad7a8257f2b2ea083c5b61dc"
+        },
+        {
+          "bytes": 3046,
+          "committed_blob": "b1eb320d895edb5877e27e9f0532f2efb3559ea5",
+          "path": "src/shiftory/classify/rules.py",
+          "sha256": "412b738927c7566271c02808c1c48c99557813390ae7fff44decf0262a05f574"
+        },
+        {
+          "bytes": 21931,
+          "committed_blob": "45181ffa59c518e1f717009f9a39ad31f6cb305a",
+          "path": "src/shiftory/cli.py",
+          "sha256": "8a2b251afcb0ce60324e851a44c209e3233e211653393ab5de1a33dec778541a"
+        },
+        {
+          "bytes": 72,
+          "committed_blob": "e63f2674823445ba3de3a3ce9c8ba87ddd201d70",
+          "path": "src/shiftory/diff/__init__.py",
+          "sha256": "982dc016b89cebf16bf68cf3f6a41ba261d43a59dde29d569aff5d99047e7dcb"
+        },
+        {
+          "bytes": 555,
+          "committed_blob": "3a707551307c7386785d35eb2cfdf360e8829f69",
+          "path": "src/shiftory/diff/identity.py",
+          "sha256": "c590ad5edb36628f8dbcecc2f2882563e088d8794eb4b7166c086c4cd8dae3ae"
+        },
+        {
+          "bytes": 26011,
+          "committed_blob": "9b08173a46d314fb6da3654a462b1b0df5a08d29",
+          "path": "src/shiftory/diff/parser.py",
+          "sha256": "3c3b3791811af03798080e41a33892e3f91e6de8f14210ba76ee206d5ac22c9f"
+        },
+        {
+          "bytes": 1671,
+          "committed_blob": "451247fc428336907aac483f8ddb727bc2f00632",
+          "path": "src/shiftory/errors.py",
+          "sha256": "6e79c8ed2b6d6d0e6e14555f04104faa89cc68d71b5c648c6cdf12b934e0fb2a"
+        },
+        {
+          "bytes": 137,
+          "committed_blob": "361baea9420e761f2e9349e5e5207341cd7706f5",
+          "path": "src/shiftory/evidence/__init__.py",
+          "sha256": "41292efa0ba4d2279ac94aef1e69fe5242ef92b1b998d83eb87c0e295f692581"
+        },
+        {
+          "bytes": 25540,
+          "committed_blob": "706be4f16daa1396955f291a79d3f547f8b946bb",
+          "path": "src/shiftory/evidence/builder.py",
+          "sha256": "5764fdf81b77000f9eb7c90beed5701631bf31189eafc1501f3563562e8d9059"
+        },
+        {
+          "bytes": 134,
+          "committed_blob": "61e5dc2f385c457db3edf0c15098bb1d45ac23a8",
+          "path": "src/shiftory/explain/__init__.py",
+          "sha256": "b17c156d020c9912df02483cb6b0cbcb73f786aa632a38e20e7d297a8299973a"
+        },
+        {
+          "bytes": 36564,
+          "committed_blob": "03726142f609709e5eafa5499928f4885960518a",
+          "path": "src/shiftory/explain/validator.py",
+          "sha256": "53ba3a4a073f5889ac9b77f1cf0c0de136d9c89b5a1d6dabe51b95ffa4e71c69"
+        },
+        {
+          "bytes": 208,
+          "committed_blob": "ca579a4663f57c6b013295792c5ed4274a8166d3",
+          "path": "src/shiftory/git/__init__.py",
+          "sha256": "b68c3635337c8be6e860c320ec88acc2b30f32d8cbb69c056ac56660394e1d3e"
+        },
+        {
+          "bytes": 27023,
+          "committed_blob": "d8aadc4cc3c05dca1ce4e0a2927d7768d96ab6e5",
+          "path": "src/shiftory/git/repository.py",
+          "sha256": "affc6cfdbda35dee6ad176a6c12cd2a015dbf81a96f45c0d1d84d9de6048677a"
+        },
+        {
+          "bytes": 12378,
+          "committed_blob": "253021da2663abc05e85ea90ede7ca9480d7f4cd",
+          "path": "src/shiftory/git/source.py",
+          "sha256": "1992c7e31324392ab3c8b0a252623cc00320a4530e8c1768ac8f8c031d7f4d28"
+        },
+        {
+          "bytes": 167,
+          "committed_blob": "521d5d598d5e68b40773f62931254c74711a9a84",
+          "path": "src/shiftory/graph/__init__.py",
+          "sha256": "fdb3dd351b898c6253312511a645b9c5394df96d23915d9c9b93c6f30d467092"
+        },
+        {
+          "bytes": 51103,
+          "committed_blob": "add24de314990b531beba791921664bfc2989c71",
+          "path": "src/shiftory/graph/provider.py",
+          "sha256": "dd6b4744dd30d920564bc0ea60d3b7a3d7509b68b5e4c845fb01eaec1e07dac2"
+        },
+        {
+          "bytes": 9673,
+          "committed_blob": "63defcaf744e55af9bc61b8fa4150c0c9ad052a4",
+          "path": "src/shiftory/graph/worker.py",
+          "sha256": "56727cdcd059bf6efec14cae182b4a613f8b668b63623e1ea04fee73ab689da6"
+        },
+        {
+          "bytes": 394,
+          "committed_blob": "5c4a8285e384a793964e1c9db61c41d82ba46787",
+          "path": "src/shiftory/models/__init__.py",
+          "sha256": "2ac8aac2e44818f6015a9be2c4a2326db7245efd87699d942ac49ab4428c9067"
+        },
+        {
+          "bytes": 3715,
+          "committed_blob": "993487839fcb47d9f564c8889e3d9180af05d3e9",
+          "path": "src/shiftory/models/core.py",
+          "sha256": "313138ca110de3531c5f30c13988367125027e73d7aca08092397de66ab5df29"
+        },
+        {
+          "bytes": 601,
+          "committed_blob": "ac55074742f81e0b4f5766bae3d0be642fedc6f9",
+          "path": "src/shiftory/models/json.py",
+          "sha256": "144c215f8d9f6fab5bc2c9c1285ea5fb2b906deae4ee1cf7eda9f73708bdbdb0"
+        },
+        {
+          "bytes": 0,
+          "committed_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "path": "src/shiftory/py.typed",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 267,
+          "committed_blob": "979c90d3f24b148315c3dddcad50f8e8b86c4862",
+          "path": "src/shiftory/render/__init__.py",
+          "sha256": "5e5ced22076e1672aaea267e560baeeaa33141ee61ec9528a9ea4a80015a1d5c"
+        },
+        {
+          "bytes": 5633,
+          "committed_blob": "18ab04f403bac7e58c6927ff1e21cb50609cd2ba",
+          "path": "src/shiftory/render/evidence.py",
+          "sha256": "aca36323dfd709308c375325bc52544073cc06fd7162f098f0fc6cbab6b23f00"
+        },
+        {
+          "bytes": 4535,
+          "committed_blob": "29a4676f13b063db3d1b2bbdac3e6e6fbbbba76f",
+          "path": "src/shiftory/render/report.py",
+          "sha256": "89e3b0997bb94dff9a8e83eea71c2e132c764f7f400f501d2d83bd2de8cb4fc1"
+        },
+        {
+          "bytes": 443,
+          "committed_blob": "94a5a359658243c03b7e69eec0e913161fb0c24d",
+          "path": "src/shiftory/schemas/__init__.py",
+          "sha256": "709ea81f5bb035d73ccc641c496074403fcf0a3ce5b3d7788cc669fb57288086"
+        },
+        {
+          "bytes": 10858,
+          "committed_blob": "84f8722940160fbb5e6f02cffef2ab0b252de644",
+          "path": "src/shiftory/schemas/evidence-v1.json",
+          "sha256": "b0a5d6f0c61f3aa77571df05a982798b26467b4d85ed6b9bd8ea0334550e14e3"
+        },
+        {
+          "bytes": 4905,
+          "committed_blob": "8166afdb0b54ab076455b4a0958aceba46872f3e",
+          "path": "src/shiftory/schemas/explanation-v1.json",
+          "sha256": "93db4b4280f0db99c1ca6c2de4b756fde00ff772859c70dc3f8e62380c1355c6"
+        },
+        {
+          "bytes": 5093,
+          "committed_blob": "c304b504adbf4d3d944af82b6e551302cf644adb",
+          "path": "src/shiftory/schemas/report-v1.json",
+          "sha256": "bb1a7940040ebc192d08c1b8c1582c68f9c3e50317adbffca4d0ec3f100b7773"
+        },
+        {
+          "bytes": 0,
+          "committed_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "path": "src/shiftory/skills/__init__.py",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 1601,
+          "committed_blob": "31fe20372708af13c5dd095e4fae27bd6ad43cd0",
+          "path": "src/shiftory/skills/shiftory/SKILL.md",
+          "sha256": "0f7ddbe349e93b68924c2665f06e015114130083841702ce14c8c650b99c5be0"
+        },
+        {
+          "bytes": 0,
+          "committed_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "path": "src/shiftory/skills/shiftory/__init__.py",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "selection": [
+        "src/shiftory/",
+        "benchmarks/runner.py",
+        "benchmarks/scenarios.toml",
+        "benchmarks/golden/",
+        "benchmarks/fixtures/",
+        "pyproject.toml",
+        "constraints-dev.txt"
+      ],
+      "sha256": "edaa36712710d2c59ec68cc7d2102dbad31612d382f72a71a5f2f4779d69415f"
+    },
+    "package": {
+      "dependencies": [
+        "graphora-kg==0.2.1",
+        "jsonschema>=4.23,<5",
+        "platformdirs>=4.3,<5"
+      ],
+      "installed_distributions": {
+        "graphora-kg": "0.2.1",
+        "jsonschema": "4.24.0",
+        "platformdirs": "4.3.7",
+        "shiftory": "0.1.0",
+        "tree-sitter": "0.25.2"
+      },
+      "name": "shiftory",
+      "requires_python": ">=3.10",
+      "version": "0.1.0"
+    },
+    "package_code": {
+      "files": [
+        {
+          "bytes": 439,
+          "path": "shiftory/__init__.py",
+          "sha256": "61b8890fa18f809e9b658ebb78a6f0fc0329e89c8ab7eb398515f79a6d7ef992"
+        },
+        {
+          "bytes": 160,
+          "path": "shiftory/cache/__init__.py",
+          "sha256": "af5e3167b3dd6bbcbb49079ec5c3963aad74fa991436eba718fcb48fc9330996"
+        },
+        {
+          "bytes": 5148,
+          "path": "shiftory/cache/store.py",
+          "sha256": "4851cfc03a44a72c0c0c4f57cf206412ecb6a70a6d10bafec1c33acfdc4fd25d"
+        },
+        {
+          "bytes": 79,
+          "path": "shiftory/classify/__init__.py",
+          "sha256": "4fc70d52ca226081aad389f067c955f7b30c5e00ad7a8257f2b2ea083c5b61dc"
+        },
+        {
+          "bytes": 3046,
+          "path": "shiftory/classify/rules.py",
+          "sha256": "412b738927c7566271c02808c1c48c99557813390ae7fff44decf0262a05f574"
+        },
+        {
+          "bytes": 21931,
+          "path": "shiftory/cli.py",
+          "sha256": "8a2b251afcb0ce60324e851a44c209e3233e211653393ab5de1a33dec778541a"
+        },
+        {
+          "bytes": 72,
+          "path": "shiftory/diff/__init__.py",
+          "sha256": "982dc016b89cebf16bf68cf3f6a41ba261d43a59dde29d569aff5d99047e7dcb"
+        },
+        {
+          "bytes": 555,
+          "path": "shiftory/diff/identity.py",
+          "sha256": "c590ad5edb36628f8dbcecc2f2882563e088d8794eb4b7166c086c4cd8dae3ae"
+        },
+        {
+          "bytes": 26011,
+          "path": "shiftory/diff/parser.py",
+          "sha256": "3c3b3791811af03798080e41a33892e3f91e6de8f14210ba76ee206d5ac22c9f"
+        },
+        {
+          "bytes": 1671,
+          "path": "shiftory/errors.py",
+          "sha256": "6e79c8ed2b6d6d0e6e14555f04104faa89cc68d71b5c648c6cdf12b934e0fb2a"
+        },
+        {
+          "bytes": 137,
+          "path": "shiftory/evidence/__init__.py",
+          "sha256": "41292efa0ba4d2279ac94aef1e69fe5242ef92b1b998d83eb87c0e295f692581"
+        },
+        {
+          "bytes": 25540,
+          "path": "shiftory/evidence/builder.py",
+          "sha256": "5764fdf81b77000f9eb7c90beed5701631bf31189eafc1501f3563562e8d9059"
+        },
+        {
+          "bytes": 134,
+          "path": "shiftory/explain/__init__.py",
+          "sha256": "b17c156d020c9912df02483cb6b0cbcb73f786aa632a38e20e7d297a8299973a"
+        },
+        {
+          "bytes": 36564,
+          "path": "shiftory/explain/validator.py",
+          "sha256": "53ba3a4a073f5889ac9b77f1cf0c0de136d9c89b5a1d6dabe51b95ffa4e71c69"
+        },
+        {
+          "bytes": 208,
+          "path": "shiftory/git/__init__.py",
+          "sha256": "b68c3635337c8be6e860c320ec88acc2b30f32d8cbb69c056ac56660394e1d3e"
+        },
+        {
+          "bytes": 27023,
+          "path": "shiftory/git/repository.py",
+          "sha256": "affc6cfdbda35dee6ad176a6c12cd2a015dbf81a96f45c0d1d84d9de6048677a"
+        },
+        {
+          "bytes": 12378,
+          "path": "shiftory/git/source.py",
+          "sha256": "1992c7e31324392ab3c8b0a252623cc00320a4530e8c1768ac8f8c031d7f4d28"
+        },
+        {
+          "bytes": 167,
+          "path": "shiftory/graph/__init__.py",
+          "sha256": "fdb3dd351b898c6253312511a645b9c5394df96d23915d9c9b93c6f30d467092"
+        },
+        {
+          "bytes": 51103,
+          "path": "shiftory/graph/provider.py",
+          "sha256": "dd6b4744dd30d920564bc0ea60d3b7a3d7509b68b5e4c845fb01eaec1e07dac2"
+        },
+        {
+          "bytes": 9673,
+          "path": "shiftory/graph/worker.py",
+          "sha256": "56727cdcd059bf6efec14cae182b4a613f8b668b63623e1ea04fee73ab689da6"
+        },
+        {
+          "bytes": 394,
+          "path": "shiftory/models/__init__.py",
+          "sha256": "2ac8aac2e44818f6015a9be2c4a2326db7245efd87699d942ac49ab4428c9067"
+        },
+        {
+          "bytes": 3715,
+          "path": "shiftory/models/core.py",
+          "sha256": "313138ca110de3531c5f30c13988367125027e73d7aca08092397de66ab5df29"
+        },
+        {
+          "bytes": 601,
+          "path": "shiftory/models/json.py",
+          "sha256": "144c215f8d9f6fab5bc2c9c1285ea5fb2b906deae4ee1cf7eda9f73708bdbdb0"
+        },
+        {
+          "bytes": 267,
+          "path": "shiftory/render/__init__.py",
+          "sha256": "5e5ced22076e1672aaea267e560baeeaa33141ee61ec9528a9ea4a80015a1d5c"
+        },
+        {
+          "bytes": 5633,
+          "path": "shiftory/render/evidence.py",
+          "sha256": "aca36323dfd709308c375325bc52544073cc06fd7162f098f0fc6cbab6b23f00"
+        },
+        {
+          "bytes": 4535,
+          "path": "shiftory/render/report.py",
+          "sha256": "89e3b0997bb94dff9a8e83eea71c2e132c764f7f400f501d2d83bd2de8cb4fc1"
+        },
+        {
+          "bytes": 443,
+          "path": "shiftory/schemas/__init__.py",
+          "sha256": "709ea81f5bb035d73ccc641c496074403fcf0a3ce5b3d7788cc669fb57288086"
+        },
+        {
+          "bytes": 0,
+          "path": "shiftory/skills/__init__.py",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 0,
+          "path": "shiftory/skills/shiftory/__init__.py",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "sha256": "e9279689384c1e9779fec8c85d19811b7d0bab64a360c56bcd1b425c135fe764"
+    },
+    "runner_sha256": "172249864800dc2f72951d879fbde0e7fe30b96c18308514e9200e5cddcf2dd4",
+    "schema": "shiftory.benchmark-implementation/v1",
+    "shiftory_commit": "42e96ba5977b17fc0cfe9cc34e4de88ffb83ebf9",
+    "shiftory_tree": "bb1ecc5fe9010c11f72dbd0122a213989fc0c826",
+    "shiftory_worktree_clean": true
+  },
+  "input": {
+    "added_lines": 1470,
+    "changed_lines": 2026,
+    "deleted_lines": 556,
+    "files": 2,
+    "hunks": 14,
+    "raw_hunk_patch_bytes": 89023,
+    "raw_patch_bytes": 89361,
+    "spans": 38
+  },
+  "limitations": [
+    "Coverage is accounting, not a semantic-correctness score.",
+    "Golden assertions verify selected observable facts, not complete behavior.",
+    "Wall times describe only the recorded machine and environment."
+  ],
+  "repeatability": {
+    "cold_sha256": "25f9155cde54218e8b5589e63db1f073be5e0742d451a4692e93edb0b2d84086",
+    "excluded_envelopes": [
+      "environment",
+      "acquisition timing",
+      "run timing",
+      "local and installation paths"
+    ],
+    "passed": true,
+    "schema": "shiftory.benchmark-repeatability/v1",
+    "warm_sha256": "25f9155cde54218e8b5589e63db1f073be5e0742d451a4692e93edb0b2d84086"
+  },
+  "runs": [
+    {
+      "artifact_sha256": {
+        "assertions_json": "42168d3bb2cc39b8699dab0998d66c17592192a1b21f87629579373749d9d9aa",
+        "evidence_json": "764e07c20527b447257cae4d1fea61cc5a49639271b204f81e2f607b9ec71f1b",
+        "evidence_markdown": "72312d147f931060a2201fb3ba86d94abd095b67bd6ba9e984024a877279bded",
+        "explanation_json": "92b1c8a5111d8a9dacdb3eaf43993edb599d8ab0c5acf4c52623ab22bf56f8ed",
+        "report_json": "f2b2b5d95083d328c59f8e2a320f0f576fa12b1b3ffe465d76ea148e560ade5b",
+        "report_markdown": "fae60e8e06189f5b9559a0d775ec6b9644489356bdfc6c61268468eac117c124",
+        "verify_json": "12fb4570776f3ea360ece06c059c86ba5d1fa6bc7fb67ba8add6ca50cdef5ae3"
+      },
+      "assertions": {
+        "counts": {
+          "fail": 0,
+          "pass": 40,
+          "skip": 0
+        },
+        "passed": true,
+        "results": [
+          {
+            "detail": "c8e755f11f31b6da04329cdc7433747bba70150f",
+            "domain": "evidence",
+            "id": "evidence-base-sha",
+            "status": "pass",
+            "target": "$.comparison.base_sha"
+          },
+          {
+            "detail": "d83bab4d3f29a0176a20ea004c2cba44058d4210",
+            "domain": "evidence",
+            "id": "evidence-head-sha",
+            "status": "pass",
+            "target": "$.comparison.head_sha"
+          },
+          {
+            "detail": "valid=True",
+            "domain": "report",
+            "id": "verify-valid",
+            "status": "pass",
+            "target": "$.verify.valid"
+          },
+          {
+            "detail": "expected=2, actual=2",
+            "domain": "evidence",
+            "id": "evidence-inventory-files",
+            "status": "pass",
+            "target": "$.metrics.files"
+          },
+          {
+            "detail": "expected=14, actual=14",
+            "domain": "evidence",
+            "id": "evidence-inventory-hunks",
+            "status": "pass",
+            "target": "$.metrics.hunks"
+          },
+          {
+            "detail": "expected=1470, actual=1470",
+            "domain": "evidence",
+            "id": "evidence-inventory-added_lines",
+            "status": "pass",
+            "target": "$.metrics.added_lines"
+          },
+          {
+            "detail": "expected=556, actual=556",
+            "domain": "evidence",
+            "id": "evidence-inventory-deleted_lines",
+            "status": "pass",
+            "target": "$.metrics.deleted_lines"
+          },
+          {
+            "detail": "expected=True, actual=True",
+            "domain": "before-source",
+            "id": "structured-argument-model:before:file-exists",
+            "status": "pass",
+            "target": "src/app.rs"
+          },
+          {
+            "detail": "contains 'use clap::{App, AppSettings, Arg, ArgSettings};'",
+            "domain": "before-source",
+            "id": "structured-argument-model:before:contains:1",
+            "status": "pass",
+            "target": "src/app.rs"
+          },
+          {
+            "detail": "contains 'let flag = |name| arg(name).long(name);'",
+            "domain": "before-source",
+            "id": "structured-argument-model:before:contains:2",
+            "status": "pass",
+            "target": "src/app.rs"
+          },
+          {
+            "detail": "does not contain 'struct RGArg {'",
+            "domain": "before-source",
+            "id": "structured-argument-model:before:not-contains:1",
+            "status": "pass",
+            "target": "src/app.rs"
+          },
+          {
+            "detail": "expected=True, actual=True",
+            "domain": "after-source",
+            "id": "structured-argument-model:after:file-exists",
+            "status": "pass",
+            "target": "src/app.rs"
+          },
+          {
+            "detail": "contains 'use clap::{self, App, AppSettings};'",
+            "domain": "after-source",
+            "id": "structured-argument-model:after:contains:1",
+            "status": "pass",
+            "target": "src/app.rs"
+          },
+          {
+            "detail": "contains 'struct RGArg {'",
+            "domain": "after-source",
+            "id": "structured-argument-model:after:contains:2",
+            "status": "pass",
+            "target": "src/app.rs"
+          },
+          {
+            "detail": "contains 'enum RGArgKind {'",
+            "domain": "after-source",
+            "id": "structured-argument-model:after:contains:3",
+            "status": "pass",
+            "target": "src/app.rs"
+          },
+          {
+            "detail": "does not contain 'let flag = |name| arg(name).long(name);'",
+            "domain": "after-source",
+            "id": "structured-argument-model:after:not-contains:1",
+            "status": "pass",
+            "target": "src/app.rs"
+          },
+          {
+            "detail": "behavior item exists and all citations resolve",
+            "domain": "evidence",
+            "id": "structured-argument-model:evidence-citations",
+            "status": "pass",
+            "target": "argument-definition-model"
+          },
+          {
+            "detail": "expected=structural, actual=structural",
+            "domain": "report",
+            "id": "structured-argument-model:report-section",
+            "status": "pass",
+            "target": "argument-definition-model"
+          },
+          {
+            "detail": "expected=True, actual=True",
+            "domain": "before-source",
+            "id": "repeatable-value-selection:before:file-exists",
+            "status": "pass",
+            "target": "src/args.rs"
+          },
+          {
+            "detail": "contains \"impl<'a> ops::Deref for ArgMatches<'a> {\"",
+            "domain": "before-source",
+            "id": "repeatable-value-selection:before:contains:1",
+            "status": "pass",
+            "target": "src/args.rs"
+          },
+          {
+            "detail": "contains 'self.value_of_lossy(\"replace\").map(|s| s.into_owned().into_bytes())'",
+            "domain": "before-source",
+            "id": "repeatable-value-selection:before:contains:2",
+            "status": "pass",
+            "target": "src/args.rs"
+          },
+          {
+            "detail": "does not contain 'self.values_of_os(name).and_then(|it| it.last())'",
+            "domain": "before-source",
+            "id": "repeatable-value-selection:before:not-contains:1",
+            "status": "pass",
+            "target": "src/args.rs"
+          },
+          {
+            "detail": "expected=True, actual=True",
+            "domain": "after-source",
+            "id": "repeatable-value-selection:after:file-exists",
+            "status": "pass",
+            "target": "src/args.rs"
+          },
+          {
+            "detail": "contains 'self.value_of_lossy(\"replace\").map(|s| s.into_bytes())'",
+            "domain": "after-source",
+            "id": "repeatable-value-selection:after:contains:1",
+            "status": "pass",
+            "target": "src/args.rs"
+          },
+          {
+            "detail": "contains 'self.values_of_os(name).and_then(|it| it.last())'",
+            "domain": "after-source",
+            "id": "repeatable-value-selection:after:contains:2",
+            "status": "pass",
+            "target": "src/args.rs"
+          },
+          {
+            "detail": "contains 'self.values_of_lossy(name).and_then(|mut vals| vals.pop())'",
+            "domain": "after-source",
+            "id": "repeatable-value-selection:after:contains:3",
+            "status": "pass",
+            "target": "src/args.rs"
+          },
+          {
+            "detail": "does not contain \"impl<'a> ops::Deref for ArgMatches<'a> {\"",
+            "domain": "after-source",
+            "id": "repeatable-value-selection:after:not-contains:1",
+            "status": "pass",
+            "target": "src/args.rs"
+          },
+          {
+            "detail": "behavior item exists and all citations resolve",
+            "domain": "evidence",
+            "id": "repeatable-value-selection:evidence-citations",
+            "status": "pass",
+            "target": "last-repeated-value"
+          },
+          {
+            "detail": "expected=behavioral, actual=behavioral",
+            "domain": "report",
+            "id": "repeatable-value-selection:report-section",
+            "status": "pass",
+            "target": "last-repeated-value"
+          },
+          {
+            "detail": "expected=True, actual=True",
+            "domain": "before-source",
+            "id": "normalized-positional-names:before:file-exists",
+            "status": "pass",
+            "target": "src/args.rs"
+          },
+          {
+            "detail": "contains 'match self.values_of_os(\"PATH\") {'",
+            "domain": "before-source",
+            "id": "normalized-positional-names:before:contains:1",
+            "status": "pass",
+            "target": "src/args.rs"
+          },
+          {
+            "detail": "contains 'if let Some(path) = self.value_of_os(\"PATTERN\") {'",
+            "domain": "before-source",
+            "id": "normalized-positional-names:before:contains:2",
+            "status": "pass",
+            "target": "src/args.rs"
+          },
+          {
+            "detail": "does not contain 'match self.values_of_os(\"path\") {'",
+            "domain": "before-source",
+            "id": "normalized-positional-names:before:not-contains:1",
+            "status": "pass",
+            "target": "src/args.rs"
+          },
+          {
+            "detail": "expected=True, actual=True",
+            "domain": "after-source",
+            "id": "normalized-positional-names:after:file-exists",
+            "status": "pass",
+            "target": "src/args.rs"
+          },
+          {
+            "detail": "contains 'match self.values_of_os(\"path\") {'",
+            "domain": "after-source",
+            "id": "normalized-positional-names:after:contains:1",
+            "status": "pass",
+            "target": "src/args.rs"
+          },
+          {
+            "detail": "contains 'if let Some(path) = self.value_of_os(\"pattern\") {'",
+            "domain": "after-source",
+            "id": "normalized-positional-names:after:contains:2",
+            "status": "pass",
+            "target": "src/args.rs"
+          },
+          {
+            "detail": "does not contain 'match self.values_of_os(\"PATH\") {'",
+            "domain": "after-source",
+            "id": "normalized-positional-names:after:not-contains:1",
+            "status": "pass",
+            "target": "src/args.rs"
+          },
+          {
+            "detail": "behavior item exists and all citations resolve",
+            "domain": "evidence",
+            "id": "normalized-positional-names:evidence-citations",
+            "status": "pass",
+            "target": "normalized-positionals"
+          },
+          {
+            "detail": "expected=structural, actual=structural",
+            "domain": "report",
+            "id": "normalized-positional-names:report-section",
+            "status": "pass",
+            "target": "normalized-positionals"
+          },
+          {
+            "detail": "facts=3074",
+            "domain": "graph",
+            "id": "graph-fact-integrity",
+            "status": "pass",
+            "target": "$.graph.facts"
+          }
+        ],
+        "scenario_id": "ripgrep-repeated-flags",
+        "schema": "shiftory.benchmark-assertion-results/v1"
+      },
+      "cache": {
+        "after": {
+          "exists": true,
+          "file_count": 242,
+          "files": [
+            "graphora/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/9f99bdd3fc74ddf5639c1d24d76789ff54b532b672e9482571817e9895081d07/manifest.json",
+            "graphora/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/9f99bdd3fc74ddf5639c1d24d76789ff54b532b672e9482571817e9895081d07/shiftory-9f99bdd3fc74ddf5639c1d24d76789ff54b532b672e9482571817e9895081d07.json",
+            "graphora/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/0f0b07cb04b9415af542ea085d94dc520c34c73463c91b2688108e1d7eb350d3/manifest.json",
+            "graphora/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/0f0b07cb04b9415af542ea085d94dc520c34c73463c91b2688108e1d7eb350d3/shiftory-0f0b07cb04b9415af542ea085d94dc520c34c73463c91b2688108e1d7eb350d3.json",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/manifest.json",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/.gitignore",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/.travis.yml",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/CHANGELOG.md",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/COPYING",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/Cargo.lock",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/Cargo.toml",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ISSUE_TEMPLATE.md",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/LICENSE-MIT",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/README.md",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/UNLICENSE",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/appveyor.yml",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/benchsuite",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-09-17-ubuntu1604-ec2/README.SETUP",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-09-17-ubuntu1604-ec2/raw.csv",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-09-17-ubuntu1604-ec2/summary",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-09-20-ubuntu1604-ec2/README.SETUP",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-09-20-ubuntu1604-ec2/raw.csv",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-09-20-ubuntu1604-ec2/summary",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-09-22-archlinux-cheetah/raw.csv",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-09-22-archlinux-cheetah/summary",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-glibc-jemalloc/raw.csv",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-glibc-jemalloc/summary",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-glibc-system/raw.csv",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-glibc-system/summary",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-musl-jemalloc/raw.csv",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-musl-jemalloc/summary",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-musl-system/raw.csv",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-musl-system/summary",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-24-archlinux-cheetah/raw.csv",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-24-archlinux-cheetah/summary",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-30-archlinux-cheetah/raw.csv",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-30-archlinux-cheetah/summary",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2018-01-08-archlinux-cheetah/README",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2018-01-08-archlinux-cheetah/raw.csv",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2018-01-08-archlinux-cheetah/summary",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/build.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ci/before_deploy.sh",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ci/install.sh",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ci/script.sh",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ci/sha256.sh",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ci/test_complete.sh",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ci/utils.sh",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/compile",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/complete/_rg",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/doc/convert-to-man",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/doc/rg.1",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/doc/rg.1.md",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/globset/COPYING",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/globset/Cargo.toml",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/globset/LICENSE-MIT",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/globset/README.md",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/globset/UNLICENSE",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/globset/benches/bench.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/globset/src/glob.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/globset/src/lib.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/globset/src/pathutil.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/grep/COPYING",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/grep/Cargo.toml",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/grep/LICENSE-MIT",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/grep/README.md",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/grep/UNLICENSE",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/grep/src/data/sherlock.txt",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/grep/src/lib.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/grep/src/literals.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/grep/src/nonl.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/grep/src/search.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/grep/src/word_boundary.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/COPYING",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/Cargo.toml",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/LICENSE-MIT",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/README.md",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/UNLICENSE",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/examples/walk.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/src/dir.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/src/gitignore.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/src/lib.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/src/overrides.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/src/pathutil.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/src/types.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/src/walk.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/tests/gitignore_matched_path_or_any_parents_tests.gitignore",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/tests/gitignore_matched_path_or_any_parents_tests.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/pkg/archlinux/.gitignore",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/pkg/archlinux/PKGBUILD",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/pkg/brew/ripgrep-bin.rb",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/snapcraft.yaml",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/app.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/args.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/decoder.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/decompressor.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/logger.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/main.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/pathutil.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/printer.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/search_buffer.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/search_stream.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/unescape.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/worker.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/termcolor/COPYING",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/termcolor/Cargo.toml",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/termcolor/LICENSE-MIT",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/termcolor/README.md",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/termcolor/UNLICENSE",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/termcolor/src/lib.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/tests/data/sherlock.bz2",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/tests/data/sherlock.gz",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/tests/data/sherlock.lzma",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/tests/data/sherlock.xz",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/tests/hay.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/tests/tests.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/tests/workdir.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/wincolor/COPYING",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/wincolor/Cargo.toml",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/wincolor/LICENSE-MIT",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/wincolor/README.md",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/wincolor/UNLICENSE",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/wincolor/src/lib.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/wincolor/src/win.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/manifest.json",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/.gitignore",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/.travis.yml",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/CHANGELOG.md",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/COPYING",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/Cargo.lock",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/Cargo.toml",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ISSUE_TEMPLATE.md",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/LICENSE-MIT",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/README.md",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/UNLICENSE",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/appveyor.yml",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/benchsuite",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-09-17-ubuntu1604-ec2/README.SETUP",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-09-17-ubuntu1604-ec2/raw.csv",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-09-17-ubuntu1604-ec2/summary",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-09-20-ubuntu1604-ec2/README.SETUP",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-09-20-ubuntu1604-ec2/raw.csv",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-09-20-ubuntu1604-ec2/summary",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-09-22-archlinux-cheetah/raw.csv",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-09-22-archlinux-cheetah/summary",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-glibc-jemalloc/raw.csv",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-glibc-jemalloc/summary",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-glibc-system/raw.csv",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-glibc-system/summary",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-musl-jemalloc/raw.csv",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-musl-jemalloc/summary",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-musl-system/raw.csv",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-musl-system/summary",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-24-archlinux-cheetah/raw.csv",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-24-archlinux-cheetah/summary",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-30-archlinux-cheetah/raw.csv",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-30-archlinux-cheetah/summary",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2018-01-08-archlinux-cheetah/README",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2018-01-08-archlinux-cheetah/raw.csv",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2018-01-08-archlinux-cheetah/summary",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/build.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ci/before_deploy.sh",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ci/install.sh",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ci/script.sh",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ci/sha256.sh",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ci/test_complete.sh",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ci/utils.sh",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/compile",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/complete/_rg",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/doc/convert-to-man",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/doc/rg.1",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/doc/rg.1.md",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/globset/COPYING",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/globset/Cargo.toml",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/globset/LICENSE-MIT",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/globset/README.md",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/globset/UNLICENSE",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/globset/benches/bench.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/globset/src/glob.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/globset/src/lib.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/globset/src/pathutil.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/grep/COPYING",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/grep/Cargo.toml",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/grep/LICENSE-MIT",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/grep/README.md",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/grep/UNLICENSE",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/grep/src/data/sherlock.txt",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/grep/src/lib.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/grep/src/literals.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/grep/src/nonl.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/grep/src/search.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/grep/src/word_boundary.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/COPYING",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/Cargo.toml",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/LICENSE-MIT",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/README.md",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/UNLICENSE",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/examples/walk.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/src/dir.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/src/gitignore.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/src/lib.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/src/overrides.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/src/pathutil.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/src/types.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/src/walk.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/tests/gitignore_matched_path_or_any_parents_tests.gitignore",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/tests/gitignore_matched_path_or_any_parents_tests.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/pkg/archlinux/.gitignore",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/pkg/archlinux/PKGBUILD",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/pkg/brew/ripgrep-bin.rb",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/snapcraft.yaml",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/app.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/args.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/decoder.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/decompressor.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/logger.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/main.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/pathutil.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/printer.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/search_buffer.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/search_stream.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/unescape.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/worker.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/termcolor/COPYING",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/termcolor/Cargo.toml",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/termcolor/LICENSE-MIT",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/termcolor/README.md",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/termcolor/UNLICENSE",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/termcolor/src/lib.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/tests/data/sherlock.bz2",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/tests/data/sherlock.gz",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/tests/data/sherlock.lzma",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/tests/data/sherlock.xz",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/tests/hay.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/tests/tests.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/tests/workdir.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/wincolor/COPYING",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/wincolor/Cargo.toml",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/wincolor/LICENSE-MIT",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/wincolor/README.md",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/wincolor/UNLICENSE",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/wincolor/src/lib.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/wincolor/src/win.rs"
+          ]
+        },
+        "before": {
+          "exists": false,
+          "file_count": 0,
+          "files": []
+        },
+        "graph_cache_key": "9f99bdd3fc74ddf5639c1d24d76789ff54b532b672e9482571817e9895081d07:0f0b07cb04b9415af542ea085d94dc520c34c73463c91b2688108e1d7eb350d3",
+        "graph_status": "available"
+      },
+      "canonical_output_sha256": "25f9155cde54218e8b5589e63db1f073be5e0742d451a4692e93edb0b2d84086",
+      "commands": [
+        [
+          "shiftory",
+          "analyze",
+          "--repo",
+          "<repository>",
+          "--range",
+          "c8e755f11f31b6da04329cdc7433747bba70150f..d83bab4d3f29a0176a20ea004c2cba44058d4210",
+          "--graphora",
+          "auto",
+          "--cache-dir",
+          "<scenario-cache>",
+          "--output",
+          "<run>/evidence.json"
+        ],
+        [
+          "shiftory-python",
+          "render-evidence-markdown",
+          "--evidence",
+          "<run>/evidence.json"
+        ],
+        [
+          "benchmark-runner",
+          "instantiate-manifest"
+        ],
+        [
+          "shiftory",
+          "verify",
+          "--evidence",
+          "<run>/evidence.json",
+          "--explanation",
+          "<run>/explanation.json"
+        ],
+        [
+          "shiftory",
+          "render",
+          "--format",
+          "json",
+          "--evidence",
+          "<run>/evidence.json",
+          "--explanation",
+          "<run>/explanation.json"
+        ],
+        [
+          "shiftory",
+          "render",
+          "--format",
+          "markdown",
+          "--evidence",
+          "<run>/evidence.json",
+          "--explanation",
+          "<run>/explanation.json"
+        ]
+      ],
+      "coverage": {
+        "citation_count": 14,
+        "hunk_coverage_ratio": 1.0,
+        "hunk_covered": 14,
+        "hunk_total": 14,
+        "line_coverage_ratio": 1.0,
+        "line_owned": 2026,
+        "line_total": 2026,
+        "span_coverage_ratio": 1.0,
+        "span_owned": 38,
+        "span_total": 38,
+        "unit_coverage_ratio": 1.0,
+        "unit_covered": 2,
+        "unit_total": 2
+      },
+      "evidence_markdown_renderer": {
+        "distribution": "shiftory",
+        "module": "shiftory.render.evidence",
+        "module_file": "src/shiftory/render/evidence.py",
+        "module_sha256": "aca36323dfd709308c375325bc52544073cc06fd7162f098f0fc6cbab6b23f00",
+        "package_code_sha256": "e9279689384c1e9779fec8c85d19811b7d0bab64a360c56bcd1b425c135fe764",
+        "schema": "shiftory.benchmark-renderer/v1"
+      },
+      "label": "cold",
+      "paths": {
+        "assertions_json": "runs/ripgrep-repeated-flags/cold/assertions.json",
+        "evidence_json": "runs/ripgrep-repeated-flags/cold/evidence.json",
+        "evidence_markdown": "runs/ripgrep-repeated-flags/cold/evidence.md",
+        "explanation_json": "runs/ripgrep-repeated-flags/cold/explanation.json",
+        "report_json": "runs/ripgrep-repeated-flags/cold/shiftory-report.json",
+        "report_markdown": "runs/ripgrep-repeated-flags/cold/shiftory-report.md",
+        "verify_json": "runs/ripgrep-repeated-flags/cold/verify.json"
+      },
+      "sizes": {
+        "assertions_json_bytes": 6884,
+        "evidence_json_bytes": 1243642,
+        "evidence_markdown_bytes": 673829,
+        "explanation_json_bytes": 178188,
+        "report_json_bytes": 232099,
+        "report_markdown_bytes": 135985,
+        "verify_json_bytes": 375
+      },
+      "wall_seconds": {
+        "complete_path": 4.61606275,
+        "phases": {
+          "analyze": 3.329501916,
+          "instantiate_manifest": 0.002126709,
+          "render_evidence_markdown": 0.079663167,
+          "render_json": 0.413892083,
+          "render_markdown": 0.407082541,
+          "verify": 0.349769917
+        }
+      }
+    },
+    {
+      "artifact_sha256": {
+        "assertions_json": "42168d3bb2cc39b8699dab0998d66c17592192a1b21f87629579373749d9d9aa",
+        "evidence_json": "764e07c20527b447257cae4d1fea61cc5a49639271b204f81e2f607b9ec71f1b",
+        "evidence_markdown": "72312d147f931060a2201fb3ba86d94abd095b67bd6ba9e984024a877279bded",
+        "explanation_json": "92b1c8a5111d8a9dacdb3eaf43993edb599d8ab0c5acf4c52623ab22bf56f8ed",
+        "report_json": "f2b2b5d95083d328c59f8e2a320f0f576fa12b1b3ffe465d76ea148e560ade5b",
+        "report_markdown": "fae60e8e06189f5b9559a0d775ec6b9644489356bdfc6c61268468eac117c124",
+        "verify_json": "12fb4570776f3ea360ece06c059c86ba5d1fa6bc7fb67ba8add6ca50cdef5ae3"
+      },
+      "assertions": {
+        "counts": {
+          "fail": 0,
+          "pass": 40,
+          "skip": 0
+        },
+        "passed": true,
+        "results": [
+          {
+            "detail": "c8e755f11f31b6da04329cdc7433747bba70150f",
+            "domain": "evidence",
+            "id": "evidence-base-sha",
+            "status": "pass",
+            "target": "$.comparison.base_sha"
+          },
+          {
+            "detail": "d83bab4d3f29a0176a20ea004c2cba44058d4210",
+            "domain": "evidence",
+            "id": "evidence-head-sha",
+            "status": "pass",
+            "target": "$.comparison.head_sha"
+          },
+          {
+            "detail": "valid=True",
+            "domain": "report",
+            "id": "verify-valid",
+            "status": "pass",
+            "target": "$.verify.valid"
+          },
+          {
+            "detail": "expected=2, actual=2",
+            "domain": "evidence",
+            "id": "evidence-inventory-files",
+            "status": "pass",
+            "target": "$.metrics.files"
+          },
+          {
+            "detail": "expected=14, actual=14",
+            "domain": "evidence",
+            "id": "evidence-inventory-hunks",
+            "status": "pass",
+            "target": "$.metrics.hunks"
+          },
+          {
+            "detail": "expected=1470, actual=1470",
+            "domain": "evidence",
+            "id": "evidence-inventory-added_lines",
+            "status": "pass",
+            "target": "$.metrics.added_lines"
+          },
+          {
+            "detail": "expected=556, actual=556",
+            "domain": "evidence",
+            "id": "evidence-inventory-deleted_lines",
+            "status": "pass",
+            "target": "$.metrics.deleted_lines"
+          },
+          {
+            "detail": "expected=True, actual=True",
+            "domain": "before-source",
+            "id": "structured-argument-model:before:file-exists",
+            "status": "pass",
+            "target": "src/app.rs"
+          },
+          {
+            "detail": "contains 'use clap::{App, AppSettings, Arg, ArgSettings};'",
+            "domain": "before-source",
+            "id": "structured-argument-model:before:contains:1",
+            "status": "pass",
+            "target": "src/app.rs"
+          },
+          {
+            "detail": "contains 'let flag = |name| arg(name).long(name);'",
+            "domain": "before-source",
+            "id": "structured-argument-model:before:contains:2",
+            "status": "pass",
+            "target": "src/app.rs"
+          },
+          {
+            "detail": "does not contain 'struct RGArg {'",
+            "domain": "before-source",
+            "id": "structured-argument-model:before:not-contains:1",
+            "status": "pass",
+            "target": "src/app.rs"
+          },
+          {
+            "detail": "expected=True, actual=True",
+            "domain": "after-source",
+            "id": "structured-argument-model:after:file-exists",
+            "status": "pass",
+            "target": "src/app.rs"
+          },
+          {
+            "detail": "contains 'use clap::{self, App, AppSettings};'",
+            "domain": "after-source",
+            "id": "structured-argument-model:after:contains:1",
+            "status": "pass",
+            "target": "src/app.rs"
+          },
+          {
+            "detail": "contains 'struct RGArg {'",
+            "domain": "after-source",
+            "id": "structured-argument-model:after:contains:2",
+            "status": "pass",
+            "target": "src/app.rs"
+          },
+          {
+            "detail": "contains 'enum RGArgKind {'",
+            "domain": "after-source",
+            "id": "structured-argument-model:after:contains:3",
+            "status": "pass",
+            "target": "src/app.rs"
+          },
+          {
+            "detail": "does not contain 'let flag = |name| arg(name).long(name);'",
+            "domain": "after-source",
+            "id": "structured-argument-model:after:not-contains:1",
+            "status": "pass",
+            "target": "src/app.rs"
+          },
+          {
+            "detail": "behavior item exists and all citations resolve",
+            "domain": "evidence",
+            "id": "structured-argument-model:evidence-citations",
+            "status": "pass",
+            "target": "argument-definition-model"
+          },
+          {
+            "detail": "expected=structural, actual=structural",
+            "domain": "report",
+            "id": "structured-argument-model:report-section",
+            "status": "pass",
+            "target": "argument-definition-model"
+          },
+          {
+            "detail": "expected=True, actual=True",
+            "domain": "before-source",
+            "id": "repeatable-value-selection:before:file-exists",
+            "status": "pass",
+            "target": "src/args.rs"
+          },
+          {
+            "detail": "contains \"impl<'a> ops::Deref for ArgMatches<'a> {\"",
+            "domain": "before-source",
+            "id": "repeatable-value-selection:before:contains:1",
+            "status": "pass",
+            "target": "src/args.rs"
+          },
+          {
+            "detail": "contains 'self.value_of_lossy(\"replace\").map(|s| s.into_owned().into_bytes())'",
+            "domain": "before-source",
+            "id": "repeatable-value-selection:before:contains:2",
+            "status": "pass",
+            "target": "src/args.rs"
+          },
+          {
+            "detail": "does not contain 'self.values_of_os(name).and_then(|it| it.last())'",
+            "domain": "before-source",
+            "id": "repeatable-value-selection:before:not-contains:1",
+            "status": "pass",
+            "target": "src/args.rs"
+          },
+          {
+            "detail": "expected=True, actual=True",
+            "domain": "after-source",
+            "id": "repeatable-value-selection:after:file-exists",
+            "status": "pass",
+            "target": "src/args.rs"
+          },
+          {
+            "detail": "contains 'self.value_of_lossy(\"replace\").map(|s| s.into_bytes())'",
+            "domain": "after-source",
+            "id": "repeatable-value-selection:after:contains:1",
+            "status": "pass",
+            "target": "src/args.rs"
+          },
+          {
+            "detail": "contains 'self.values_of_os(name).and_then(|it| it.last())'",
+            "domain": "after-source",
+            "id": "repeatable-value-selection:after:contains:2",
+            "status": "pass",
+            "target": "src/args.rs"
+          },
+          {
+            "detail": "contains 'self.values_of_lossy(name).and_then(|mut vals| vals.pop())'",
+            "domain": "after-source",
+            "id": "repeatable-value-selection:after:contains:3",
+            "status": "pass",
+            "target": "src/args.rs"
+          },
+          {
+            "detail": "does not contain \"impl<'a> ops::Deref for ArgMatches<'a> {\"",
+            "domain": "after-source",
+            "id": "repeatable-value-selection:after:not-contains:1",
+            "status": "pass",
+            "target": "src/args.rs"
+          },
+          {
+            "detail": "behavior item exists and all citations resolve",
+            "domain": "evidence",
+            "id": "repeatable-value-selection:evidence-citations",
+            "status": "pass",
+            "target": "last-repeated-value"
+          },
+          {
+            "detail": "expected=behavioral, actual=behavioral",
+            "domain": "report",
+            "id": "repeatable-value-selection:report-section",
+            "status": "pass",
+            "target": "last-repeated-value"
+          },
+          {
+            "detail": "expected=True, actual=True",
+            "domain": "before-source",
+            "id": "normalized-positional-names:before:file-exists",
+            "status": "pass",
+            "target": "src/args.rs"
+          },
+          {
+            "detail": "contains 'match self.values_of_os(\"PATH\") {'",
+            "domain": "before-source",
+            "id": "normalized-positional-names:before:contains:1",
+            "status": "pass",
+            "target": "src/args.rs"
+          },
+          {
+            "detail": "contains 'if let Some(path) = self.value_of_os(\"PATTERN\") {'",
+            "domain": "before-source",
+            "id": "normalized-positional-names:before:contains:2",
+            "status": "pass",
+            "target": "src/args.rs"
+          },
+          {
+            "detail": "does not contain 'match self.values_of_os(\"path\") {'",
+            "domain": "before-source",
+            "id": "normalized-positional-names:before:not-contains:1",
+            "status": "pass",
+            "target": "src/args.rs"
+          },
+          {
+            "detail": "expected=True, actual=True",
+            "domain": "after-source",
+            "id": "normalized-positional-names:after:file-exists",
+            "status": "pass",
+            "target": "src/args.rs"
+          },
+          {
+            "detail": "contains 'match self.values_of_os(\"path\") {'",
+            "domain": "after-source",
+            "id": "normalized-positional-names:after:contains:1",
+            "status": "pass",
+            "target": "src/args.rs"
+          },
+          {
+            "detail": "contains 'if let Some(path) = self.value_of_os(\"pattern\") {'",
+            "domain": "after-source",
+            "id": "normalized-positional-names:after:contains:2",
+            "status": "pass",
+            "target": "src/args.rs"
+          },
+          {
+            "detail": "does not contain 'match self.values_of_os(\"PATH\") {'",
+            "domain": "after-source",
+            "id": "normalized-positional-names:after:not-contains:1",
+            "status": "pass",
+            "target": "src/args.rs"
+          },
+          {
+            "detail": "behavior item exists and all citations resolve",
+            "domain": "evidence",
+            "id": "normalized-positional-names:evidence-citations",
+            "status": "pass",
+            "target": "normalized-positionals"
+          },
+          {
+            "detail": "expected=structural, actual=structural",
+            "domain": "report",
+            "id": "normalized-positional-names:report-section",
+            "status": "pass",
+            "target": "normalized-positionals"
+          },
+          {
+            "detail": "facts=3074",
+            "domain": "graph",
+            "id": "graph-fact-integrity",
+            "status": "pass",
+            "target": "$.graph.facts"
+          }
+        ],
+        "scenario_id": "ripgrep-repeated-flags",
+        "schema": "shiftory.benchmark-assertion-results/v1"
+      },
+      "cache": {
+        "after": {
+          "exists": true,
+          "file_count": 242,
+          "files": [
+            "graphora/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/9f99bdd3fc74ddf5639c1d24d76789ff54b532b672e9482571817e9895081d07/manifest.json",
+            "graphora/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/9f99bdd3fc74ddf5639c1d24d76789ff54b532b672e9482571817e9895081d07/shiftory-9f99bdd3fc74ddf5639c1d24d76789ff54b532b672e9482571817e9895081d07.json",
+            "graphora/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/0f0b07cb04b9415af542ea085d94dc520c34c73463c91b2688108e1d7eb350d3/manifest.json",
+            "graphora/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/0f0b07cb04b9415af542ea085d94dc520c34c73463c91b2688108e1d7eb350d3/shiftory-0f0b07cb04b9415af542ea085d94dc520c34c73463c91b2688108e1d7eb350d3.json",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/manifest.json",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/.gitignore",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/.travis.yml",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/CHANGELOG.md",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/COPYING",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/Cargo.lock",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/Cargo.toml",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ISSUE_TEMPLATE.md",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/LICENSE-MIT",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/README.md",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/UNLICENSE",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/appveyor.yml",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/benchsuite",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-09-17-ubuntu1604-ec2/README.SETUP",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-09-17-ubuntu1604-ec2/raw.csv",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-09-17-ubuntu1604-ec2/summary",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-09-20-ubuntu1604-ec2/README.SETUP",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-09-20-ubuntu1604-ec2/raw.csv",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-09-20-ubuntu1604-ec2/summary",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-09-22-archlinux-cheetah/raw.csv",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-09-22-archlinux-cheetah/summary",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-glibc-jemalloc/raw.csv",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-glibc-jemalloc/summary",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-glibc-system/raw.csv",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-glibc-system/summary",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-musl-jemalloc/raw.csv",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-musl-jemalloc/summary",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-musl-system/raw.csv",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-musl-system/summary",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-24-archlinux-cheetah/raw.csv",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-24-archlinux-cheetah/summary",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-30-archlinux-cheetah/raw.csv",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-30-archlinux-cheetah/summary",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2018-01-08-archlinux-cheetah/README",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2018-01-08-archlinux-cheetah/raw.csv",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2018-01-08-archlinux-cheetah/summary",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/build.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ci/before_deploy.sh",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ci/install.sh",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ci/script.sh",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ci/sha256.sh",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ci/test_complete.sh",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ci/utils.sh",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/compile",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/complete/_rg",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/doc/convert-to-man",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/doc/rg.1",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/doc/rg.1.md",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/globset/COPYING",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/globset/Cargo.toml",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/globset/LICENSE-MIT",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/globset/README.md",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/globset/UNLICENSE",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/globset/benches/bench.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/globset/src/glob.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/globset/src/lib.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/globset/src/pathutil.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/grep/COPYING",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/grep/Cargo.toml",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/grep/LICENSE-MIT",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/grep/README.md",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/grep/UNLICENSE",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/grep/src/data/sherlock.txt",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/grep/src/lib.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/grep/src/literals.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/grep/src/nonl.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/grep/src/search.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/grep/src/word_boundary.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/COPYING",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/Cargo.toml",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/LICENSE-MIT",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/README.md",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/UNLICENSE",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/examples/walk.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/src/dir.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/src/gitignore.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/src/lib.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/src/overrides.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/src/pathutil.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/src/types.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/src/walk.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/tests/gitignore_matched_path_or_any_parents_tests.gitignore",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/tests/gitignore_matched_path_or_any_parents_tests.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/pkg/archlinux/.gitignore",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/pkg/archlinux/PKGBUILD",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/pkg/brew/ripgrep-bin.rb",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/snapcraft.yaml",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/app.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/args.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/decoder.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/decompressor.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/logger.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/main.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/pathutil.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/printer.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/search_buffer.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/search_stream.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/unescape.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/worker.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/termcolor/COPYING",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/termcolor/Cargo.toml",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/termcolor/LICENSE-MIT",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/termcolor/README.md",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/termcolor/UNLICENSE",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/termcolor/src/lib.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/tests/data/sherlock.bz2",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/tests/data/sherlock.gz",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/tests/data/sherlock.lzma",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/tests/data/sherlock.xz",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/tests/hay.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/tests/tests.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/tests/workdir.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/wincolor/COPYING",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/wincolor/Cargo.toml",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/wincolor/LICENSE-MIT",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/wincolor/README.md",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/wincolor/UNLICENSE",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/wincolor/src/lib.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/wincolor/src/win.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/manifest.json",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/.gitignore",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/.travis.yml",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/CHANGELOG.md",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/COPYING",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/Cargo.lock",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/Cargo.toml",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ISSUE_TEMPLATE.md",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/LICENSE-MIT",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/README.md",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/UNLICENSE",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/appveyor.yml",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/benchsuite",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-09-17-ubuntu1604-ec2/README.SETUP",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-09-17-ubuntu1604-ec2/raw.csv",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-09-17-ubuntu1604-ec2/summary",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-09-20-ubuntu1604-ec2/README.SETUP",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-09-20-ubuntu1604-ec2/raw.csv",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-09-20-ubuntu1604-ec2/summary",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-09-22-archlinux-cheetah/raw.csv",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-09-22-archlinux-cheetah/summary",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-glibc-jemalloc/raw.csv",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-glibc-jemalloc/summary",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-glibc-system/raw.csv",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-glibc-system/summary",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-musl-jemalloc/raw.csv",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-musl-jemalloc/summary",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-musl-system/raw.csv",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-musl-system/summary",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-24-archlinux-cheetah/raw.csv",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-24-archlinux-cheetah/summary",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-30-archlinux-cheetah/raw.csv",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-30-archlinux-cheetah/summary",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2018-01-08-archlinux-cheetah/README",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2018-01-08-archlinux-cheetah/raw.csv",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2018-01-08-archlinux-cheetah/summary",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/build.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ci/before_deploy.sh",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ci/install.sh",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ci/script.sh",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ci/sha256.sh",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ci/test_complete.sh",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ci/utils.sh",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/compile",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/complete/_rg",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/doc/convert-to-man",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/doc/rg.1",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/doc/rg.1.md",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/globset/COPYING",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/globset/Cargo.toml",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/globset/LICENSE-MIT",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/globset/README.md",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/globset/UNLICENSE",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/globset/benches/bench.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/globset/src/glob.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/globset/src/lib.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/globset/src/pathutil.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/grep/COPYING",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/grep/Cargo.toml",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/grep/LICENSE-MIT",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/grep/README.md",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/grep/UNLICENSE",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/grep/src/data/sherlock.txt",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/grep/src/lib.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/grep/src/literals.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/grep/src/nonl.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/grep/src/search.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/grep/src/word_boundary.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/COPYING",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/Cargo.toml",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/LICENSE-MIT",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/README.md",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/UNLICENSE",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/examples/walk.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/src/dir.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/src/gitignore.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/src/lib.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/src/overrides.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/src/pathutil.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/src/types.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/src/walk.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/tests/gitignore_matched_path_or_any_parents_tests.gitignore",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/tests/gitignore_matched_path_or_any_parents_tests.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/pkg/archlinux/.gitignore",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/pkg/archlinux/PKGBUILD",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/pkg/brew/ripgrep-bin.rb",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/snapcraft.yaml",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/app.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/args.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/decoder.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/decompressor.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/logger.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/main.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/pathutil.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/printer.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/search_buffer.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/search_stream.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/unescape.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/worker.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/termcolor/COPYING",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/termcolor/Cargo.toml",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/termcolor/LICENSE-MIT",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/termcolor/README.md",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/termcolor/UNLICENSE",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/termcolor/src/lib.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/tests/data/sherlock.bz2",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/tests/data/sherlock.gz",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/tests/data/sherlock.lzma",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/tests/data/sherlock.xz",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/tests/hay.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/tests/tests.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/tests/workdir.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/wincolor/COPYING",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/wincolor/Cargo.toml",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/wincolor/LICENSE-MIT",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/wincolor/README.md",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/wincolor/UNLICENSE",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/wincolor/src/lib.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/wincolor/src/win.rs"
+          ]
+        },
+        "before": {
+          "exists": true,
+          "file_count": 242,
+          "files": [
+            "graphora/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/9f99bdd3fc74ddf5639c1d24d76789ff54b532b672e9482571817e9895081d07/manifest.json",
+            "graphora/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/9f99bdd3fc74ddf5639c1d24d76789ff54b532b672e9482571817e9895081d07/shiftory-9f99bdd3fc74ddf5639c1d24d76789ff54b532b672e9482571817e9895081d07.json",
+            "graphora/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/0f0b07cb04b9415af542ea085d94dc520c34c73463c91b2688108e1d7eb350d3/manifest.json",
+            "graphora/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/0f0b07cb04b9415af542ea085d94dc520c34c73463c91b2688108e1d7eb350d3/shiftory-0f0b07cb04b9415af542ea085d94dc520c34c73463c91b2688108e1d7eb350d3.json",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/manifest.json",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/.gitignore",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/.travis.yml",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/CHANGELOG.md",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/COPYING",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/Cargo.lock",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/Cargo.toml",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ISSUE_TEMPLATE.md",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/LICENSE-MIT",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/README.md",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/UNLICENSE",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/appveyor.yml",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/benchsuite",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-09-17-ubuntu1604-ec2/README.SETUP",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-09-17-ubuntu1604-ec2/raw.csv",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-09-17-ubuntu1604-ec2/summary",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-09-20-ubuntu1604-ec2/README.SETUP",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-09-20-ubuntu1604-ec2/raw.csv",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-09-20-ubuntu1604-ec2/summary",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-09-22-archlinux-cheetah/raw.csv",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-09-22-archlinux-cheetah/summary",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-glibc-jemalloc/raw.csv",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-glibc-jemalloc/summary",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-glibc-system/raw.csv",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-glibc-system/summary",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-musl-jemalloc/raw.csv",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-musl-jemalloc/summary",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-musl-system/raw.csv",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-musl-system/summary",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-24-archlinux-cheetah/raw.csv",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-24-archlinux-cheetah/summary",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-30-archlinux-cheetah/raw.csv",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2016-12-30-archlinux-cheetah/summary",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2018-01-08-archlinux-cheetah/README",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2018-01-08-archlinux-cheetah/raw.csv",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/benchsuite/runs/2018-01-08-archlinux-cheetah/summary",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/build.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ci/before_deploy.sh",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ci/install.sh",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ci/script.sh",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ci/sha256.sh",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ci/test_complete.sh",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ci/utils.sh",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/compile",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/complete/_rg",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/doc/convert-to-man",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/doc/rg.1",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/doc/rg.1.md",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/globset/COPYING",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/globset/Cargo.toml",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/globset/LICENSE-MIT",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/globset/README.md",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/globset/UNLICENSE",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/globset/benches/bench.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/globset/src/glob.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/globset/src/lib.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/globset/src/pathutil.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/grep/COPYING",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/grep/Cargo.toml",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/grep/LICENSE-MIT",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/grep/README.md",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/grep/UNLICENSE",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/grep/src/data/sherlock.txt",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/grep/src/lib.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/grep/src/literals.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/grep/src/nonl.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/grep/src/search.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/grep/src/word_boundary.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/COPYING",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/Cargo.toml",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/LICENSE-MIT",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/README.md",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/UNLICENSE",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/examples/walk.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/src/dir.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/src/gitignore.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/src/lib.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/src/overrides.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/src/pathutil.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/src/types.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/src/walk.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/tests/gitignore_matched_path_or_any_parents_tests.gitignore",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/ignore/tests/gitignore_matched_path_or_any_parents_tests.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/pkg/archlinux/.gitignore",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/pkg/archlinux/PKGBUILD",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/pkg/brew/ripgrep-bin.rb",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/snapcraft.yaml",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/app.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/args.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/decoder.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/decompressor.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/logger.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/main.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/pathutil.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/printer.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/search_buffer.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/search_stream.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/unescape.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/src/worker.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/termcolor/COPYING",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/termcolor/Cargo.toml",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/termcolor/LICENSE-MIT",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/termcolor/README.md",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/termcolor/UNLICENSE",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/termcolor/src/lib.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/tests/data/sherlock.bz2",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/tests/data/sherlock.gz",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/tests/data/sherlock.lzma",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/tests/data/sherlock.xz",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/tests/hay.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/tests/tests.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/tests/workdir.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/wincolor/COPYING",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/wincolor/Cargo.toml",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/wincolor/LICENSE-MIT",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/wincolor/README.md",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/wincolor/UNLICENSE",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/wincolor/src/lib.rs",
+            "sources/736c89c72590aa4f6f81a4e7234c17a090e6761a47e5e45786e949abae48013e/tree/wincolor/src/win.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/manifest.json",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/.gitignore",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/.travis.yml",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/CHANGELOG.md",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/COPYING",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/Cargo.lock",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/Cargo.toml",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ISSUE_TEMPLATE.md",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/LICENSE-MIT",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/README.md",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/UNLICENSE",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/appveyor.yml",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/benchsuite",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-09-17-ubuntu1604-ec2/README.SETUP",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-09-17-ubuntu1604-ec2/raw.csv",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-09-17-ubuntu1604-ec2/summary",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-09-20-ubuntu1604-ec2/README.SETUP",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-09-20-ubuntu1604-ec2/raw.csv",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-09-20-ubuntu1604-ec2/summary",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-09-22-archlinux-cheetah/raw.csv",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-09-22-archlinux-cheetah/summary",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-glibc-jemalloc/raw.csv",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-glibc-jemalloc/summary",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-glibc-system/raw.csv",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-glibc-system/summary",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-musl-jemalloc/raw.csv",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-musl-jemalloc/summary",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-musl-system/raw.csv",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-24-archlinux-cheetah-musl-system/summary",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-24-archlinux-cheetah/raw.csv",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-24-archlinux-cheetah/summary",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-30-archlinux-cheetah/raw.csv",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2016-12-30-archlinux-cheetah/summary",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2018-01-08-archlinux-cheetah/README",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2018-01-08-archlinux-cheetah/raw.csv",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/benchsuite/runs/2018-01-08-archlinux-cheetah/summary",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/build.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ci/before_deploy.sh",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ci/install.sh",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ci/script.sh",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ci/sha256.sh",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ci/test_complete.sh",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ci/utils.sh",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/compile",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/complete/_rg",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/doc/convert-to-man",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/doc/rg.1",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/doc/rg.1.md",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/globset/COPYING",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/globset/Cargo.toml",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/globset/LICENSE-MIT",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/globset/README.md",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/globset/UNLICENSE",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/globset/benches/bench.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/globset/src/glob.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/globset/src/lib.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/globset/src/pathutil.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/grep/COPYING",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/grep/Cargo.toml",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/grep/LICENSE-MIT",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/grep/README.md",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/grep/UNLICENSE",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/grep/src/data/sherlock.txt",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/grep/src/lib.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/grep/src/literals.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/grep/src/nonl.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/grep/src/search.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/grep/src/word_boundary.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/COPYING",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/Cargo.toml",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/LICENSE-MIT",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/README.md",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/UNLICENSE",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/examples/walk.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/src/dir.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/src/gitignore.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/src/lib.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/src/overrides.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/src/pathutil.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/src/types.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/src/walk.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/tests/gitignore_matched_path_or_any_parents_tests.gitignore",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/ignore/tests/gitignore_matched_path_or_any_parents_tests.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/pkg/archlinux/.gitignore",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/pkg/archlinux/PKGBUILD",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/pkg/brew/ripgrep-bin.rb",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/snapcraft.yaml",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/app.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/args.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/decoder.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/decompressor.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/logger.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/main.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/pathutil.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/printer.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/search_buffer.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/search_stream.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/unescape.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/src/worker.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/termcolor/COPYING",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/termcolor/Cargo.toml",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/termcolor/LICENSE-MIT",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/termcolor/README.md",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/termcolor/UNLICENSE",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/termcolor/src/lib.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/tests/data/sherlock.bz2",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/tests/data/sherlock.gz",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/tests/data/sherlock.lzma",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/tests/data/sherlock.xz",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/tests/hay.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/tests/tests.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/tests/workdir.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/wincolor/COPYING",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/wincolor/Cargo.toml",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/wincolor/LICENSE-MIT",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/wincolor/README.md",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/wincolor/UNLICENSE",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/wincolor/src/lib.rs",
+            "sources/f3f5f43665e386cebc5ef9a96751a65b192ff29107cb8fec853484ff128388a9/tree/wincolor/src/win.rs"
+          ]
+        },
+        "graph_cache_key": "9f99bdd3fc74ddf5639c1d24d76789ff54b532b672e9482571817e9895081d07:0f0b07cb04b9415af542ea085d94dc520c34c73463c91b2688108e1d7eb350d3",
+        "graph_status": "available"
+      },
+      "canonical_output_sha256": "25f9155cde54218e8b5589e63db1f073be5e0742d451a4692e93edb0b2d84086",
+      "commands": [
+        [
+          "shiftory",
+          "analyze",
+          "--repo",
+          "<repository>",
+          "--range",
+          "c8e755f11f31b6da04329cdc7433747bba70150f..d83bab4d3f29a0176a20ea004c2cba44058d4210",
+          "--graphora",
+          "auto",
+          "--cache-dir",
+          "<scenario-cache>",
+          "--output",
+          "<run>/evidence.json"
+        ],
+        [
+          "shiftory-python",
+          "render-evidence-markdown",
+          "--evidence",
+          "<run>/evidence.json"
+        ],
+        [
+          "benchmark-runner",
+          "instantiate-manifest"
+        ],
+        [
+          "shiftory",
+          "verify",
+          "--evidence",
+          "<run>/evidence.json",
+          "--explanation",
+          "<run>/explanation.json"
+        ],
+        [
+          "shiftory",
+          "render",
+          "--format",
+          "json",
+          "--evidence",
+          "<run>/evidence.json",
+          "--explanation",
+          "<run>/explanation.json"
+        ],
+        [
+          "shiftory",
+          "render",
+          "--format",
+          "markdown",
+          "--evidence",
+          "<run>/evidence.json",
+          "--explanation",
+          "<run>/explanation.json"
+        ]
+      ],
+      "coverage": {
+        "citation_count": 14,
+        "hunk_coverage_ratio": 1.0,
+        "hunk_covered": 14,
+        "hunk_total": 14,
+        "line_coverage_ratio": 1.0,
+        "line_owned": 2026,
+        "line_total": 2026,
+        "span_coverage_ratio": 1.0,
+        "span_owned": 38,
+        "span_total": 38,
+        "unit_coverage_ratio": 1.0,
+        "unit_covered": 2,
+        "unit_total": 2
+      },
+      "evidence_markdown_renderer": {
+        "distribution": "shiftory",
+        "module": "shiftory.render.evidence",
+        "module_file": "src/shiftory/render/evidence.py",
+        "module_sha256": "aca36323dfd709308c375325bc52544073cc06fd7162f098f0fc6cbab6b23f00",
+        "package_code_sha256": "e9279689384c1e9779fec8c85d19811b7d0bab64a360c56bcd1b425c135fe764",
+        "schema": "shiftory.benchmark-renderer/v1"
+      },
+      "label": "warm",
+      "paths": {
+        "assertions_json": "runs/ripgrep-repeated-flags/warm/assertions.json",
+        "evidence_json": "runs/ripgrep-repeated-flags/warm/evidence.json",
+        "evidence_markdown": "runs/ripgrep-repeated-flags/warm/evidence.md",
+        "explanation_json": "runs/ripgrep-repeated-flags/warm/explanation.json",
+        "report_json": "runs/ripgrep-repeated-flags/warm/shiftory-report.json",
+        "report_markdown": "runs/ripgrep-repeated-flags/warm/shiftory-report.md",
+        "verify_json": "runs/ripgrep-repeated-flags/warm/verify.json"
+      },
+      "sizes": {
+        "assertions_json_bytes": 6884,
+        "evidence_json_bytes": 1243642,
+        "evidence_markdown_bytes": 673829,
+        "explanation_json_bytes": 178188,
+        "report_json_bytes": 232099,
+        "report_markdown_bytes": 135985,
+        "verify_json_bytes": 375
+      },
+      "wall_seconds": {
+        "complete_path": 2.75541525,
+        "phases": {
+          "analyze": 1.462129417,
+          "instantiate_manifest": 0.002045,
+          "render_evidence_markdown": 0.084508458,
+          "render_json": 0.411468583,
+          "render_markdown": 0.4062475,
+          "verify": 0.353825709
+        }
+      }
+    }
+  ],
+  "scenario": {
+    "base": "c8e755f11f31b6da04329cdc7433747bba70150f",
+    "head": "d83bab4d3f29a0176a20ea004c2cba44058d4210",
+    "id": "ripgrep-repeated-flags",
+    "name": "ripgrep structured arguments and repeated flag values",
+    "repository": "https://github.com/BurntSushi/ripgrep.git"
+  },
+  "schema": "shiftory.benchmark-metrics/v1"
+}

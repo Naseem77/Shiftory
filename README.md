@@ -286,9 +286,9 @@ They were published together from clean Shiftory commit
 
 | Scenario | Complete path cold / warm (s) | Evidence JSON / Markdown (bytes) | Report Markdown (bytes) | Report reduction vs evidence Markdown | Line / span / hunk / unit coverage | Assertions (pass/fail/skip) | Deterministic | Artifacts |
 |---|---:|---:|---:|---:|---:|---:|:---:|---|
-| Click optional flag value | 3.397700 / 1.164486 | 67,082 / 33,774 | 5,320 | 28,454 bytes (84.25%) | 52/52 · 8/8 · 5/5 · 3/3 (100% each) | 31/0/0 | yes | [metrics](docs/benchmarks/click-optional-flag-value/metrics-v1.json) · [report](docs/benchmarks/click-optional-flag-value/report.md) |
-| Axios spec FormData/Blob | 3.926553 / 1.379883 | 230,567 / 119,540 | 25,775 | 93,765 bytes (78.44%) | 359/359 · 48/48 · 22/22 · 11/11 (100% each) | 71/0/0 | yes | [metrics](docs/benchmarks/axios-spec-formdata-blob/metrics-v1.json) · [report](docs/benchmarks/axios-spec-formdata-blob/report.md) |
-| ripgrep repeated flags | 4.673000 / 2.763596 | 1,243,642 / 673,829 | 135,985 | 537,844 bytes (79.82%) | 2,026/2,026 · 38/38 · 14/14 · 2/2 (100% each) | 40/0/0 | yes | [metrics](docs/benchmarks/ripgrep-repeated-flags/metrics-v1.json) · [report](docs/benchmarks/ripgrep-repeated-flags/report.md) |
+| Click optional flag value | 3.286229 / 1.233675 | 67,082 / 33,774 | 5,320 | 28,454 bytes (84.25%) | 52/52 · 8/8 · 5/5 · 3/3 (100% each) | 31/0/0 | yes | [metrics](docs/benchmarks/click-optional-flag-value/metrics-v1.json) · [report](docs/benchmarks/click-optional-flag-value/report.md) |
+| Axios spec FormData/Blob | 3.898743 / 1.389953 | 230,567 / 119,540 | 25,775 | 93,765 bytes (78.44%) | 359/359 · 48/48 · 22/22 · 11/11 (100% each) | 71/0/0 | yes | [metrics](docs/benchmarks/axios-spec-formdata-blob/metrics-v1.json) · [report](docs/benchmarks/axios-spec-formdata-blob/report.md) |
+| ripgrep repeated flags | 4.616063 / 2.755415 | 1,243,642 / 673,829 | 135,985 | 537,844 bytes (79.82%) | 2,026/2,026 · 38/38 · 14/14 · 2/2 (100% each) | 40/0/0 | yes | [metrics](docs/benchmarks/ripgrep-repeated-flags/metrics-v1.json) · [report](docs/benchmarks/ripgrep-repeated-flags/report.md) |
 
 Across the three scenarios, all 142 machine assertions passed with no failures or
 skips, every accounting dimension reached 100%, and every cold/warm canonical

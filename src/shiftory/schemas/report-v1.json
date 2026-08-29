@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shiftory.dev/schemas/report-v1.json",
+  "title": "Shiftory report v1",
+  "type": "object",
+  "required": [
+    "schema",
+    "evidence_schema",
+    "explanation_schema",
+    "comparison_identity",
+    "summary",
+    "sections",
+    "coverage",
+    "coverage_owners",
+    "guarantee"
+  ],
+  "properties": {
+    "schema": {"const": "shiftory.report/v1"},
+    "evidence_schema": {"const": "shiftory.evidence/v1"},
+    "explanation_schema": {"const": "shiftory.explanation/v1"},
+    "comparison_identity": {"$ref": "#/$defs/nonEmptyString"},
+    "summary": {"$ref": "#/$defs/nonEmptyString"},
+    "sections": {
+      "type": "object",
+      "required": ["behavioral", "structural", "observer", "ambiguity"],
+      "properties": {
+        "behavioral": {
+          "type": "array",
+          "items": {
+            "allOf": [
+              {"$ref": "#/$defs/item"},
+              {"properties": {"kind": {"const": "behavioral"}}}
+            ]
+          }
+        },
+        "structural": {
+          "type": "array",
+          "items": {
+            "allOf": [
+              {"$ref": "#/$defs/item"},
+              {"properties": {"kind": {"const": "structural"}}}
+            ]
+          }
+        },
+        "observer": {
+          "type": "array",
+          "items": {
+            "allOf": [
+              {"$ref": "#/$defs/item"},
+              {"properties": {"kind": {"const": "observer"}}}
+            ]
+          }
+        },
+        "ambiguity": {
+          "type": "array",
+          "items": {
+            "allOf": [
+              {"$ref": "#/$defs/item"},
+              {"properties": {"kind": {"enum": ["ambiguity", "unresolved"]}}}
+            ]
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "coverage": {"$ref": "#/$defs/coverage"},
+    "coverage_owners": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/owner"}
+    },
+    "guarantee": {
+      "const": "Shiftory verified accounting and citation references; it does not verify semantic correctness."
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "nullableStatement": {
+      "oneOf": [
+        {"$ref": "#/$defs/nonEmptyString"},
+        {"type": "null"}
+      ]
+    },
+    "citation": {
+      "oneOf": [
+        {"$ref": "#/$defs/nonEmptyString"},
+        {
+          "type": "object",
+          "required": ["id"],
+          "properties": {"id": {"$ref": "#/$defs/nonEmptyString"}},
+          "additionalProperties": false
+        }
+      ]
+    },
+    "item": {
+      "type": "object",
+      "required": ["id", "kind", "title", "confidence", "citations"],
+      "properties": {
+        "id": {"$ref": "#/$defs/nonEmptyString"},
+        "kind": {
+          "enum": ["behavioral", "structural", "observer", "ambiguity", "unresolved"]
+        },
+        "title": {"$ref": "#/$defs/nonEmptyString"},
+        "before": {"$ref": "#/$defs/nullableStatement"},
+        "after": {"$ref": "#/$defs/nullableStatement"},
+        "absence": {"enum": ["before", "after", null]},
+        "statement": {"$ref": "#/$defs/nonEmptyString"},
+        "confidence": {
+          "enum": ["extracted", "inferred", "ambiguous", "unresolved", "unavailable"]
+        },
+        "citations": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/citation"}
+        }
+      },
+      "additionalProperties": false
+    },
+    "owner": {
+      "type": "object",
+      "required": ["evidence_id", "owner_id"],
+      "properties": {
+        "evidence_id": {"$ref": "#/$defs/nonEmptyString"},
+        "owner_id": {"$ref": "#/$defs/nonEmptyString"}
+      },
+      "additionalProperties": false
+    },
+    "coverage": {
+      "type": "object",
+      "required": [
+        "line_total",
+        "line_owned",
+        "line_coverage_ratio",
+        "span_total",
+        "span_owned",
+        "span_coverage_ratio",
+        "hunk_total",
+        "hunk_covered",
+        "hunk_coverage_ratio",
+        "unit_total",
+        "unit_covered",
+        "unit_coverage_ratio",
+        "citation_count"
+      ],
+      "properties": {
+        "line_total": {"type": "integer", "minimum": 0},
+        "line_owned": {"type": "integer", "minimum": 0},
+        "line_coverage_ratio": {"type": "number", "minimum": 0, "maximum": 1},
+        "span_total": {"type": "integer", "minimum": 0},
+        "span_owned": {"type": "integer", "minimum": 0},
+        "span_coverage_ratio": {"type": "number", "minimum": 0, "maximum": 1},
+        "hunk_total": {"type": "integer", "minimum": 0},
+        "hunk_covered": {"type": "integer", "minimum": 0},
+        "hunk_coverage_ratio": {"type": "number", "minimum": 0, "maximum": 1},
+        "unit_total": {"type": "integer", "minimum": 0},
+        "unit_covered": {"type": "integer", "minimum": 0},
+        "unit_coverage_ratio": {"type": "number", "minimum": 0, "maximum": 1},
+        "citation_count": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    }
+  }
+}

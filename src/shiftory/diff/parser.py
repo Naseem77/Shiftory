@@ -173,6 +173,8 @@ def _metadata(record: _FileRecord) -> dict[str, Any]:
     deleted_file = False
     for raw_line in record.body:
         line = _structural_line(raw_line)
+        if line.startswith(b"@@ "):
+            break
         if line.startswith(b"--- "):
             path = _unquote_path(line[4:], strip_prefix=True)
             result["old_path"] = None if path == "/dev/null" else path

@@ -30,6 +30,25 @@ def test_constructs_canonical_line_span_hunk_unit_hierarchy() -> None:
     assert len({line.id for line in file.hunks[0].lines}) == 3
 
 
+def test_hunk_content_resembling_file_headers_does_not_replace_paths() -> None:
+    patch = b"""diff --git a/query.sql b/query.sql
+--- a/query.sql
++++ b/query.sql
+@@ -1 +1 @@
+--- removed comment
++++ added comment
+"""
+
+    file = parse_patch(patch)[0]
+
+    assert file.old_path == "query.sql"
+    assert file.new_path == "query.sql"
+    assert [line.content for line in file.hunks[0].lines] == [
+        "-- removed comment",
+        "++ added comment",
+    ]
+
+
 def test_replacements_are_linked_only_within_the_same_change_block() -> None:
     patch = b"""diff --git a/app.py b/app.py
 --- a/app.py

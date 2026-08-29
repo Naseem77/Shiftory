@@ -1,0 +1,74 @@
+{
+  "template_schema": "shiftory.benchmark-explanation-template/v1",
+  "target_schema": "shiftory.explanation/v1",
+  "scenario_id": "ripgrep-repeated-flags",
+  "manifest": {
+    "schema": "shiftory.explanation/v1",
+    "summary": "Command-line arguments move into a ripgrep-specific definition model, repeatable value-taking flags select their last supplied value, and positional names become internally consistent.",
+    "items": [
+      {
+        "id": "argument-definition-model",
+        "kind": "structural",
+        "title": "Define each command-line argument through a local model",
+        "before": "The clap application was assembled as one inline chain using shared closures and clap settings.",
+        "after": "RGArg and RGArgKind describe positional arguments, switches, and value-taking flags, while per-argument functions keep each definition with its help text.",
+        "statement": "The application is generated from ripgrep-owned argument descriptions that are then translated to clap.",
+        "confidence": "extracted",
+        "citations": [
+          "conceptual-hunk:src/app.rs#1",
+          "conceptual-hunk:src/app.rs#2",
+          "conceptual-hunk:src/app.rs#3",
+          "conceptual-hunk:src/app.rs#4",
+          "conceptual-hunk:src/app.rs#5"
+        ]
+      },
+      {
+        "id": "last-repeated-value",
+        "kind": "behavioral",
+        "title": "Use the last value of a repeated value-taking flag",
+        "before": "ArgMatches exposed clap singleton accessors, whose repeated-value lookup selected clap's singleton result.",
+        "after": "The wrapper owns singleton access and derives it from all supplied values by taking the last value.",
+        "statement": "Consumers such as replacement, color, and encoding read through the wrapper's last-value semantics.",
+        "confidence": "extracted",
+        "citations": [
+          "conceptual-hunk:src/args.rs#1",
+          "conceptual-hunk:src/args.rs#2",
+          "conceptual-hunk:src/args.rs#6",
+          "conceptual-hunk:src/args.rs#7",
+          "conceptual-hunk:src/args.rs#8",
+          "conceptual-hunk:src/args.rs#9"
+        ]
+      },
+      {
+        "id": "normalized-positionals",
+        "kind": "structural",
+        "title": "Use normalized internal names for pattern and path positionals",
+        "before": "Argument consumption referred to PATTERN and PATH using uppercase identifiers.",
+        "after": "Argument consumption refers to the model's lowercase pattern and path identifiers.",
+        "statement": "Path and pattern extraction now uses the identifiers emitted by the new argument model.",
+        "confidence": "extracted",
+        "citations": [
+          "conceptual-hunk:src/args.rs#3",
+          "conceptual-hunk:src/args.rs#4",
+          "conceptual-hunk:src/args.rs#5"
+        ]
+      }
+    ],
+    "coverage_owners": [
+      {"evidence_id": "conceptual-hunk:src/app.rs#1", "owner_id": "argument-definition-model"},
+      {"evidence_id": "conceptual-hunk:src/app.rs#2", "owner_id": "argument-definition-model"},
+      {"evidence_id": "conceptual-hunk:src/app.rs#3", "owner_id": "argument-definition-model"},
+      {"evidence_id": "conceptual-hunk:src/app.rs#4", "owner_id": "argument-definition-model"},
+      {"evidence_id": "conceptual-hunk:src/app.rs#5", "owner_id": "argument-definition-model"},
+      {"evidence_id": "conceptual-hunk:src/args.rs#1", "owner_id": "last-repeated-value"},
+      {"evidence_id": "conceptual-hunk:src/args.rs#2", "owner_id": "last-repeated-value"},
+      {"evidence_id": "conceptual-hunk:src/args.rs#3", "owner_id": "normalized-positionals"},
+      {"evidence_id": "conceptual-hunk:src/args.rs#4", "owner_id": "normalized-positionals"},
+      {"evidence_id": "conceptual-hunk:src/args.rs#5", "owner_id": "normalized-positionals"},
+      {"evidence_id": "conceptual-hunk:src/args.rs#6", "owner_id": "last-repeated-value"},
+      {"evidence_id": "conceptual-hunk:src/args.rs#7", "owner_id": "last-repeated-value"},
+      {"evidence_id": "conceptual-hunk:src/args.rs#8", "owner_id": "last-repeated-value"},
+      {"evidence_id": "conceptual-hunk:src/args.rs#9", "owner_id": "last-repeated-value"}
+    ]
+  }
+}

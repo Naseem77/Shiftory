@@ -1,0 +1,112 @@
+{
+  "template_schema": "shiftory.benchmark-explanation-template/v1",
+  "target_schema": "shiftory.explanation/v1",
+  "scenario_id": "axios-spec-formdata-blob",
+  "manifest": {
+    "schema": "shiftory.explanation/v1",
+    "summary": "The Node adapter accepts spec-compliant FormData and Blob bodies, streams their bytes with computed headers, and retains the legacy form-data path.",
+    "items": [
+      {
+        "id": "request-body-dispatch",
+        "kind": "behavioral",
+        "title": "Route FormData and Blob bodies through Node streams",
+        "before": "The adapter recognized the package-specific form-data API and ordinary buffered or streamed bodies.",
+        "after": "The adapter separately recognizes spec-compliant FormData, legacy form-data, and Blob bodies and supplies corresponding headers and streams.",
+        "statement": "Body-type dispatch now selects multipart encoding or Blob reading before the existing buffered-body path.",
+        "confidence": "extracted",
+        "citations": [
+          "conceptual-hunk:lib/adapters/http.js#1",
+          "conceptual-hunk:lib/adapters/http.js#2",
+          "conceptual-hunk:lib/adapters/http.js#3",
+          "conceptual-hunk:lib/env/classes/FormData.js#1"
+        ]
+      },
+      {
+        "id": "multipart-encoding",
+        "kind": "behavioral",
+        "title": "Encode multipart parts and Blob bytes incrementally",
+        "before": "No internal helpers serialized spec-compliant FormData or adapted Blob reading strategies.",
+        "after": "New helpers encode multipart boundaries, part headers, content length, and Blob bytes as readable streams.",
+        "statement": "Multipart output is assembled from each form entry and exposes computed content headers to the adapter.",
+        "confidence": "extracted",
+        "citations": [
+          "conceptual-hunk:lib/helpers/formDataToStream.js#1",
+          "conceptual-hunk:lib/helpers/readBlob.js#1"
+        ]
+      },
+      {
+        "id": "formdata-normalization",
+        "kind": "structural",
+        "title": "Share FormData detection and platform construction",
+        "before": "toFormData owned its spec-compliance predicate and imported the environment FormData class directly.",
+        "after": "The predicate and boundary alphabet utilities are shared, while Node FormData construction uses the platform class.",
+        "statement": "Form conversion and HTTP dispatch use the same spec-compliant FormData test.",
+        "confidence": "extracted",
+        "citations": [
+          "conceptual-hunk:lib/helpers/toFormData.js#1",
+          "conceptual-hunk:lib/helpers/toFormData.js#2",
+          "conceptual-hunk:lib/helpers/toFormData.js#3",
+          "conceptual-hunk:lib/helpers/toFormData.js#4",
+          "conceptual-hunk:lib/utils.js#1",
+          "conceptual-hunk:lib/utils.js#2",
+          "conceptual-hunk:lib/utils.js#3"
+        ]
+      },
+      {
+        "id": "environment-wiring",
+        "kind": "structural",
+        "title": "Wire the test and browser environments",
+        "before": "The tool configuration targeted ES2017 and did not include the FormData polyfill or browser mapping for the Node FormData class.",
+        "after": "The configuration targets ES2018, provides a FormData test polyfill, and maps the Node-only class away in browser builds.",
+        "statement": "Development and package metadata support the new runtime paths without vendoring their source.",
+        "confidence": "extracted",
+        "citations": [
+          "conceptual-hunk:.eslintrc.cjs#1",
+          "conceptual-hunk:package.json#1",
+          "conceptual-hunk:package.json#2",
+          "conceptual-hunk:package.json#3"
+        ]
+      },
+      {
+        "id": "request-body-observers",
+        "kind": "observer",
+        "title": "Observe legacy FormData, spec FormData, and Blob uploads",
+        "before": "The adapter test covered the package-specific form-data body.",
+        "after": "The test distinguishes the legacy body and observes multipart fields, a file part, and a standalone Blob body.",
+        "statement": "HTTP test servers parse or echo each body form and compare the received values.",
+        "confidence": "extracted",
+        "citations": [
+          "conceptual-hunk:test/unit/adapters/http.js#1",
+          "conceptual-hunk:test/unit/adapters/http.js#2",
+          "conceptual-hunk:test/unit/adapters/http.js#3",
+          "conceptual-hunk:test/unit/adapters/http.js#4",
+          "conceptual-hunk:test/unit/adapters/http.js#5"
+        ]
+      }
+    ],
+    "coverage_owners": [
+      {"evidence_id": "conceptual-hunk:.eslintrc.cjs#1", "owner_id": "environment-wiring"},
+      {"evidence_id": "conceptual-hunk:lib/adapters/http.js#1", "owner_id": "request-body-dispatch"},
+      {"evidence_id": "conceptual-hunk:lib/adapters/http.js#2", "owner_id": "request-body-dispatch"},
+      {"evidence_id": "conceptual-hunk:lib/adapters/http.js#3", "owner_id": "request-body-dispatch"},
+      {"evidence_id": "conceptual-hunk:lib/env/classes/FormData.js#1", "owner_id": "request-body-dispatch"},
+      {"evidence_id": "conceptual-hunk:lib/helpers/formDataToStream.js#1", "owner_id": "multipart-encoding"},
+      {"evidence_id": "conceptual-hunk:lib/helpers/readBlob.js#1", "owner_id": "multipart-encoding"},
+      {"evidence_id": "conceptual-hunk:lib/helpers/toFormData.js#1", "owner_id": "formdata-normalization"},
+      {"evidence_id": "conceptual-hunk:lib/helpers/toFormData.js#2", "owner_id": "formdata-normalization"},
+      {"evidence_id": "conceptual-hunk:lib/helpers/toFormData.js#3", "owner_id": "formdata-normalization"},
+      {"evidence_id": "conceptual-hunk:lib/helpers/toFormData.js#4", "owner_id": "formdata-normalization"},
+      {"evidence_id": "conceptual-hunk:lib/utils.js#1", "owner_id": "formdata-normalization"},
+      {"evidence_id": "conceptual-hunk:lib/utils.js#2", "owner_id": "formdata-normalization"},
+      {"evidence_id": "conceptual-hunk:lib/utils.js#3", "owner_id": "formdata-normalization"},
+      {"evidence_id": "conceptual-hunk:package.json#1", "owner_id": "environment-wiring"},
+      {"evidence_id": "conceptual-hunk:package.json#2", "owner_id": "environment-wiring"},
+      {"evidence_id": "conceptual-hunk:package.json#3", "owner_id": "environment-wiring"},
+      {"evidence_id": "conceptual-hunk:test/unit/adapters/http.js#1", "owner_id": "request-body-observers"},
+      {"evidence_id": "conceptual-hunk:test/unit/adapters/http.js#2", "owner_id": "request-body-observers"},
+      {"evidence_id": "conceptual-hunk:test/unit/adapters/http.js#3", "owner_id": "request-body-observers"},
+      {"evidence_id": "conceptual-hunk:test/unit/adapters/http.js#4", "owner_id": "request-body-observers"},
+      {"evidence_id": "conceptual-hunk:test/unit/adapters/http.js#5", "owner_id": "request-body-observers"}
+    ]
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "template_schema": "shiftory.benchmark-explanation-template/v1",
+  "target_schema": "shiftory.explanation/v1",
+  "scenario_id": "offline-smoke",
+  "manifest": {
+    "schema": "shiftory.explanation/v1",
+    "summary": "The greeting accepts a name and an observer exercises the personalized result.",
+    "items": [
+      {
+        "id": "greeting-behavior",
+        "kind": "behavioral",
+        "title": "Personalize the greeting",
+        "before": "The greeting took no argument and returned a fixed value.",
+        "after": "The greeting accepts a defaulted name and includes it in the result.",
+        "statement": "Greeting construction now interpolates its input.",
+        "confidence": "extracted",
+        "citations": ["conceptual-hunk:app.py#1"]
+      },
+      {
+        "id": "greeting-observer",
+        "kind": "observer",
+        "title": "Observe a named greeting",
+        "statement": "A test invokes the greeting with a name and compares the result.",
+        "confidence": "extracted",
+        "citations": ["conceptual-hunk:tests/test_app.py#1"]
+      }
+    ],
+    "coverage_owners": [
+      {
+        "evidence_id": "conceptual-hunk:app.py#1",
+        "owner_id": "greeting-behavior"
+      },
+      {
+        "evidence_id": "conceptual-hunk:tests/test_app.py#1",
+        "owner_id": "greeting-observer"
+      }
+    ]
+  }
+}

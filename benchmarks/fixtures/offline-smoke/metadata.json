@@ -1,0 +1,25 @@
+{
+  "schema": "shiftory.offline-git-fixture/v1",
+  "id": "offline-smoke",
+  "description": "A deterministic two-commit Python history with one modified source file and one added observer.",
+  "history": "history.fast-import",
+  "assertions": "assertions.json",
+  "explanation_template": "explanation-template.json",
+  "import_ref": "refs/heads/main",
+  "marks": {
+    "base": 1,
+    "head": 2
+  },
+  "expected_commits": {
+    "base": "9122ecbec097db14ebefc9039ecafcf4c675603b",
+    "head": "eb7b7588b30148b94ef88a0a4767ef038fd98f2a"
+  },
+  "expected_inventory": {
+    "files": 2,
+    "hunks": 2,
+    "added_lines": 7,
+    "deleted_lines": 2
+  },
+  "network_required": false,
+  "results_recorded": false
+}

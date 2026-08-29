@@ -1,0 +1,73 @@
+{
+  "schema": "shiftory.benchmark-source-assertions/v1",
+  "scenario_id": "ripgrep-repeated-flags",
+  "base": "c8e755f11f31b6da04329cdc7433747bba70150f",
+  "head": "d83bab4d3f29a0176a20ea004c2cba44058d4210",
+  "assertions": [
+    {
+      "id": "structured-argument-model",
+      "behavior_id": "argument-definition-model",
+      "path": "src/app.rs",
+      "before": {
+        "file_exists": true,
+        "contains": [
+          "use clap::{App, AppSettings, Arg, ArgSettings};",
+          "let flag = |name| arg(name).long(name);"
+        ],
+        "not_contains": ["struct RGArg {"]
+      },
+      "after": {
+        "file_exists": true,
+        "contains": [
+          "use clap::{self, App, AppSettings};",
+          "struct RGArg {",
+          "enum RGArgKind {"
+        ],
+        "not_contains": ["let flag = |name| arg(name).long(name);"]
+      }
+    },
+    {
+      "id": "repeatable-value-selection",
+      "behavior_id": "last-repeated-value",
+      "path": "src/args.rs",
+      "before": {
+        "file_exists": true,
+        "contains": [
+          "impl<'a> ops::Deref for ArgMatches<'a> {",
+          "self.value_of_lossy(\"replace\").map(|s| s.into_owned().into_bytes())"
+        ],
+        "not_contains": ["self.values_of_os(name).and_then(|it| it.last())"]
+      },
+      "after": {
+        "file_exists": true,
+        "contains": [
+          "self.value_of_lossy(\"replace\").map(|s| s.into_bytes())",
+          "self.values_of_os(name).and_then(|it| it.last())",
+          "self.values_of_lossy(name).and_then(|mut vals| vals.pop())"
+        ],
+        "not_contains": ["impl<'a> ops::Deref for ArgMatches<'a> {"]
+      }
+    },
+    {
+      "id": "normalized-positional-names",
+      "behavior_id": "normalized-positionals",
+      "path": "src/args.rs",
+      "before": {
+        "file_exists": true,
+        "contains": [
+          "match self.values_of_os(\"PATH\") {",
+          "if let Some(path) = self.value_of_os(\"PATTERN\") {"
+        ],
+        "not_contains": ["match self.values_of_os(\"path\") {"]
+      },
+      "after": {
+        "file_exists": true,
+        "contains": [
+          "match self.values_of_os(\"path\") {",
+          "if let Some(path) = self.value_of_os(\"pattern\") {"
+        ],
+        "not_contains": ["match self.values_of_os(\"PATH\") {"]
+      }
+    }
+  ]
+}

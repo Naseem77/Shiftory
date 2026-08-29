@@ -1,0 +1,36 @@
+commit refs/heads/main
+mark :1
+author Shiftory Fixture <fixture@shiftory.invalid> 1704067200 +0000
+committer Shiftory Fixture <fixture@shiftory.invalid> 1704067200 +0000
+data <<BASE_MESSAGE
+offline smoke base
+BASE_MESSAGE
+M 100644 inline app.py
+data <<BASE_FILE
+def greeting():
+    return "hello"
+BASE_FILE
+
+commit refs/heads/main
+mark :2
+author Shiftory Fixture <fixture@shiftory.invalid> 1704153600 +0000
+committer Shiftory Fixture <fixture@shiftory.invalid> 1704153600 +0000
+data <<HEAD_MESSAGE
+offline smoke head
+HEAD_MESSAGE
+from :1
+M 100644 inline app.py
+data <<HEAD_APP
+def greeting(name: str = "world"):
+    return f"hello, {name}"
+HEAD_APP
+M 100644 inline tests/test_app.py
+data <<HEAD_TEST
+from app import greeting
+
+
+def test_greeting():
+    assert greeting("Shiftory") == "hello, Shiftory"
+HEAD_TEST
+
+done

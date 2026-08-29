@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shiftory.dev/schemas/benchmark-quality-rubric-v1.json",
+  "title": "Optional Shiftory benchmark quality evaluation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "scenario_id",
+    "artifact_sha256",
+    "evaluator",
+    "model",
+    "environment",
+    "ratings",
+    "notes"
+  ],
+  "properties": {
+    "schema": {
+      "const": "shiftory.benchmark-quality-rubric/v1"
+    },
+    "scenario_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "evaluator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "organization"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "organization": {"type": ["string", "null"]}
+      }
+    },
+    "model": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["provider", "name", "version", "evaluation_protocol"],
+      "properties": {
+        "provider": {"type": "string", "minLength": 1},
+        "name": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1},
+        "evaluation_protocol": {"type": "string", "minLength": 1}
+      }
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["recorded_at_utc", "interface", "context"],
+      "properties": {
+        "recorded_at_utc": {"type": "string", "format": "date-time"},
+        "interface": {"type": "string", "minLength": 1},
+        "context": {"type": "string", "minLength": 1}
+      }
+    },
+    "ratings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["factuality", "coverage", "citation_use", "clarity"],
+      "properties": {
+        "factuality": {"$ref": "#/$defs/rating"},
+        "coverage": {"$ref": "#/$defs/rating"},
+        "citation_use": {"$ref": "#/$defs/rating"},
+        "clarity": {"$ref": "#/$defs/rating"}
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "$defs": {
+    "rating": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["score", "rationale"],
+      "properties": {
+        "score": {"type": "integer", "minimum": 1, "maximum": 5},
+        "rationale": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

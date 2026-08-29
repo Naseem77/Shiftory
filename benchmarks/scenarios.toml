@@ -1,0 +1,68 @@
+schema_version = 1
+
+[defaults]
+comparison = "base..head"
+source_policy = "clone-on-demand"
+network_required = true
+results_recorded = true
+
+[[scenario]]
+id = "click-optional-flag-value"
+name = "Click optional values for non-flag options"
+repository = "https://github.com/pallets/click.git"
+base = "7f7bbe4569ea68e8dabee232eade069ef3310aea"
+head = "91de59c6c8abc8251e7af551cd4546cc964288af"
+license_expression = "BSD-3-Clause"
+license_files = ["LICENSE.txt"]
+languages = ["Python", "reStructuredText"]
+assertions = "golden/click/assertions.json"
+explanation_template = "golden/click/explanation-template.json"
+
+[scenario.expected_inventory]
+files = 3
+hunks = 5
+added_lines = 49
+deleted_lines = 3
+
+[[scenario]]
+id = "axios-spec-formdata-blob"
+name = "Axios spec-compliant FormData and Blob request bodies"
+repository = "https://github.com/axios/axios.git"
+base = "65e8d1e28ce829f47a837e45129730e541950d3c"
+head = "6ac574e00a06731288347acea1e8246091196953"
+license_expression = "MIT"
+license_files = ["LICENSE"]
+languages = ["JavaScript", "JSON"]
+assertions = "golden/axios/assertions.json"
+explanation_template = "golden/axios/explanation-template.json"
+
+[scenario.expected_inventory]
+files = 9
+hunks = 22
+added_lines = 304
+deleted_lines = 55
+
+[[scenario]]
+id = "ripgrep-repeated-flags"
+name = "ripgrep structured arguments and repeated flag values"
+repository = "https://github.com/BurntSushi/ripgrep.git"
+base = "c8e755f11f31b6da04329cdc7433747bba70150f"
+head = "d83bab4d3f29a0176a20ea004c2cba44058d4210"
+license_expression = "MIT OR Unlicense"
+license_files = ["LICENSE-MIT", "UNLICENSE"]
+languages = ["Rust"]
+assertions = "golden/ripgrep/assertions.json"
+explanation_template = "golden/ripgrep/explanation-template.json"
+
+[scenario.expected_inventory]
+files = 2
+hunks = 14
+added_lines = 1470
+deleted_lines = 556
+
+[offline_fixture]
+id = "offline-smoke"
+history = "fixtures/offline-smoke/history.fast-import"
+metadata = "fixtures/offline-smoke/metadata.json"
+network_required = false
+results_recorded = false

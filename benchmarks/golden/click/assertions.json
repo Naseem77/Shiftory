@@ -1,0 +1,59 @@
+{
+  "schema": "shiftory.benchmark-source-assertions/v1",
+  "scenario_id": "click-optional-flag-value",
+  "base": "7f7bbe4569ea68e8dabee232eade069ef3310aea",
+  "head": "91de59c6c8abc8251e7af551cd4546cc964288af",
+  "assertions": [
+    {
+      "id": "optional-value-decision",
+      "behavior_id": "optional-value-parsing",
+      "path": "src/click/core.py",
+      "before": {
+        "file_exists": true,
+        "contains": ["self._flag_needs_value = self.default is UNSET"],
+        "not_contains": ["self._flag_needs_value = flag_value is not UNSET or self.default is UNSET"]
+      },
+      "after": {
+        "file_exists": true,
+        "contains": ["self._flag_needs_value = flag_value is not UNSET or self.default is UNSET"],
+        "not_contains": ["self._flag_needs_value = self.default is UNSET"]
+      }
+    },
+    {
+      "id": "optional-value-contract-test",
+      "behavior_id": "optional-value-contract",
+      "path": "tests/test_options.py",
+      "before": {
+        "file_exists": true,
+        "contains": ["assert result.stdout == \"frozenset()\""],
+        "not_contains": ["def test_flag_value_optional_behavior():"]
+      },
+      "after": {
+        "file_exists": true,
+        "contains": [
+          "def test_flag_value_optional_behavior():",
+          "assert result.output == \"Hello, Flag!\\n\""
+        ],
+        "not_contains": []
+      }
+    },
+    {
+      "id": "optional-value-type-conversion",
+      "behavior_id": "optional-value-contract",
+      "path": "tests/test_options.py",
+      "before": {
+        "file_exists": true,
+        "contains": [],
+        "not_contains": ["def test_flag_value_with_type_conversion():"]
+      },
+      "after": {
+        "file_exists": true,
+        "contains": [
+          "def test_flag_value_with_type_conversion():",
+          "@click.option(\"--count\", is_flag=False, flag_value=\"1\", type=int, default=0)"
+        ],
+        "not_contains": []
+      }
+    }
+  ]
+}

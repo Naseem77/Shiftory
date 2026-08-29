@@ -1,0 +1,54 @@
+{
+  "template_schema": "shiftory.benchmark-explanation-template/v1",
+  "target_schema": "shiftory.explanation/v1",
+  "scenario_id": "click-optional-flag-value",
+  "manifest": {
+    "schema": "shiftory.explanation/v1",
+    "summary": "A non-flag option with a flag value can be invoked without a following argument, and the contract is documented and exercised.",
+    "items": [
+      {
+        "id": "optional-value-parsing",
+        "kind": "behavioral",
+        "title": "Recognize the flag value as an argument-free invocation",
+        "before": "The needs-value decision depended only on whether the default was unset.",
+        "after": "A configured flag value also marks the option as usable without a following argument.",
+        "statement": "Option initialization now includes flag_value in the decision that controls argument consumption.",
+        "confidence": "extracted",
+        "citations": ["conceptual-hunk:src/click/core.py#2"]
+      },
+      {
+        "id": "optional-value-documentation",
+        "kind": "structural",
+        "title": "Describe the optional-value contract",
+        "before": "The changelog and Option API notes did not describe this invocation form.",
+        "after": "The changelog and Option API notes state when a flag can be accepted without an argument.",
+        "statement": "Release-facing and API-facing text records the same option behavior.",
+        "confidence": "extracted",
+        "citations": [
+          "conceptual-hunk:CHANGES.rst#1",
+          "conceptual-hunk:src/click/core.py#1"
+        ]
+      },
+      {
+        "id": "optional-value-contract",
+        "kind": "observer",
+        "title": "Exercise string and converted flag values",
+        "before": "The option suite did not contain these two optional-value examples.",
+        "after": "The suite invokes a string flag value and an integer-converted flag value without following arguments.",
+        "statement": "The CLI runner observes both direct substitution and type conversion.",
+        "confidence": "extracted",
+        "citations": [
+          "conceptual-hunk:tests/test_options.py#1",
+          "conceptual-hunk:tests/test_options.py#2"
+        ]
+      }
+    ],
+    "coverage_owners": [
+      {"evidence_id": "conceptual-hunk:CHANGES.rst#1", "owner_id": "optional-value-documentation"},
+      {"evidence_id": "conceptual-hunk:src/click/core.py#1", "owner_id": "optional-value-documentation"},
+      {"evidence_id": "conceptual-hunk:src/click/core.py#2", "owner_id": "optional-value-parsing"},
+      {"evidence_id": "conceptual-hunk:tests/test_options.py#1", "owner_id": "optional-value-contract"},
+      {"evidence_id": "conceptual-hunk:tests/test_options.py#2", "owner_id": "optional-value-contract"}
+    ]
+  }
+}

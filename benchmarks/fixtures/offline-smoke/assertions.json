@@ -1,0 +1,41 @@
+{
+  "schema": "shiftory.benchmark-source-assertions/v1",
+  "scenario_id": "offline-smoke",
+  "base": "9122ecbec097db14ebefc9039ecafcf4c675603b",
+  "head": "eb7b7588b30148b94ef88a0a4767ef038fd98f2a",
+  "assertions": [
+    {
+      "id": "parameterized-greeting",
+      "behavior_id": "greeting-behavior",
+      "path": "app.py",
+      "before": {
+        "file_exists": true,
+        "contains": ["def greeting():", "return \"hello\""],
+        "not_contains": ["def greeting(name: str = \"world\"):"]
+      },
+      "after": {
+        "file_exists": true,
+        "contains": [
+          "def greeting(name: str = \"world\"):",
+          "return f\"hello, {name}\""
+        ],
+        "not_contains": ["def greeting():"]
+      }
+    },
+    {
+      "id": "greeting-observer",
+      "behavior_id": "greeting-observer",
+      "path": "tests/test_app.py",
+      "before": {
+        "file_exists": false,
+        "contains": [],
+        "not_contains": []
+      },
+      "after": {
+        "file_exists": true,
+        "contains": ["assert greeting(\"Shiftory\") == \"hello, Shiftory\""],
+        "not_contains": []
+      }
+    }
+  ]
+}

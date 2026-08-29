@@ -1,0 +1,153 @@
+{
+  "schema": "shiftory.benchmark-source-assertions/v1",
+  "scenario_id": "axios-spec-formdata-blob",
+  "base": "65e8d1e28ce829f47a837e45129730e541950d3c",
+  "head": "6ac574e00a06731288347acea1e8246091196953",
+  "assertions": [
+    {
+      "id": "adapter-formdata-dispatch",
+      "behavior_id": "request-body-dispatch",
+      "path": "lib/adapters/http.js",
+      "before": {
+        "file_exists": true,
+        "contains": ["if (utils.isFormData(data) && utils.isFunction(data.getHeaders)) {"],
+        "not_contains": ["if (utils.isSpecCompliantForm(data)) {"]
+      },
+      "after": {
+        "file_exists": true,
+        "contains": [
+          "if (utils.isSpecCompliantForm(data)) {",
+          "data = formDataToStream(data, (formHeaders) => {"
+        ],
+        "not_contains": []
+      }
+    },
+    {
+      "id": "adapter-blob-dispatch",
+      "behavior_id": "request-body-dispatch",
+      "path": "lib/adapters/http.js",
+      "before": {
+        "file_exists": true,
+        "contains": ["headers.set('Content-Length', data.length, false);"],
+        "not_contains": ["} else if (utils.isBlob(data)) {"]
+      },
+      "after": {
+        "file_exists": true,
+        "contains": [
+          "} else if (utils.isBlob(data)) {",
+          "data = stream.Readable.from(readBlob(data));",
+          "headers.setContentLength(data.length, false);"
+        ],
+        "not_contains": []
+      }
+    },
+    {
+      "id": "native-formdata-selection",
+      "behavior_id": "request-body-dispatch",
+      "path": "lib/env/classes/FormData.js",
+      "before": {
+        "file_exists": true,
+        "contains": ["import FormData from 'form-data';", "export default FormData;"],
+        "not_contains": []
+      },
+      "after": {
+        "file_exists": true,
+        "contains": ["export default typeof FormData !== 'undefined' ? FormData : _FormData;"],
+        "not_contains": []
+      }
+    },
+    {
+      "id": "multipart-stream-encoding",
+      "behavior_id": "multipart-encoding",
+      "path": "lib/helpers/formDataToStream.js",
+      "before": {
+        "file_exists": false,
+        "contains": [],
+        "not_contains": []
+      },
+      "after": {
+        "file_exists": true,
+        "contains": [
+          "'Content-Type': `multipart/form-data; boundary=${boundary}`",
+          "computedHeaders['Content-Length'] = contentLength;",
+          "return Readable.from((async function *() {"
+        ],
+        "not_contains": []
+      }
+    },
+    {
+      "id": "blob-reader-fallbacks",
+      "behavior_id": "multipart-encoding",
+      "path": "lib/helpers/readBlob.js",
+      "before": {
+        "file_exists": false,
+        "contains": [],
+        "not_contains": []
+      },
+      "after": {
+        "file_exists": true,
+        "contains": [
+          "const readBlob = async function* (blob) {",
+          "} else if (blob.arrayBuffer) {",
+          "} else if (blob[asyncIterator]) {"
+        ],
+        "not_contains": []
+      }
+    },
+    {
+      "id": "shared-formdata-predicate",
+      "behavior_id": "formdata-normalization",
+      "path": "lib/utils.js",
+      "before": {
+        "file_exists": true,
+        "contains": ["const toJSONObject = (obj) => {"],
+        "not_contains": ["function isSpecCompliantForm(thing) {"]
+      },
+      "after": {
+        "file_exists": true,
+        "contains": [
+          "function isSpecCompliantForm(thing) {",
+          "return !!(thing && isFunction(thing.append) && thing[Symbol.toStringTag] === 'FormData' && thing[Symbol.iterator]);"
+        ],
+        "not_contains": []
+      }
+    },
+    {
+      "id": "node-formdata-construction",
+      "behavior_id": "formdata-normalization",
+      "path": "lib/helpers/toFormData.js",
+      "before": {
+        "file_exists": true,
+        "contains": ["import envFormData from '../env/classes/FormData.js';"],
+        "not_contains": ["import PlatformFormData from '../platform/node/classes/FormData.js';"]
+      },
+      "after": {
+        "file_exists": true,
+        "contains": [
+          "import PlatformFormData from '../platform/node/classes/FormData.js';",
+          "const useBlob = _Blob && utils.isSpecCompliantForm(formData);"
+        ],
+        "not_contains": []
+      }
+    },
+    {
+      "id": "adapter-observers",
+      "behavior_id": "request-body-observers",
+      "path": "test/unit/adapters/http.js",
+      "before": {
+        "file_exists": true,
+        "contains": ["import FormData from 'form-data';"],
+        "not_contains": ["describe('SpecCompliant FormData'"]
+      },
+      "after": {
+        "file_exists": true,
+        "contains": [
+          "describe('SpecCompliant FormData'",
+          "describe('Blob', function () {",
+          "assert.deepStrictEqual(data, blobContent);"
+        ],
+        "not_contains": []
+      }
+    }
+  ]
+}

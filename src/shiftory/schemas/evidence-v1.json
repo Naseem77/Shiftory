@@ -1,0 +1,288 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shiftory.dev/schemas/evidence-v1.json",
+  "title": "Shiftory evidence v1",
+  "type": "object",
+  "required": [
+    "schema",
+    "tool_version",
+    "comparison",
+    "repository",
+    "files",
+    "graph",
+    "groups",
+    "diagnostics",
+    "omissions",
+    "metrics"
+  ],
+  "properties": {
+    "schema": {"const": "shiftory.evidence/v1"},
+    "tool_version": {"type": "string"},
+    "comparison": {
+      "type": "object",
+      "required": ["repository_id", "mode", "base_label", "head_label", "identity"],
+      "properties": {
+        "repository_id": {"type": "string"},
+        "mode": {"type": "string"},
+        "base_sha": {"type": ["string", "null"]},
+        "head_sha": {"type": ["string", "null"]},
+        "base_label": {"type": "string"},
+        "head_label": {"type": "string"},
+        "identity": {"type": "string"},
+        "after_fingerprint": {"type": ["string", "null"]},
+        "parent": {"type": ["integer", "null"]}
+      },
+      "additionalProperties": false
+    },
+    "repository": {
+      "type": "object",
+      "required": ["id"],
+      "properties": {"id": {"type": "string"}},
+      "additionalProperties": false
+    },
+    "files": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/file"}
+    },
+    "graph": {"$ref": "#/$defs/graph"},
+    "groups": {"type": "array", "items": {"$ref": "#/$defs/group"}},
+    "diagnostics": {"type": "array", "items": {"$ref": "#/$defs/diagnostic"}},
+    "omissions": {"type": "array", "items": {"$ref": "#/$defs/omission"}},
+    "metrics": {"$ref": "#/$defs/metrics"}
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "line": {
+      "type": "object",
+      "required": ["id", "side", "old_line", "new_line", "ordinal", "content", "content_hash"],
+      "properties": {
+        "id": {"type": "string"},
+        "side": {"enum": ["before", "after"]},
+        "old_line": {"type": ["integer", "null"]},
+        "new_line": {"type": ["integer", "null"]},
+        "ordinal": {"type": "integer", "minimum": 0},
+        "content": {"type": "string"},
+        "content_hash": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "span": {
+      "type": "object",
+      "required": ["id", "side", "start_line", "end_line", "line_ids", "replacement_span_id"],
+      "properties": {
+        "id": {"type": "string"},
+        "side": {"enum": ["before", "after"]},
+        "start_line": {"type": "integer", "minimum": 0},
+        "end_line": {"type": "integer", "minimum": 0},
+        "line_ids": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+        "replacement_span_id": {"type": ["string", "null"]}
+      },
+      "additionalProperties": false
+    },
+    "hunk": {
+      "type": "object",
+      "required": [
+        "id", "old_start", "old_count", "new_start", "new_count", "heading",
+        "span_ids", "lines", "raw_patch_bytes"
+      ],
+      "properties": {
+        "id": {"type": "string"},
+        "old_start": {"type": "integer", "minimum": 0},
+        "old_count": {"type": "integer", "minimum": 0},
+        "new_start": {"type": "integer", "minimum": 0},
+        "new_count": {"type": "integer", "minimum": 0},
+        "heading": {"type": "string"},
+        "span_ids": {"type": "array", "items": {"type": "string"}},
+        "lines": {"type": "array", "items": {"$ref": "#/$defs/line"}, "minItems": 1},
+        "raw_patch_bytes": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "unit": {
+      "type": "object",
+      "required": ["id", "kind", "hunk_ids", "metadata"],
+      "properties": {
+        "id": {"type": "string"},
+        "kind": {"enum": ["text", "binary", "mode", "rename", "copy", "submodule", "unsupported"]},
+        "hunk_ids": {"type": "array", "items": {"type": "string"}},
+        "metadata": {"type": "object"}
+      },
+      "additionalProperties": false
+    },
+    "citation": {
+      "type": "object",
+      "required": [
+        "id", "path", "side", "start_line", "end_line", "text",
+        "content_hash", "omitted", "retrieval"
+      ],
+      "properties": {
+        "id": {"type": "string"},
+        "path": {"type": "string"},
+        "side": {"enum": ["before", "after"]},
+        "start_line": {"type": "integer", "minimum": 1},
+        "end_line": {"type": "integer", "minimum": 1},
+        "text": {"type": ["string", "null"]},
+        "content_hash": {"type": "string"},
+        "omitted": {"type": "boolean"},
+        "retrieval": {
+          "anyOf": [
+            {"$ref": "#/$defs/retrieval"},
+            {"type": "null"}
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "file": {
+      "type": "object",
+      "required": [
+        "old_path", "new_path", "status", "old_blob", "new_blob", "old_mode",
+        "new_mode", "units", "hunks", "spans", "citations", "classification",
+        "classification_confidence"
+      ],
+      "properties": {
+        "old_path": {"type": ["string", "null"]},
+        "new_path": {"type": ["string", "null"]},
+        "status": {"type": "string"},
+        "old_blob": {"type": ["string", "null"]},
+        "new_blob": {"type": ["string", "null"]},
+        "old_mode": {"type": ["string", "null"]},
+        "new_mode": {"type": ["string", "null"]},
+        "units": {"type": "array", "items": {"$ref": "#/$defs/unit"}, "minItems": 1},
+        "hunks": {"type": "array", "items": {"$ref": "#/$defs/hunk"}},
+        "spans": {"type": "array", "items": {"$ref": "#/$defs/span"}},
+        "citations": {"type": "array", "items": {"$ref": "#/$defs/citation"}},
+        "classification": {"$ref": "#/$defs/classification"},
+        "classification_confidence": {"$ref": "#/$defs/confidence"}
+      },
+      "additionalProperties": false
+    },
+    "confidence": {
+      "enum": ["extracted", "inferred", "ambiguous", "unresolved", "unavailable"]
+    },
+    "graph": {
+      "type": "object",
+      "required": ["status", "provider", "version", "facts", "diagnostics", "cache_key"],
+      "properties": {
+        "status": {"enum": ["available", "unavailable", "disabled"]},
+        "provider": {"type": "string"},
+        "version": {"type": ["string", "null"]},
+        "facts": {"type": "array", "items": {"$ref": "#/$defs/graph_fact"}},
+        "diagnostics": {"type": "array", "items": {"$ref": "#/$defs/diagnostic"}},
+        "cache_key": {"type": ["string", "null"]}
+      },
+      "additionalProperties": false
+    },
+    "classification": {
+      "enum": [
+        "added", "deleted", "binary", "rename", "mode", "configuration",
+        "schema", "dependency", "docs", "tests", "generated", "formatting",
+        "structural", "unsupported", "behavioral", "unresolved"
+      ]
+    },
+    "group": {
+      "type": "object",
+      "required": ["id", "classification", "unit_ids"],
+      "properties": {
+        "id": {"type": "string"},
+        "classification": {"$ref": "#/$defs/classification"},
+        "unit_ids": {
+          "type": "array",
+          "items": {"type": "string"},
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "diagnostic": {
+      "type": "object",
+      "required": ["code", "message"],
+      "properties": {
+        "code": {"type": "string"},
+        "message": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "retrieval": {
+      "type": "object",
+      "required": ["kind", "path", "side", "start_line", "end_line", "content_hash"],
+      "properties": {
+        "kind": {"const": "git_source_range"},
+        "path": {"type": "string"},
+        "side": {"enum": ["before", "after"]},
+        "start_line": {"type": "integer", "minimum": 1},
+        "end_line": {"type": "integer", "minimum": 1},
+        "content_hash": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "omission": {
+      "type": "object",
+      "required": ["id", "kind", "citation_id", "retrieval"],
+      "properties": {
+        "id": {"type": "string"},
+        "kind": {"const": "source_context"},
+        "citation_id": {"type": "string"},
+        "retrieval": {"$ref": "#/$defs/retrieval"}
+      },
+      "additionalProperties": false
+    },
+    "graph_fact": {
+      "type": "object",
+      "required": [
+        "id", "kind", "side", "path", "line", "symbol", "target",
+        "confidence", "provenance"
+      ],
+      "properties": {
+        "id": {"type": "string"},
+        "kind": {"type": "string"},
+        "side": {"enum": ["before", "after"]},
+        "path": {"type": "string"},
+        "line": {"type": ["integer", "null"], "minimum": 1},
+        "symbol": {"type": ["string", "null"]},
+        "target": {"type": ["string", "null"]},
+        "confidence": {"$ref": "#/$defs/confidence"},
+        "provenance": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "metrics": {
+      "type": "object",
+      "required": [
+        "files", "units", "hunks", "spans", "added_lines", "deleted_lines",
+        "changed_lines", "added_files", "deleted_files", "renamed_files",
+        "binary_units", "unsupported_units", "source_citations",
+        "omitted_source_contexts", "raw_patch_bytes", "graph_facts",
+        "unresolved_graph_facts", "classification_groups",
+        "line_coverage_ratio", "hunk_coverage_ratio", "unit_coverage_ratio",
+        "evidence_bytes"
+      ],
+      "properties": {
+        "files": {"type": "integer", "minimum": 0},
+        "units": {"type": "integer", "minimum": 0},
+        "hunks": {"type": "integer", "minimum": 0},
+        "spans": {"type": "integer", "minimum": 0},
+        "added_lines": {"type": "integer", "minimum": 0},
+        "deleted_lines": {"type": "integer", "minimum": 0},
+        "changed_lines": {"type": "integer", "minimum": 0},
+        "added_files": {"type": "integer", "minimum": 0},
+        "deleted_files": {"type": "integer", "minimum": 0},
+        "renamed_files": {"type": "integer", "minimum": 0},
+        "binary_units": {"type": "integer", "minimum": 0},
+        "unsupported_units": {"type": "integer", "minimum": 0},
+        "source_citations": {"type": "integer", "minimum": 0},
+        "omitted_source_contexts": {"type": "integer", "minimum": 0},
+        "raw_patch_bytes": {"type": "integer", "minimum": 0},
+        "graph_facts": {"type": "integer", "minimum": 0},
+        "unresolved_graph_facts": {"type": "integer", "minimum": 0},
+        "classification_groups": {"type": "integer", "minimum": 0},
+        "line_coverage_ratio": {"type": "number", "minimum": 0, "maximum": 1},
+        "hunk_coverage_ratio": {"type": "number", "minimum": 0, "maximum": 1},
+        "unit_coverage_ratio": {"type": "number", "minimum": 0, "maximum": 1},
+        "evidence_bytes": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    }
+  }
+}

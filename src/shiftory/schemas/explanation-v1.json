@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shiftory.dev/schemas/explanation-v1.json",
+  "title": "Shiftory explanation v1",
+  "type": "object",
+  "required": ["schema", "summary", "items", "coverage_owners"],
+  "properties": {
+    "schema": {"const": "shiftory.explanation/v1"},
+    "summary": {"type": "string", "minLength": 1, "pattern": "\\S"},
+    "items": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/item"}
+    },
+    "coverage_owners": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/owner"}
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "nullableStatement": {
+      "oneOf": [
+        {"$ref": "#/$defs/nonEmptyString"},
+        {"type": "null"}
+      ]
+    },
+    "citation": {
+      "oneOf": [
+        {"$ref": "#/$defs/nonEmptyString"},
+        {
+          "type": "object",
+          "required": ["id"],
+          "properties": {"id": {"$ref": "#/$defs/nonEmptyString"}},
+          "additionalProperties": false
+        }
+      ]
+    },
+    "item": {
+      "type": "object",
+      "required": ["id", "kind", "title", "confidence", "citations"],
+      "properties": {
+        "id": {"$ref": "#/$defs/nonEmptyString"},
+        "kind": {
+          "enum": ["behavioral", "structural", "observer", "ambiguity", "unresolved"]
+        },
+        "title": {"$ref": "#/$defs/nonEmptyString"},
+        "before": {"$ref": "#/$defs/nullableStatement"},
+        "after": {"$ref": "#/$defs/nullableStatement"},
+        "absence": {"enum": ["before", "after", null]},
+        "statement": {"$ref": "#/$defs/nonEmptyString"},
+        "confidence": {
+          "enum": ["extracted", "inferred", "ambiguous", "unresolved", "unavailable"]
+        },
+        "citations": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/citation"}
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "required": ["kind"],
+            "properties": {"kind": {"const": "behavioral"}}
+          },
+          "then": {
+            "required": ["before", "after"],
+            "oneOf": [
+              {
+                "properties": {
+                  "before": {"$ref": "#/$defs/nonEmptyString"},
+                  "after": {"$ref": "#/$defs/nonEmptyString"},
+                  "absence": {"type": "null"}
+                }
+              },
+              {
+                "required": ["absence"],
+                "properties": {
+                  "before": {"type": "null"},
+                  "after": {"$ref": "#/$defs/nonEmptyString"},
+                  "absence": {"const": "before"}
+                }
+              },
+              {
+                "required": ["absence"],
+                "properties": {
+                  "before": {"$ref": "#/$defs/nonEmptyString"},
+                  "after": {"type": "null"},
+                  "absence": {"const": "after"}
+                }
+              }
+            ]
+          },
+          "else": {
+            "properties": {"absence": {"type": "null"}},
+            "oneOf": [
+              {
+                "not": {
+                  "anyOf": [
+                    {"required": ["before"]},
+                    {"required": ["after"]}
+                  ]
+                }
+              },
+              {
+                "required": ["before", "after"],
+                "properties": {
+                  "before": {"$ref": "#/$defs/nonEmptyString"},
+                  "after": {"$ref": "#/$defs/nonEmptyString"}
+                }
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": ["kind"],
+            "properties": {"kind": {"const": "ambiguity"}}
+          },
+          "then": {"properties": {"confidence": {"const": "ambiguous"}}}
+        },
+        {
+          "if": {
+            "required": ["kind"],
+            "properties": {"kind": {"const": "unresolved"}}
+          },
+          "then": {
+            "properties": {"confidence": {"enum": ["unresolved", "unavailable"]}}
+          }
+        },
+        {
+          "if": {
+            "required": ["confidence"],
+            "properties": {"confidence": {"const": "ambiguous"}}
+          },
+          "then": {"properties": {"kind": {"const": "ambiguity"}}}
+        },
+        {
+          "if": {
+            "required": ["confidence"],
+            "properties": {"confidence": {"enum": ["unresolved", "unavailable"]}}
+          },
+          "then": {"properties": {"kind": {"const": "unresolved"}}}
+        }
+      ]
+    },
+    "owner": {
+      "type": "object",
+      "required": ["evidence_id", "owner_id"],
+      "properties": {
+        "evidence_id": {"$ref": "#/$defs/nonEmptyString"},
+        "owner_id": {"$ref": "#/$defs/nonEmptyString"}
+      },
+      "additionalProperties": false
+    }
+  }
+}

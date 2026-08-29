@@ -8,7 +8,7 @@ Comparison: `7f7bbe4569ea68e8dabee232eade069ef3310aea..91de59c6c8abc8251e7af551c
 
 | Measure | Cold | Warm |
 |---|---:|---:|
-| Complete path wall time (seconds) | 3.286229 | 1.233675 |
+| Complete path wall time (seconds) | 3.124221 | 1.115434 |
 | Evidence JSON (bytes) | 67082 | 67082 |
 | Evidence Markdown (bytes) | 33774 | 33774 |
 | Shiftory report Markdown (bytes) | 5320 | 5320 |
@@ -66,17 +66,17 @@ Comparison: `7f7bbe4569ea68e8dabee232eade069ef3310aea..91de59c6c8abc8251e7af551c
 
 ## Reproduction envelope
 
-- Recorded: 2026-08-29T13:35:29.190541+00:00
+- Recorded: 2026-08-29T14:32:02.806696+00:00
 - OS: `macOS-15.6.1-arm64-arm-64bit`
 - Python: `3.11.6 (main, Jan 28 2025, 18:28:48) [Clang 16.0.0 (clang-1600.0.26.6)]`
 - Git: `git version 2.53.0`
-- Shiftory: `shiftory 0.1.0` at `42e96ba5977b17fc0cfe9cc34e4de88ffb83ebf9`
+- Shiftory: `shiftory 0.1.0` at `bc7c1219265963f2d29a6bd93ca2964900b12c7b`
 - Clean committed source: `True`
-- Implementation manifest: `edaa36712710d2c59ec68cc7d2102dbad31612d382f72a71a5f2f4779d69415f`
-- Executed package code: `e9279689384c1e9779fec8c85d19811b7d0bab64a360c56bcd1b425c135fe764`
+- Implementation manifest: `2e7817ae6081efe95c3f97c063f0a5e1d388612935987ac66d811fb3aad11f11`
+- Executed package code: `d26e37f5836f3d3c55fe19aaef94b2c7ead34f7012038fcee9c40d8096f4cec0`
 - Imported package: `shiftory` from `repository:src` (`src/shiftory/__init__.py`)
 - Evidence Markdown renderer: `shiftory.render.evidence` (`src/shiftory/render/evidence.py`; `aca36323dfd709308c375325bc52544073cc06fd7162f098f0fc6cbab6b23f00`)
-- Benchmark runner: `172249864800dc2f72951d879fbde0e7fe30b96c18308514e9200e5cddcf2dd4`
+- Benchmark runner: `19e274efa61890b76d759bec059788e6fab4d9e6dace25727a80ddb154437073`
 - Golden inputs: `f1fd72c75085f3a989cb9b11438baa764a103eece3148e9b55ccc062866a25ac`
 
 ## Rendered Shiftory report

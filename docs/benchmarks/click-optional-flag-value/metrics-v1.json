@@ -1,7 +1,7 @@
 {
   "acquisition": {
-    "acquired_at_utc": "2026-08-29T13:35:23.809565+00:00",
-    "acquisition_wall_seconds": 0.060830167,
+    "acquired_at_utc": "2026-08-29T14:31:57.723377+00:00",
+    "acquisition_wall_seconds": 0.058209875,
     "commits": {
       "base": "7f7bbe4569ea68e8dabee232eade069ef3310aea",
       "head": "91de59c6c8abc8251e7af551cd4546cc964288af"
@@ -34,7 +34,7 @@
       "shiftory": "0.1.0",
       "tree-sitter": "0.25.2"
     },
-    "executed_package_code_sha256": "e9279689384c1e9779fec8c85d19811b7d0bab64a360c56bcd1b425c135fe764",
+    "executed_package_code_sha256": "d26e37f5836f3d3c55fe19aaef94b2c7ead34f7012038fcee9c40d8096f4cec0",
     "git": "git version 2.53.0",
     "logical_cpu_count": 8,
     "machine": "arm64",
@@ -42,9 +42,9 @@
     "os": "macOS-15.6.1-arm64-arm-64bit",
     "processor": "arm",
     "python": "3.11.6 (main, Jan 28 2025, 18:28:48) [Clang 16.0.0 (clang-1600.0.26.6)]",
-    "recorded_at_utc": "2026-08-29T13:35:29.190541+00:00",
+    "recorded_at_utc": "2026-08-29T14:32:02.806696+00:00",
     "shiftory": "shiftory 0.1.0",
-    "shiftory_commit": "42e96ba5977b17fc0cfe9cc34e4de88ffb83ebf9",
+    "shiftory_commit": "bc7c1219265963f2d29a6bd93ca2964900b12c7b",
     "shiftory_distribution": "shiftory",
     "shiftory_module": "src/shiftory/__init__.py",
     "shiftory_worktree_dirty": false
@@ -54,7 +54,7 @@
     "module": "shiftory.render.evidence",
     "module_file": "src/shiftory/render/evidence.py",
     "module_sha256": "aca36323dfd709308c375325bc52544073cc06fd7162f098f0fc6cbab6b23f00",
-    "package_code_sha256": "e9279689384c1e9779fec8c85d19811b7d0bab64a360c56bcd1b425c135fe764",
+    "package_code_sha256": "d26e37f5836f3d3c55fe19aaef94b2c7ead34f7012038fcee9c40d8096f4cec0",
     "schema": "shiftory.benchmark-renderer/v1"
   },
   "execution": {
@@ -89,9 +89,9 @@
           "sha256": "412b738927c7566271c02808c1c48c99557813390ae7fff44decf0262a05f574"
         },
         {
-          "bytes": 21931,
+          "bytes": 22113,
           "path": "shiftory/cli.py",
-          "sha256": "8a2b251afcb0ce60324e851a44c209e3233e211653393ab5de1a33dec778541a"
+          "sha256": "8637e1de81b5f8d58ff13405c0d2b91b3e20ecc452ecdad15c25be3a1e6fb28a"
         },
         {
           "bytes": 72,
@@ -104,9 +104,9 @@
           "sha256": "c590ad5edb36628f8dbcecc2f2882563e088d8794eb4b7166c086c4cd8dae3ae"
         },
         {
-          "bytes": 26011,
+          "bytes": 26065,
           "path": "shiftory/diff/parser.py",
-          "sha256": "3c3b3791811af03798080e41a33892e3f91e6de8f14210ba76ee206d5ac22c9f"
+          "sha256": "9f2593a16d463bbdb7905cb29e255abb47b9601219175e9d16e389c9cc6d8cce"
         },
         {
           "bytes": 1671,
@@ -139,9 +139,9 @@
           "sha256": "b68c3635337c8be6e860c320ec88acc2b30f32d8cbb69c056ac56660394e1d3e"
         },
         {
-          "bytes": 27023,
+          "bytes": 27162,
           "path": "shiftory/git/repository.py",
-          "sha256": "affc6cfdbda35dee6ad176a6c12cd2a015dbf81a96f45c0d1d84d9de6048677a"
+          "sha256": "bcc079fe53e24c9811ceed04b35dea4202eb5c31caf048641d98027fb4d3537e"
         },
         {
           "bytes": 12378,
@@ -209,7 +209,7 @@
           "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
         }
       ],
-      "sha256": "e9279689384c1e9779fec8c85d19811b7d0bab64a360c56bcd1b425c135fe764"
+      "sha256": "d26e37f5836f3d3c55fe19aaef94b2c7ead34f7012038fcee9c40d8096f4cec0"
     },
     "schema": "shiftory.benchmark-execution/v1"
   },
@@ -278,10 +278,10 @@
           "sha256": "57c8335080a3dedb14daef74ad593217798ee4bf949e8c47ea83ccc62bbfceb7"
         },
         {
-          "bytes": 66022,
-          "committed_blob": "5cb0403871b08bd94ef97d16da12799b84d76f33",
+          "bytes": 67922,
+          "committed_blob": "fa022c1acd3fb2b118a38e8a6af05161c76df570",
           "path": "benchmarks/runner.py",
-          "sha256": "172249864800dc2f72951d879fbde0e7fe30b96c18308514e9200e5cddcf2dd4"
+          "sha256": "19e274efa61890b76d759bec059788e6fab4d9e6dace25727a80ddb154437073"
         },
         {
           "bytes": 2009,
@@ -332,10 +332,10 @@
           "sha256": "412b738927c7566271c02808c1c48c99557813390ae7fff44decf0262a05f574"
         },
         {
-          "bytes": 21931,
-          "committed_blob": "45181ffa59c518e1f717009f9a39ad31f6cb305a",
+          "bytes": 22113,
+          "committed_blob": "2f78dcc0d33b003ee201c92e397e26144d7c579f",
           "path": "src/shiftory/cli.py",
-          "sha256": "8a2b251afcb0ce60324e851a44c209e3233e211653393ab5de1a33dec778541a"
+          "sha256": "8637e1de81b5f8d58ff13405c0d2b91b3e20ecc452ecdad15c25be3a1e6fb28a"
         },
         {
           "bytes": 72,
@@ -350,10 +350,10 @@
           "sha256": "c590ad5edb36628f8dbcecc2f2882563e088d8794eb4b7166c086c4cd8dae3ae"
         },
         {
-          "bytes": 26011,
-          "committed_blob": "9b08173a46d314fb6da3654a462b1b0df5a08d29",
+          "bytes": 26065,
+          "committed_blob": "e5a967709890f4fdfa33b04da19201a0e686598e",
           "path": "src/shiftory/diff/parser.py",
-          "sha256": "3c3b3791811af03798080e41a33892e3f91e6de8f14210ba76ee206d5ac22c9f"
+          "sha256": "9f2593a16d463bbdb7905cb29e255abb47b9601219175e9d16e389c9cc6d8cce"
         },
         {
           "bytes": 1671,
@@ -392,10 +392,10 @@
           "sha256": "b68c3635337c8be6e860c320ec88acc2b30f32d8cbb69c056ac56660394e1d3e"
         },
         {
-          "bytes": 27023,
-          "committed_blob": "d8aadc4cc3c05dca1ce4e0a2927d7768d96ab6e5",
+          "bytes": 27162,
+          "committed_blob": "a022514cf7ef380d086b0db24639e9793f9a09a0",
           "path": "src/shiftory/git/repository.py",
-          "sha256": "affc6cfdbda35dee6ad176a6c12cd2a015dbf81a96f45c0d1d84d9de6048677a"
+          "sha256": "bcc079fe53e24c9811ceed04b35dea4202eb5c31caf048641d98027fb4d3537e"
         },
         {
           "bytes": 12378,
@@ -515,7 +515,7 @@
         "pyproject.toml",
         "constraints-dev.txt"
       ],
-      "sha256": "edaa36712710d2c59ec68cc7d2102dbad31612d382f72a71a5f2f4779d69415f"
+      "sha256": "2e7817ae6081efe95c3f97c063f0a5e1d388612935987ac66d811fb3aad11f11"
     },
     "package": {
       "dependencies": [
@@ -562,9 +562,9 @@
           "sha256": "412b738927c7566271c02808c1c48c99557813390ae7fff44decf0262a05f574"
         },
         {
-          "bytes": 21931,
+          "bytes": 22113,
           "path": "shiftory/cli.py",
-          "sha256": "8a2b251afcb0ce60324e851a44c209e3233e211653393ab5de1a33dec778541a"
+          "sha256": "8637e1de81b5f8d58ff13405c0d2b91b3e20ecc452ecdad15c25be3a1e6fb28a"
         },
         {
           "bytes": 72,
@@ -577,9 +577,9 @@
           "sha256": "c590ad5edb36628f8dbcecc2f2882563e088d8794eb4b7166c086c4cd8dae3ae"
         },
         {
-          "bytes": 26011,
+          "bytes": 26065,
           "path": "shiftory/diff/parser.py",
-          "sha256": "3c3b3791811af03798080e41a33892e3f91e6de8f14210ba76ee206d5ac22c9f"
+          "sha256": "9f2593a16d463bbdb7905cb29e255abb47b9601219175e9d16e389c9cc6d8cce"
         },
         {
           "bytes": 1671,
@@ -612,9 +612,9 @@
           "sha256": "b68c3635337c8be6e860c320ec88acc2b30f32d8cbb69c056ac56660394e1d3e"
         },
         {
-          "bytes": 27023,
+          "bytes": 27162,
           "path": "shiftory/git/repository.py",
-          "sha256": "affc6cfdbda35dee6ad176a6c12cd2a015dbf81a96f45c0d1d84d9de6048677a"
+          "sha256": "bcc079fe53e24c9811ceed04b35dea4202eb5c31caf048641d98027fb4d3537e"
         },
         {
           "bytes": 12378,
@@ -682,12 +682,12 @@
           "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
         }
       ],
-      "sha256": "e9279689384c1e9779fec8c85d19811b7d0bab64a360c56bcd1b425c135fe764"
+      "sha256": "d26e37f5836f3d3c55fe19aaef94b2c7ead34f7012038fcee9c40d8096f4cec0"
     },
-    "runner_sha256": "172249864800dc2f72951d879fbde0e7fe30b96c18308514e9200e5cddcf2dd4",
+    "runner_sha256": "19e274efa61890b76d759bec059788e6fab4d9e6dace25727a80ddb154437073",
     "schema": "shiftory.benchmark-implementation/v1",
-    "shiftory_commit": "42e96ba5977b17fc0cfe9cc34e4de88ffb83ebf9",
-    "shiftory_tree": "bb1ecc5fe9010c11f72dbd0122a213989fc0c826",
+    "shiftory_commit": "bc7c1219265963f2d29a6bd93ca2964900b12c7b",
+    "shiftory_tree": "bcdf26cd0f4c3fed64e7a7e1d2523a552c0f1c81",
     "shiftory_worktree_clean": true
   },
   "input": {
@@ -706,7 +706,7 @@
     "Wall times describe only the recorded machine and environment."
   ],
   "repeatability": {
-    "cold_sha256": "af148f84a10f5638323bab5c0b5399d9811a50d7ef23c20b5d1dba3ae9757134",
+    "cold_sha256": "1b7f4d11cb9edff772717649d9faaad07fe3d4912a0d5d392e1e40475c63df5a",
     "excluded_envelopes": [
       "environment",
       "acquisition timing",
@@ -715,7 +715,7 @@
     ],
     "passed": true,
     "schema": "shiftory.benchmark-repeatability/v1",
-    "warm_sha256": "af148f84a10f5638323bab5c0b5399d9811a50d7ef23c20b5d1dba3ae9757134"
+    "warm_sha256": "1b7f4d11cb9edff772717649d9faaad07fe3d4912a0d5d392e1e40475c63df5a"
   },
   "runs": [
     {
@@ -1266,7 +1266,7 @@
         "graph_cache_key": "c06a163c869a8ef962d3007dcf04c6e89a0a04bc3b2299af5e55037104d69035:ddca7758aa649a4b95c1bb702ac0a72a5852a94fdd6e3a7c93b561fc25648397",
         "graph_status": "available"
       },
-      "canonical_output_sha256": "af148f84a10f5638323bab5c0b5399d9811a50d7ef23c20b5d1dba3ae9757134",
+      "canonical_output_sha256": "1b7f4d11cb9edff772717649d9faaad07fe3d4912a0d5d392e1e40475c63df5a",
       "commands": [
         [
           "shiftory",
@@ -1341,7 +1341,7 @@
         "module": "shiftory.render.evidence",
         "module_file": "src/shiftory/render/evidence.py",
         "module_sha256": "aca36323dfd709308c375325bc52544073cc06fd7162f098f0fc6cbab6b23f00",
-        "package_code_sha256": "e9279689384c1e9779fec8c85d19811b7d0bab64a360c56bcd1b425c135fe764",
+        "package_code_sha256": "d26e37f5836f3d3c55fe19aaef94b2c7ead34f7012038fcee9c40d8096f4cec0",
         "schema": "shiftory.benchmark-renderer/v1"
       },
       "label": "cold",
@@ -1364,14 +1364,14 @@
         "verify_json_bytes": 366
       },
       "wall_seconds": {
-        "complete_path": 3.286228583,
+        "complete_path": 3.1242207499999997,
         "phases": {
-          "analyze": 2.848941333,
-          "instantiate_manifest": 0.000340417,
-          "render_evidence_markdown": 0.05941075,
-          "render_json": 0.117401458,
-          "render_markdown": 0.117470917,
-          "verify": 0.114895917
+          "analyze": 2.720487375,
+          "instantiate_manifest": 0.000355208,
+          "render_evidence_markdown": 0.058689167,
+          "render_json": 0.115594333,
+          "render_markdown": 0.114372167,
+          "verify": 0.114265584
         }
       }
     },
@@ -2218,7 +2218,7 @@
         "graph_cache_key": "c06a163c869a8ef962d3007dcf04c6e89a0a04bc3b2299af5e55037104d69035:ddca7758aa649a4b95c1bb702ac0a72a5852a94fdd6e3a7c93b561fc25648397",
         "graph_status": "available"
       },
-      "canonical_output_sha256": "af148f84a10f5638323bab5c0b5399d9811a50d7ef23c20b5d1dba3ae9757134",
+      "canonical_output_sha256": "1b7f4d11cb9edff772717649d9faaad07fe3d4912a0d5d392e1e40475c63df5a",
       "commands": [
         [
           "shiftory",
@@ -2293,7 +2293,7 @@
         "module": "shiftory.render.evidence",
         "module_file": "src/shiftory/render/evidence.py",
         "module_sha256": "aca36323dfd709308c375325bc52544073cc06fd7162f098f0fc6cbab6b23f00",
-        "package_code_sha256": "e9279689384c1e9779fec8c85d19811b7d0bab64a360c56bcd1b425c135fe764",
+        "package_code_sha256": "d26e37f5836f3d3c55fe19aaef94b2c7ead34f7012038fcee9c40d8096f4cec0",
         "schema": "shiftory.benchmark-renderer/v1"
       },
       "label": "warm",
@@ -2316,14 +2316,14 @@
         "verify_json_bytes": 366
       },
       "wall_seconds": {
-        "complete_path": 1.2336745,
+        "complete_path": 1.1154342499999998,
         "phases": {
-          "analyze": 0.7507155,
-          "instantiate_manifest": 0.000343541,
-          "render_evidence_markdown": 0.066690875,
-          "render_json": 0.129136125,
-          "render_markdown": 0.1223305,
-          "verify": 0.134072625
+          "analyze": 0.709788083,
+          "instantiate_manifest": 0.000334208,
+          "render_evidence_markdown": 0.058254792,
+          "render_json": 0.117801417,
+          "render_markdown": 0.115567541,
+          "verify": 0.113116084
         }
       }
     }

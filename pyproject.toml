@@ -1,0 +1,71 @@
+[build-system]
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "shiftory"
+version = "0.1.0"
+description = "Local-first, source-cited explanations for Git changes"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+authors = [{name = "Shiftory contributors"}]
+dependencies = [
+  "graphora-kg==0.2.1",
+  "jsonschema>=4.23,<5",
+  "platformdirs>=4.3,<5",
+]
+
+[project.optional-dependencies]
+dev = [
+  "build>=1.2,<2",
+  "mypy>=1.15,<2",
+  "packaging>=24,<26",
+  "pytest>=8.3,<9",
+  "pytest-cov>=6,<7",
+  "ruff>=0.11,<1",
+  "tomli==2.2.1; python_version < '3.11'",
+  "twine>=6,<7",
+  "types-jsonschema>=4.23,<5",
+]
+
+[project.scripts]
+shiftory = "shiftory.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/shiftory"]
+
+[tool.hatch.build]
+include = [
+  "src/shiftory/**/*.py",
+  "src/shiftory/py.typed",
+  "src/shiftory/schemas/*.json",
+  "src/shiftory/skills/shiftory/SKILL.md",
+]
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-markers"
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+packages = ["shiftory"]
+
+[[tool.mypy.overrides]]
+module = ["graphora"]
+ignore_missing_imports = true
+
+[tool.coverage.run]
+source = ["shiftory"]
+
+[tool.coverage.report]
+fail_under = 75
+show_missing = true

@@ -4,10 +4,11 @@
 
 Public all-pass Graphora 0.2.1 results for all three scenarios are recorded under
 `docs/benchmarks/`. They were produced in one clean publication suite from
-Shiftory commit `7248eb13f2ce458a05f88279cad0730459f1ffd6` (tree
-`6ac0abc505342a4ee5bddfe2291d9cdafc172991`). All 142 machine assertions
-passed with no failures or skips, line/span/hunk/unit accounting was 100%, and
-the cold and warm canonical semantic bundles matched for every scenario. The
+one committed Shiftory tree whose exact commit, tree, implementation manifest,
+and executed-code identity are recorded in every metrics artifact. All 142
+machine assertions passed with no failures or skips, line/span/hunk/unit
+accounting was 100%, and the cold and warm canonical semantic bundles matched
+for every scenario. The
 values in `benchmarks/scenarios.toml` are immutable fixture expectations, not
 measured Shiftory results. The
 [public summary](../README.md#public-benchmarks) records the exact scenario

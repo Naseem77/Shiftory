@@ -105,7 +105,7 @@ Only one scope may be selected.
 | `--range BASE..HEAD` | the two resolved commits |
 | `--range BASE...HEAD` | merge base of the endpoints → resolved right endpoint |
 | `--branch NAME` | merge base of current `HEAD` and `NAME` → current `HEAD` |
-| `--pr NUMBER` | immutable PR base SHA → head SHA |
+| `--pr NUMBER` | merge base of immutable PR base/head SHAs → head SHA |
 
 `--repo PATH` selects another checkout. `--pr` is the only analysis scope that
 may contact a network: it uses an authenticated `gh` CLI and may fetch missing
@@ -274,9 +274,8 @@ deliberately according to your retention policy.
 ## Public benchmarks
 
 All three Graphora 0.2.1 scenarios passed the complete cold and warm product path.
-They were published together from clean Shiftory commit
-`7248eb13f2ce458a05f88279cad0730459f1ffd6` (tree
-`6ac0abc505342a4ee5bddfe2291d9cdafc172991`).
+They were published together from one clean committed Shiftory tree; each metrics
+artifact records that exact source commit, tree, manifest, and executed-code identity.
 
 | Scenario | Base → head | Files | Hunks | Changed lines (+/−) | Spans |
 |---|---|---:|---:|---:|---:|
@@ -301,15 +300,9 @@ machine and environment. Cold and warm canonical semantic bundles matched after
 excluding environment, acquisition and run timing, and local and installation
 paths.
 
-The publication binds `repository:src` execution to implementation manifest
-`edaa36712710d2c59ec68cc7d2102dbad31612d382f72a71a5f2f4779d69415f`,
-executed package-code digest
-`e9279689384c1e9779fec8c85d19811b7d0bab64a360c56bcd1b425c135fe764`,
-runner digest
-`172249864800dc2f72951d879fbde0e7fe30b96c18308514e9200e5cddcf2dd4`,
-and golden-input digest
-`f1fd72c75085f3a989cb9b11438baa764a103eece3148e9b55ccc062866a25ac`.
-The generated metrics contain the complete private-safe provenance.
+The generated metrics contain the complete private-safe `repository:src`
+implementation manifest, executed package-code digest, runner digest, and
+golden-input digest.
 
 Coverage is measurable **accounting**, not a semantic-correctness or prose-quality
 score. Machine assertions check the listed selected observable facts, evidence,

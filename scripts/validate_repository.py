@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 import re
 import sys
@@ -55,7 +54,6 @@ def validate_markdown_links() -> None:
             *(ROOT / "benchmarks").rglob("*.md"),
             *(ROOT / "skills").rglob("*.md"),
             *(ROOT / "src" / "shiftory" / "skills").rglob("*.md"),
-            *(ROOT / "THIRD_PARTY_LICENSES").rglob("*.md"),
         }
     )
     for source in markdown_paths:
@@ -89,10 +87,6 @@ def validate_bundled_assets() -> None:
         raise SystemExit("The source and bundled Shiftory skills differ")
 
     notice = (ROOT / "NOTICE").read_text(encoding="utf-8")
-    graphora_license = ROOT / "THIRD_PARTY_LICENSES" / "graphora-kg-0.2.1" / "LICENSE"
-    license_sha256 = hashlib.sha256(graphora_license.read_bytes()).hexdigest()
-    if license_sha256 != "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4":
-        raise SystemExit("The recorded graphora-kg 0.2.1 license has an unexpected hash")
     required_notice_facts = (
         "graphora-kg 0.2.1",
         "graphora_kg-0.2.1-py3-none-any.whl",

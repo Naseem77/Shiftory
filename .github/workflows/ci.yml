@@ -1,0 +1,172 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.10"
+          cache: pip
+      - name: Install development environment
+        run: python -m pip install --constraint constraints-dev.txt --editable ".[dev]"
+      - name: Check formatting
+        run: ruff format --check .
+      - name: Lint
+        run: ruff check .
+      - name: Type check
+        run: mypy
+      - name: Validate schemas, links, skills, and license materials
+        run: python scripts/validate_repository.py
+
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install test environment
+        run: python -m pip install --constraint constraints-dev.txt --editable ".[dev]"
+      - name: Test with coverage
+        run: python -m pytest --cov=shiftory --cov-report=term-missing --cov-report=xml
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: coverage-python-${{ matrix.python-version }}
+          path: coverage.xml
+
+  benchmark-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          # The full benchmark runner intentionally uses stdlib tomllib.
+          python-version: "3.11"
+          cache: pip
+      - name: Install runtime environment
+        run: python -m pip install --constraint constraints-dev.txt --editable .
+      - name: Run offline benchmark smoke
+        run: python scripts/offline_benchmark_smoke.py
+
+  package:
+    needs: [quality, tests, benchmark-smoke]
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            python-version: "3.10"
+            expected-wheel-count: 25
+          - runner: ubuntu-latest
+            python-version: "3.11"
+            expected-wheel-count: 24
+          - runner: ubuntu-latest
+            python-version: "3.12"
+            expected-wheel-count: 24
+          - runner: macos-latest
+            python-version: "3.10"
+            expected-wheel-count: 25
+          - runner: macos-latest
+            python-version: "3.11"
+            expected-wheel-count: 24
+          - runner: macos-latest
+            python-version: "3.12"
+            expected-wheel-count: 24
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install release tools
+        run: >-
+          python -m pip install --only-binary=:all:
+          --constraint constraints-dev.txt build twine
+      - name: Build distributions
+        env:
+          PIP_ONLY_BINARY: ":all:"
+        run: python -m build
+      - name: Check distribution metadata and wheel contents
+        run: |
+          python -m twine check dist/*
+          python scripts/check_wheel.py dist/*.whl
+      - name: Install and smoke-test the wheel
+        run: |
+          python -m venv .ci-wheel-venv
+          mkdir dist/wheelhouse
+          .ci-wheel-venv/bin/python -m pip install \
+            --dry-run \
+            --ignore-installed \
+            --only-binary=:all: \
+            --constraint constraints-release.txt \
+            --report dist/shiftory.install-report.json \
+            dist/*.whl
+          .ci-wheel-venv/bin/python -m pip download \
+            --constraint constraints-release.txt \
+            --only-binary=:all: \
+            --dest dist/wheelhouse \
+            dist/*.whl
+          .ci-wheel-venv/bin/python scripts/validate_wheelhouse.py \
+            --wheelhouse dist/wheelhouse \
+            --report dist/shiftory.install-report.json \
+            --expected-count ${{ matrix.expected-wheel-count }}
+          .ci-wheel-venv/bin/python -m pip install \
+            --no-index \
+            --find-links dist/wheelhouse \
+            dist/wheelhouse/shiftory-*.whl
+          .ci-wheel-venv/bin/python -m pip check
+          .ci-wheel-venv/bin/shiftory --version
+          mkdir -p .ci-wheel-smoke/repository
+          git -C .ci-wheel-smoke/repository init --quiet
+          .ci-wheel-venv/bin/shiftory schema evidence > .ci-wheel-smoke/evidence-schema.json
+          .ci-wheel-venv/bin/shiftory cache status \
+            --repo .ci-wheel-smoke/repository \
+            --cache-dir .ci-wheel-smoke/cache > .ci-wheel-smoke/cache-status.json
+          .ci-wheel-venv/bin/shiftory cache clear \
+            --repo .ci-wheel-smoke/repository \
+            --cache-dir .ci-wheel-smoke/cache > .ci-wheel-smoke/cache-clear.json
+          .ci-wheel-venv/bin/shiftory install-skill \
+            --target generic \
+            --directory .ci-wheel-smoke/skill
+          test -s .ci-wheel-smoke/evidence-schema.json
+          test -s .ci-wheel-smoke/cache-status.json
+          test -s .ci-wheel-smoke/cache-clear.json
+          test -s .ci-wheel-smoke/skill/SKILL.md
+      - name: Install release inventory tool
+        run: >-
+          .ci-wheel-venv/bin/python -m pip install --only-binary=:all:
+          --constraint constraints-dev.txt packaging
+      - name: Generate exact SBOM and preserve wheel license materials
+        run: |
+          .ci-wheel-venv/bin/python scripts/generate_sbom.py \
+            --wheelhouse dist/wheelhouse \
+            --report dist/shiftory.install-report.json \
+            --output dist/shiftory.cdx.json \
+            --licenses-output dist/shiftory.notice-license-inventory.json \
+            --license-materials-dir dist/license-materials
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: release-${{ runner.os }}-${{ runner.arch }}-python-${{ matrix.python-version }}
+          path: dist/*

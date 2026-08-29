@@ -1,0 +1,29 @@
+Shiftory
+
+Third-party licensing notice
+
+Shiftory includes graphora-kg 0.2.1. The clean PyPI wheel
+graphora_kg-0.2.1-py3-none-any.whl has SHA-256:
+
+6b39eab0dc8aa7fc2aec9912d1506306556ca5cacd76447aa00e8afb6ef358d9
+
+PyPI direct URL:
+https://files.pythonhosted.org/packages/56/9e/c72faf76868d0b856332bc36e2c2efa2d72dfdd0c3dba78f2d65892f3ddd/graphora_kg-0.2.1-py3-none-any.whl
+
+The wheel's package metadata declares "License: MIT". The wheel also bundles
+graphora_kg-0.2.1.dist-info/licenses/LICENSE, an 11,357-byte copy of the
+Apache License, Version 2.0. That file is byte-identical to the LICENSE file
+at Graphora tag v0.2.1, commit
+584e45e71dfeb9004ebfef7a187a6773ffb2db04. No separate Graphora NOTICE file
+is present in the wheel.
+
+The bundled license file has SHA-256:
+
+c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
+
+The wheel requires tree-sitter!=0.26.0,>=0.23. Shiftory's development and
+release constraints resolve that dependency to tree-sitter 0.25.2.
+
+These facts record the upstream declarations as distributed. Shiftory does
+not interpret or reconcile the discrepancy between the metadata declaration
+and the bundled license text.

@@ -8,6 +8,10 @@ verifies and renders an agent-authored explanation. It accounts for every parsed
 added and deleted line, textual hunk, and non-text change unit without treating a
 language model—or Graphora—as the source of truth.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Naseem77/Shiftory/main/docs/assets/shiftory-demo.gif" alt="Animated Shiftory demo showing a 12,000-line Git diff becoming a source-cited, fully accounted human change explanation." width="960">
+</p>
+
 > [!IMPORTANT]
 > **Shiftory explains changes; it does not review them.** Its output does not make
 > bug findings, assign severity, rank risk, or recommend fixes. Verification proves

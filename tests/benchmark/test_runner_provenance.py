@@ -67,8 +67,27 @@ def publication_metrics(
         "execution": execution,
         "evidence_markdown_renderer": renderer_identity,
         "runs": [
-            {"evidence_markdown_renderer": renderer_identity},
-            {"evidence_markdown_renderer": renderer_identity},
+            {
+                "label": "cold",
+                "evidence_markdown_renderer": renderer_identity,
+                "cache": {
+                    "graph_status": "available",
+                    "before": {"exists": False, "files": [], "file_count": 0},
+                },
+                "assertions": {
+                    "passed": True,
+                    "counts": {"pass": 1, "fail": 0, "skip": 0},
+                },
+            },
+            {
+                "label": "warm",
+                "evidence_markdown_renderer": renderer_identity,
+                "cache": {"graph_status": "available"},
+                "assertions": {
+                    "passed": True,
+                    "counts": {"pass": 1, "fail": 0, "skip": 0},
+                },
+            },
         ],
     }
 
@@ -138,6 +157,58 @@ def test_clean_publication_rejects_results_from_another_commit(repo_factory, mon
 
     with pytest.raises(runner.BenchmarkError, match="not bound to the current"):
         runner.publish({"demo": ({"implementation": stale_identity}, "# stale\n")})
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "message"),
+    [
+        ("graph_status", "unavailable", "requires Graphora enrichment"),
+        ("skip", 1, "requires zero failed or skipped assertions"),
+    ],
+)
+def test_publication_rejects_graphora_degradation_or_skips(
+    repo_factory, monkeypatch, field: str, value: object, message: str
+) -> None:
+    repository = repo_factory()
+    committed_implementation(repository)
+    monkeypatch.setattr(runner, "ROOT", repository)
+    monkeypatch.setattr(runner, "load_scenarios", lambda: {"demo": {}})
+    implementation = runner.implementation_identity(repository)
+    execution = runner.executed_package_identity(repository)
+    metrics = publication_metrics(repository, implementation, execution)
+    if field == "graph_status":
+        metrics["runs"][0]["cache"]["graph_status"] = value
+    else:
+        metrics["runs"][0]["assertions"]["counts"][field] = value
+
+    with pytest.raises(runner.BenchmarkError, match=message):
+        runner.publish({"demo": (metrics, "# result\n")})
+
+
+def test_publication_rejects_nonempty_cold_cache(repo_factory, monkeypatch) -> None:
+    repository = repo_factory()
+    committed_implementation(repository)
+    monkeypatch.setattr(runner, "ROOT", repository)
+    monkeypatch.setattr(runner, "load_scenarios", lambda: {"demo": {}})
+    implementation = runner.implementation_identity(repository)
+    execution = runner.executed_package_identity(repository)
+    metrics = publication_metrics(repository, implementation, execution)
+    metrics["runs"][0]["cache"]["before"]["exists"] = True
+
+    with pytest.raises(runner.BenchmarkError, match="cold run did not start with an empty cache"):
+        runner.publish({"demo": (metrics, "# result\n")})
+
+
+def test_input_inventory_ignores_user_diff_prefix_configuration(repo_factory) -> None:
+    repository = repo_factory()
+    base = git(repository, "rev-parse", "HEAD")
+    (repository / "app.py").write_text("value = 2\n", encoding="utf-8")
+    git(repository, "commit", "-am", "change")
+    head = git(repository, "rev-parse", "HEAD")
+    expected = runner.input_inventory(repository, base, head)
+    git(repository, "config", "diff.noprefix", "true")
+
+    assert runner.input_inventory(repository, base, head) == expected
 
 
 def test_adversarial_pythonpath_cannot_impersonate_checkout(repo_factory, monkeypatch) -> None:

@@ -40,6 +40,8 @@ DIFF_ARGS = (
     "--no-ext-diff",
     "--no-textconv",
     "--no-color",
+    "--src-prefix=a/",
+    "--dst-prefix=b/",
     "--full-index",
     "--binary",
     "--find-renames",
@@ -1237,7 +1239,6 @@ def run_complete_path(
     }
     cache_before = cache_status(repository, cache_dir)
     phases: dict[str, float] = {}
-    complete_started = time.perf_counter_ns()
     _, phases["analyze"] = run_cli(
         [
             "analyze",
@@ -1258,6 +1259,7 @@ def run_complete_path(
     check_expected_inventory(
         scenario, {key: int(evidence["metrics"][key]) for key in scenario["expected_inventory"]}
     )
+    complete_started = time.perf_counter_ns()
     started = time.perf_counter_ns()
     evidence_markdown, renderer_identity = render_evidence(evidence, execution)
     atomic_write(paths["evidence_markdown"], evidence_markdown)
@@ -1307,6 +1309,9 @@ def run_complete_path(
         ],
         output=paths["report_markdown"],
     )
+    complete_seconds = (
+        phases["analyze"] + (time.perf_counter_ns() - complete_started) / 1_000_000_000
+    )
     assertion_document = json.loads(
         (BENCHMARKS / safe_relative(scenario["assertions"])).read_text(encoding="utf-8")
     )
@@ -1320,7 +1325,6 @@ def run_complete_path(
         json.loads(paths["report_json"].read_text(encoding="utf-8")),
     )
     atomic_write(paths["assertions_json"], canonical_json(assertions))
-    complete_seconds = (time.perf_counter_ns() - complete_started) / 1_000_000_000
     cache_after = cache_status(repository, cache_dir)
     digest, hashes = semantic_bundle(
         paths,
@@ -1559,10 +1563,18 @@ def run_benchmark(
     local_inventory = input_inventory(repository, scenario["base"], scenario["head"])
     check_expected_inventory(scenario, local_inventory)
     cache_dir = workspace / "cache" / scenario["id"]
-    shutil.rmtree(cache_dir, ignore_errors=True)
+    try:
+        if cache_dir.is_symlink():
+            raise OSError("cache path is a symbolic link")
+        if cache_dir.exists():
+            shutil.rmtree(cache_dir)
+    except OSError as exc:
+        raise BenchmarkError(f"Unable to clear cold-run cache {cache_dir}: {exc}") from exc
     cold = run_complete_path(
         scenario, repository, workspace, cache_dir, "cold", graphora, execution, implementation
     )
+    if cold["cache"]["before"] != {"exists": False, "files": [], "file_count": 0}:
+        raise BenchmarkError("Cold benchmark run started with a non-empty cache")
     warm = run_complete_path(
         scenario, repository, workspace, cache_dir, "warm", graphora, execution, implementation
     )
@@ -1649,6 +1661,36 @@ def publish(results: dict[str, tuple[dict[str, Any], str]]) -> None:
         runs = metrics.get("runs")
         if not isinstance(runs, list) or len(runs) != 2:
             raise BenchmarkError(f"{scenario_id} result does not contain both benchmark runs")
+        if [run.get("label") if isinstance(run, dict) else None for run in runs] != [
+            "cold",
+            "warm",
+        ]:
+            raise BenchmarkError(f"{scenario_id} result does not identify cold and warm runs")
+        if runs[0].get("cache", {}).get("before") != {
+            "exists": False,
+            "files": [],
+            "file_count": 0,
+        }:
+            raise BenchmarkError(f"{scenario_id} cold run did not start with an empty cache")
+        for run in runs:
+            if not isinstance(run, dict):
+                raise BenchmarkError(f"{scenario_id} result contains an invalid benchmark run")
+            cache = run.get("cache")
+            if not isinstance(cache, dict) or cache.get("graph_status") != "available":
+                raise BenchmarkError(
+                    f"{scenario_id} publication requires Graphora enrichment in every run"
+                )
+            assertions = run.get("assertions")
+            counts = assertions.get("counts") if isinstance(assertions, dict) else None
+            if (
+                not isinstance(counts, dict)
+                or assertions.get("passed") is not True
+                or counts.get("fail") != 0
+                or counts.get("skip") != 0
+            ):
+                raise BenchmarkError(
+                    f"{scenario_id} publication requires zero failed or skipped assertions"
+                )
         if metrics.get("evidence_markdown_renderer") != renderer_identity or any(
             not isinstance(run, dict) or run.get("evidence_markdown_renderer") != renderer_identity
             for run in runs

@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.coverage
+coverage.xml
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.pytest-workspaces/
+.ci-wheel-smoke/
+.ci-wheel-venv/
+.ci-release-py*/
+.ci-smoke-py*/
+.ci-work/
+build/
+dist/
+*.egg-info/

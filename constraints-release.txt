@@ -1,0 +1,27 @@
+# Fully pinned runtime closure used to resolve release wheelhouses.
+# Wheel hashes remain platform/Python-specific and are recorded in the release SBOM.
+attrs==26.1.0
+async-timeout==5.0.1; python_full_version < "3.11.3"
+falkordb==1.7.1
+graphora-kg==0.2.1
+jsonschema==4.26.0
+jsonschema-specifications==2025.9.1
+platformdirs==4.11.5
+python-dateutil==2.9.0.post0
+redis==8.1.0
+referencing==0.37.0
+rpds-py==0.30.0; python_version < "3.11"
+rpds-py==2026.6.3; python_version >= "3.11"
+six==1.17.0
+tree-sitter==0.25.2
+tree-sitter-c==0.24.2
+tree-sitter-cpp==0.23.4
+tree-sitter-go==0.25.0
+tree-sitter-java==0.23.5
+tree-sitter-javascript==0.25.0
+tree-sitter-php==0.24.1
+tree-sitter-python==0.25.0
+tree-sitter-ruby==0.23.1
+tree-sitter-rust==0.24.2
+tree-sitter-typescript==0.23.2
+typing-extensions==4.16.0

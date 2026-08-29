@@ -91,7 +91,6 @@ def test_pinned_package_root_contract_and_embedded_backend(repo_factory) -> None
     assert provenance["editable"] is False
     assert provenance["artifact_verified"] is True
     assert provenance["artifact_errors"] == []
-    assert provenance["metadata_license"] == "MIT"
     assert provenance["package_code_sha256"] == GRAPHORA_PACKAGE_CODE_SHA256
     if provenance["artifact_sha256"] is not None:
         assert provenance["artifact_sha256"] == GRAPHORA_WHEEL_SHA256
@@ -118,7 +117,6 @@ def test_pinned_package_root_contract_and_embedded_backend(repo_factory) -> None
 
 
 def test_pinned_artifact_excludes_incompatible_tree_sitter_runtime() -> None:
-    assert importlib.metadata.metadata("graphora-kg")["License"] == "MIT"
     requirements = importlib.metadata.requires("graphora-kg") or []
     tree_sitter = next(
         requirement for requirement in requirements if requirement.startswith("tree-sitter!")

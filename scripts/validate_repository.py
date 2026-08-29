@@ -86,22 +86,6 @@ def validate_bundled_assets() -> None:
     if source_skill.read_bytes() != bundled_skill.read_bytes():
         raise SystemExit("The source and bundled Shiftory skills differ")
 
-    notice = (ROOT / "NOTICE").read_text(encoding="utf-8")
-    required_notice_facts = (
-        "graphora-kg 0.2.1",
-        "graphora_kg-0.2.1-py3-none-any.whl",
-        "6b39eab0dc8aa7fc2aec9912d1506306556ca5cacd76447aa00e8afb6ef358d9",
-        "https://files.pythonhosted.org/packages/56/9e/c72faf76868d0b856332bc36e2c2efa2d72dfdd0c3dba78f2d65892f3ddd/",
-        "584e45e71dfeb9004ebfef7a187a6773ffb2db04",
-        "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
-        "License: MIT",
-        "Apache License, Version 2.0",
-        "tree-sitter!=0.26.0,>=0.23",
-        "tree-sitter 0.25.2",
-    )
-    if any(fact not in notice for fact in required_notice_facts):
-        raise SystemExit("NOTICE does not describe the recorded graphora-kg artifact")
-
 
 def validate_graphora_contract() -> None:
     project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]

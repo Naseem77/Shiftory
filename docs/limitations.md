@@ -102,11 +102,6 @@ provenance (version, module path, direct-URL/editable metadata, and package-code
 digest) is retained with success or failure diagnostics. Development checkouts
 must be built and installed as an artifact before they can provide graph facts.
 
-Graphora's source repository license is Apache-2.0 while its 0.2.1 package
-metadata reports MIT. Consult this repository's third-party notices for the
-recorded attribution; Shiftory does not resolve that upstream metadata
-inconsistency.
-
 ## Confidence is not probability
 
 `extracted`, `inferred`, `ambiguous`, `unresolved`, and `unavailable` are

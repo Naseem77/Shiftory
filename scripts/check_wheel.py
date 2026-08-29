@@ -77,7 +77,6 @@ def main() -> None:
             f"{dist_info}WHEEL",
             f"{dist_info}entry_points.txt",
             f"{dist_info}licenses/LICENSE",
-            f"{dist_info}licenses/NOTICE",
             f"{dist_info}RECORD",
         }
         if names != expected:

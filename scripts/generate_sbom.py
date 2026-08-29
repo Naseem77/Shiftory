@@ -431,7 +431,6 @@ def main() -> None:
         or graphora.version != GRAPHORA_VERSION
         or graphora.filename != GRAPHORA_FILENAME
         or graphora.sha256 != GRAPHORA_SHA256
-        or graphora.license != "MIT"
     ):
         raise SystemExit("Resolved runtime closure has unexpected graphora-kg artifact facts")
     graphora_requirements = [

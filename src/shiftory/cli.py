@@ -234,8 +234,12 @@ def _install_skill(args: argparse.Namespace) -> int:
     }
     directory = (args.directory or default_targets[args.target]).expanduser()
     target = directory / "SKILL.md"
-    if directory.is_symlink() or target.is_symlink():
-        raise ValidationError(f"Refusing to install through a symbolic link at {target}")
+    absolute_target = target if target.is_absolute() else Path.cwd() / target
+    current = Path(absolute_target.anchor)
+    for component in absolute_target.parts[1:]:
+        current /= component
+        if current.is_symlink():
+            raise ValidationError(f"Refusing to install through a symbolic link at {current}")
     if directory.exists() and not directory.is_dir():
         raise ValidationError(f"Skill directory is not a directory: {directory}")
     if target.exists() and not target.is_file():

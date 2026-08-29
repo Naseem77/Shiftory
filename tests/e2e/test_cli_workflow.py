@@ -390,3 +390,22 @@ def test_schema_cache_and_skill_install_commands(repo_factory) -> None:
         ).stdout
     )
     assert Path(result["installed"]) == custom / "SKILL.md"
+
+
+def test_skill_install_rejects_symlinked_parent(repo_factory) -> None:
+    repository = repo_factory()
+    outside = repository.parent / f"{repository.name}-outside"
+    outside.mkdir()
+    (repository / ".github").symlink_to(outside, target_is_directory=True)
+
+    result = run_cli(
+        repository,
+        "install-skill",
+        "--target",
+        "copilot",
+        check=False,
+    )
+
+    assert result.returncode == 2
+    assert json.loads(result.stderr)["error"] == "validation_error"
+    assert not (outside / "skills/shiftory/SKILL.md").exists()

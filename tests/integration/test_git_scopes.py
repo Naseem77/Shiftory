@@ -75,6 +75,52 @@ def test_working_staged_unstaged_and_untracked_scopes(repo_factory) -> None:
     assert {file["new_path"] for file in working["files"]} == {"app.py", "new file.py"}
 
 
+@pytest.mark.parametrize("scope", [ScopeSpec(), ScopeSpec(unstaged=True), ScopeSpec(staged=True)])
+def test_diff_paths_ignore_configured_mnemonic_prefixes(repo_factory, scope: ScopeSpec) -> None:
+    repository = repo_factory()
+    subprocess.run(["git", "config", "diff.mnemonicPrefix", "true"], cwd=repository, check=True)
+    (repository / "app.py").write_text("def value():\n    return 2\n", encoding="utf-8")
+    if scope.staged:
+        subprocess.run(["git", "add", "app.py"], cwd=repository, check=True)
+
+    result = changed(repository, scope)
+
+    assert result["files"][0]["old_path"] == "app.py"
+    assert result["files"][0]["new_path"] == "app.py"
+
+
+def test_pr_scope_uses_merge_base_when_base_tip_advanced(repo_factory, monkeypatch) -> None:
+    repository = repo_factory()
+    common = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=repository, text=True
+    ).strip()
+    subprocess.run(["git", "switch", "-qc", "feature"], cwd=repository, check=True)
+    (repository / "app.py").write_text("feature = True\n", encoding="utf-8")
+    subprocess.run(["git", "commit", "-qam", "feature"], cwd=repository, check=True)
+    feature = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=repository, text=True
+    ).strip()
+    subprocess.run(["git", "switch", "-q", "-"], cwd=repository, check=True)
+    (repository / "base.py").write_text("base = True\n", encoding="utf-8")
+    subprocess.run(["git", "add", "base.py"], cwd=repository, check=True)
+    subprocess.run(["git", "commit", "-qm", "advance base"], cwd=repository, check=True)
+    base_tip = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=repository, text=True
+    ).strip()
+    monkeypatch.setattr(
+        repository_module,
+        "_resolve_pr",
+        lambda _root, _number, _remote: {"base": base_tip, "head": feature},
+    )
+
+    comparison = resolve_comparison(repository, ScopeSpec(pr=1))
+    result = changed(repository, ScopeSpec(pr=1))
+
+    assert comparison.base_sha == common
+    assert comparison.head_sha == feature
+    assert {file["new_path"] for file in result["files"]} == {"app.py"}
+
+
 def test_default_scope_is_nul_safe_and_includes_empty_untracked_files(repo_factory) -> None:
     repository = repo_factory()
     (repository / "app.py").write_text("def value():\n    return 2\n", encoding="utf-8")
@@ -366,6 +412,7 @@ def test_two_dot_three_dot_and_branch_use_exact_merge_base_semantics(repo_factor
 
     assert two_dot["comparison"]["base_sha"] == other
     assert three_dot["comparison"]["base_sha"] == base
+    assert three_dot["comparison"]["base_label"] == base
     assert branch["comparison"]["base_sha"] == base
     assert {file["new_path"] or file["old_path"] for file in two_dot["files"]} == {
         "main.py",

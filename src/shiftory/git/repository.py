@@ -369,15 +369,18 @@ def resolve_comparison(root: Path, scope: ScopeSpec | None = None) -> Comparison
         left, right = _rev(root, parts[0]), _rev(root, parts[1])
         base = _merge_base(root, left, right) if separator == "..." else left
         target = right
-        mode, base_label, head_label = f"range-{separator}", left, right
+        mode, base_label, head_label = f"range-{separator}", base, right
     elif scope.branch:
         branch = _rev(root, scope.branch)
         base, target = _merge_base(root, head, branch), head
         mode, base_label, head_label = "branch", f"merge-base(HEAD,{scope.branch})", "HEAD"
     elif scope.pr is not None:
         data = _resolve_pr(root, scope.pr, scope.remote)
-        base, target = data["base"], data["head"]
-        mode, base_label, head_label = "pr", base, target
+        target = data["head"]
+        base = _merge_base(root, data["base"], target)
+        mode = "pr"
+        base_label = f"merge-base({data['base']},{target})"
+        head_label = target
     else:
         mode, base, target = "working", head, None
         base_label, head_label = "HEAD", "working-tree"
@@ -557,6 +560,8 @@ def _diff_args(context_lines: int) -> list[str]:
         "--no-ext-diff",
         "--no-textconv",
         "--no-color",
+        "--src-prefix=a/",
+        "--dst-prefix=b/",
         "--full-index",
         "--binary",
         "--find-renames",

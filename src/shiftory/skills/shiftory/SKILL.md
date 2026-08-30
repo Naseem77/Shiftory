@@ -21,9 +21,11 @@ private phases:
 5. On failure, report the exact `details.diagnostic` path from CLI JSON. Never
    present an unverified template or partial report.
 
-Use only these scope forms when requested: `--staged`, `--unstaged`,
+Use only these comparison scope forms when requested: `--staged`, `--unstaged`,
 `--commit REV [--parent N]`, `--range BASE..HEAD`, `--branch REF`, or
-`--pr NUMBER [--remote NAME]`. Do not add `--keep-artifacts` unless requested.
+`--pr NUMBER [--remote NAME]`. Add one `--path PATH` for each requested file or
+directory; directory selection is recursive and repeated paths are unioned. Do
+not invent other path syntax. Do not add `--keep-artifacts` unless requested.
 
 Explain; do not review. Do not make findings, severity/risk judgments, or
 recommendations. Do not parse Git, query Graphora, reproduce schemas, or place a

@@ -8,7 +8,7 @@ the prose.
 ## Data flow
 
 ```text
-scope + repository
+comparison scope + path selections + repository
         │
         ▼
 comparison resolver ──► immutable SHAs / index / working-tree fingerprint
@@ -50,6 +50,12 @@ so worktrees that share Git storage use the same repository cache namespace whil
 portable evidence avoids absolute paths. Dirty targets use index or working-tree
 fingerprints.
 
+Optional path selections are normalized relative to the discovered repository
+and become part of the comparison identity. Each file selection is exact; each
+directory selection recursively includes changed descendants using path-component
+boundaries. Repeated selections form a union. Invalid, outside-repository, and
+unmatched selections fail with typed diagnostics.
+
 Supported modes are working tree, staged, unstaged, commit, two-dot range,
 three-dot range, branch, and pull request. All are local except explicit pull
 request resolution, which calls `gh pr view` and may run `git fetch` for missing
@@ -59,8 +65,10 @@ base/head objects.
 
 The repository layer invokes Git with stable locale, no pager, no color, no
 external diff driver, no text conversion, full object IDs, binary markers, and
-explicit context. Full working-tree mode also creates patches for non-ignored
-untracked files.
+explicit context. It resolves optional selections against Git's changed-path
+inventory before patch parsing, matching either side of renames and copies and
+passing literal pathspecs without shell interpolation. Full working-tree mode
+also creates patches for selected non-ignored untracked files.
 
 The parser:
 
@@ -91,8 +99,11 @@ the complete ledger and records a diagnostic rather than silently truncating it.
 
 When Graphora is enabled, Shiftory materializes separate before/after source
 snapshots in its cache and opens Graphora's embedded backend in a
-repository-scoped directory. The adapter uses only Graphora's public package API:
-repository indexing, per-file parsing, and blast-radius relationships.
+repository-scoped directory. Path selection does not prune these snapshots:
+Graphora indexes the whole immutable before/after repository state for structural
+context, while only selected changed paths and lines seed enrichment. The adapter
+uses only Graphora's public package API: repository indexing, per-file parsing,
+and blast-radius relationships.
 
 Graphora and its tree-sitter extensions load only in a Shiftory-owned worker
 process. The parent sends explicit snapshot, cache, side, changed-path, and
@@ -172,10 +183,13 @@ Violating one of these invariants is an error, not a partial-success report.
 
 ## Determinism
 
-Stable identities hash versioned canonical payloads containing paths, source
-coordinates, object/fingerprint data, and content. Files, facts, groups, and
-owners are sorted; JSON is canonical; report sections have fixed order; and
-reproducibility-sensitive payloads contain no timestamps.
+Stable identities hash versioned canonical payloads containing path selections,
+changed paths, source coordinates, object/fingerprint data, and content.
+Different path selections over the same Git state therefore have distinct
+comparison identities, while immutable whole-snapshot cache entries may be
+safely shared because their contents do not depend on the selection. Files,
+facts, groups, and owners are sorted; JSON is canonical; report sections have
+fixed order; and reproducibility-sensitive payloads contain no timestamps.
 
 Working-tree evidence remains deterministic only for the recorded filesystem
 state. If files change between phases, use the run's captured evidence and

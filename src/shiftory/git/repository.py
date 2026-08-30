@@ -30,6 +30,7 @@ class ScopeSpec:
     pr: int | None = None
     remote: str = "origin"
     parent: int | None = None
+    paths: tuple[str, ...] = ()
 
     def selected(self) -> int:
         return sum(
@@ -150,6 +151,59 @@ def normalize_path(path: str) -> str:
     ):
         raise GitError(f"Git produced an unsafe repository path: {path!r}")
     return normalized[2:] if normalized.startswith("./") else normalized
+
+
+def normalize_selected_paths(root: Path, paths: Sequence[str]) -> tuple[str, ...]:
+    normalized: set[str] = set()
+    resolved_root = root.resolve()
+    for supplied in paths:
+        if not supplied or "\0" in supplied:
+            raise ScopeError(
+                f"Invalid path selection: {supplied!r}",
+                details={
+                    "path": supplied,
+                    "recovery": "pass a file or directory inside the repository",
+                },
+            )
+        candidate = Path(supplied).expanduser()
+        if ".." in candidate.parts:
+            raise ScopeError(
+                f"Path selection must not contain traversal components: {supplied!r}",
+                details={"path": supplied, "reason": "path_traversal"},
+            )
+        if candidate.is_absolute():
+            resolved = candidate.resolve()
+            try:
+                relative = resolved.relative_to(resolved_root)
+            except ValueError as exc:
+                raise ScopeError(
+                    f"Path selection is outside the repository: {supplied!r}",
+                    details={"path": supplied, "repository": str(resolved_root)},
+                ) from exc
+        else:
+            relative = candidate
+            resolved = (resolved_root / relative).resolve()
+            try:
+                resolved.relative_to(resolved_root)
+            except ValueError as exc:
+                raise ScopeError(
+                    f"Path selection resolves outside the repository: {supplied!r}",
+                    details={"path": supplied, "repository": str(resolved_root)},
+                ) from exc
+        value = PurePosixPath(relative.as_posix()).as_posix()
+        while value.startswith("./"):
+            value = value[2:]
+        value = value.rstrip("/")
+        if value in {"", "."}:
+            raise ScopeError(
+                "Repository root is not a valid path selection",
+                details={
+                    "path": supplied,
+                    "recovery": "omit --path to select the whole comparison",
+                },
+            )
+        normalized.add(value)
+    return tuple(sorted(normalized))
 
 
 def resolve_repository(path: str | Path = ".") -> Path:
@@ -318,6 +372,7 @@ def _comparison_id(payload: dict[str, object]) -> str:
 
 def resolve_comparison(root: Path, scope: ScopeSpec | None = None) -> Comparison:
     scope = scope or ScopeSpec()
+    paths = normalize_selected_paths(root, scope.paths)
     if scope.selected() > 1:
         raise ScopeError("Comparison modes are mutually exclusive")
     if scope.parent is not None and scope.commit is None:
@@ -396,6 +451,7 @@ def resolve_comparison(root: Path, scope: ScopeSpec | None = None) -> Comparison
         ),
         "head_tree": _tree(root, target) if target else after_fingerprint,
         "parent": parent,
+        "paths": paths,
     }
     return Comparison(
         repository_root=root,
@@ -408,6 +464,7 @@ def resolve_comparison(root: Path, scope: ScopeSpec | None = None) -> Comparison
         identity=_comparison_id(payload),
         after_fingerprint=after_fingerprint,
         parent=parent,
+        paths=paths,
     )
 
 
@@ -571,24 +628,128 @@ def _diff_args(context_lines: int) -> list[str]:
     ]
 
 
+def _comparison_diff_args(comparison: Comparison) -> list[str]:
+    if comparison.mode == "staged":
+        return ["--cached", comparison.base_sha or "HEAD"]
+    if comparison.mode == "unstaged":
+        return []
+    if comparison.mode == "working":
+        return [comparison.base_sha or "HEAD"]
+    if not comparison.base_sha or not comparison.head_sha:
+        raise ScopeError("Resolved committed comparison is incomplete")
+    return [comparison.base_sha, comparison.head_sha]
+
+
+def _tracked_changes(comparison: Comparison) -> tuple[tuple[str, str | None], ...]:
+    output = _git(
+        comparison.repository_root,
+        [
+            "diff",
+            "--no-ext-diff",
+            "--no-textconv",
+            "--no-color",
+            "--find-renames",
+            "--find-copies",
+            "--find-copies-harder",
+            "--name-status",
+            "-z",
+            *_comparison_diff_args(comparison),
+        ],
+        text=False,
+    )
+    assert isinstance(output, bytes)
+    records = [item for item in output.split(b"\0") if item]
+    changes: list[tuple[str, str | None]] = []
+    index = 0
+    while index < len(records):
+        status = records[index].decode("ascii", "strict")
+        index += 1
+        if index >= len(records):
+            raise GitError("Git produced an incomplete changed-path inventory")
+        old_path = normalize_path(os.fsdecode(records[index]))
+        index += 1
+        if status.startswith(("R", "C")):
+            if index >= len(records):
+                raise GitError("Git produced an incomplete rename/copy inventory")
+            new_path = normalize_path(os.fsdecode(records[index]))
+            index += 1
+            changes.append((old_path, new_path))
+        else:
+            changes.append((old_path, None))
+    return tuple(changes)
+
+
+def _untracked_paths(root: Path) -> tuple[str, ...]:
+    listing = _git(
+        root,
+        ["ls-files", "--others", "--exclude-standard", "-z"],
+        text=False,
+    )
+    assert isinstance(listing, bytes)
+    return tuple(
+        normalize_path(os.fsdecode(raw).rstrip("/"))
+        for raw in sorted(item for item in listing.split(b"\0") if item)
+    )
+
+
+def _matches_selection(path: str, selections: tuple[str, ...], exact_paths: set[str]) -> bool:
+    return any(
+        path == selected or (selected not in exact_paths and path.startswith(f"{selected}/"))
+        for selected in selections
+    )
+
+
+def _selected_changed_paths(comparison: Comparison) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    tracked = _tracked_changes(comparison)
+    untracked = _untracked_paths(comparison.repository_root) if comparison.mode == "working" else ()
+    all_paths = {
+        path for old_path, new_path in tracked for path in (old_path, new_path) if path is not None
+    } | set(untracked)
+    exact_paths = set(comparison.paths) & all_paths
+    selected_tracked = tuple(
+        sorted(
+            {
+                path
+                for old_path, new_path in tracked
+                if any(
+                    _matches_selection(path, comparison.paths, exact_paths)
+                    for path in (old_path, new_path)
+                    if path is not None
+                )
+                for path in (old_path, new_path)
+                if path is not None
+            }
+        )
+    )
+    selected_untracked = tuple(
+        path for path in untracked if _matches_selection(path, comparison.paths, exact_paths)
+    )
+    if not selected_tracked and not selected_untracked:
+        raise ScopeError(
+            "Path selection does not match any changed path",
+            details={
+                "paths": list(comparison.paths),
+                "mode": comparison.mode,
+                "recovery": "select a changed file or a directory containing changed files",
+            },
+        )
+    return selected_tracked, selected_untracked
+
+
 def acquire_patch(comparison: Comparison, *, context_lines: int = 3) -> bytes:
     if context_lines < 0:
         raise ScopeError("Context lines must be non-negative")
     root = comparison.repository_root
     assert_comparison_consistent(comparison, operation="patch acquisition")
-    args = ["diff", *_diff_args(context_lines)]
-    if comparison.mode == "staged":
-        args.extend(["--cached", comparison.base_sha or "HEAD"])
-    elif comparison.mode == "unstaged":
-        pass
-    elif comparison.mode == "working":
-        args.append(comparison.base_sha or "HEAD")
-    else:
-        if not comparison.base_sha or not comparison.head_sha:
-            raise ScopeError("Resolved committed comparison is incomplete")
-        args.extend([comparison.base_sha, comparison.head_sha])
+    selected_tracked: tuple[str, ...] | None = None
+    selected_untracked: tuple[str, ...] | None = None
+    if comparison.paths:
+        selected_tracked, selected_untracked = _selected_changed_paths(comparison)
+    args = ["diff", *_diff_args(context_lines), *_comparison_diff_args(comparison)]
+    if selected_tracked is not None:
+        args.extend(["--", *(f":(literal){path}" for path in selected_tracked)])
     try:
-        output = _git(root, args, text=False)
+        output = b"" if selected_tracked == () else _git(root, args, text=False)
     except GitError as exc:
         if "filter" not in str(exc).lower():
             raise
@@ -598,21 +759,23 @@ def acquire_patch(comparison: Comparison, *, context_lines: int = 3) -> bytes:
         ) from exc
     assert isinstance(output, bytes)
     if comparison.mode == "working":
-        output += _untracked_patches(root, context_lines)
+        output += (
+            _untracked_patches(root, context_lines)
+            if selected_untracked is None
+            else _untracked_patches(root, context_lines, selected_untracked)
+        )
     assert_comparison_consistent(comparison, operation="patch acquisition")
     return output
 
 
-def _untracked_patches(root: Path, context_lines: int) -> bytes:
-    listing = _git(
-        root,
-        ["ls-files", "--others", "--exclude-standard", "-z"],
-        text=False,
-    )
-    assert isinstance(listing, bytes)
+def _untracked_patches(
+    root: Path,
+    context_lines: int,
+    selected_paths: tuple[str, ...] | None = None,
+) -> bytes:
+    paths = selected_paths if selected_paths is not None else _untracked_paths(root)
     patches: list[bytes] = []
-    for raw in sorted(item for item in listing.split(b"\0") if item):
-        path = os.fsdecode(raw).rstrip("/")
+    for path in paths:
         candidate = root / path
         try:
             metadata = candidate.lstat()

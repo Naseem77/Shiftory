@@ -75,6 +75,150 @@ def test_working_staged_unstaged_and_untracked_scopes(repo_factory) -> None:
     assert {file["new_path"] for file in working["files"]} == {"app.py", "new file.py"}
 
 
+def test_path_scope_exact_recursive_multiple_and_prefix_boundary(repo_factory) -> None:
+    repository = repo_factory()
+    auth = repository / "src" / "auth"
+    auth.mkdir(parents=True)
+    (auth / "login.py").write_text("login = 1\n", encoding="utf-8")
+    (auth / "nested").mkdir()
+    (auth / "nested" / "token.py").write_text("token = 1\n", encoding="utf-8")
+    (repository / "src" / "authentication.py").write_text("other = 1\n", encoding="utf-8")
+    (repository / "docs").mkdir()
+    (repository / "docs" / "guide.md").write_text("guide\n", encoding="utf-8")
+
+    exact = analyze(
+        AnalyzeOptions(
+            repo=repository,
+            scope=ScopeSpec(paths=("src/auth/login.py",)),
+            graphora="off",
+        )
+    ).to_dict()
+    recursive = analyze(
+        AnalyzeOptions(repo=repository, scope=ScopeSpec(paths=("src/auth",)), graphora="off")
+    ).to_dict()
+    multiple = analyze(
+        AnalyzeOptions(
+            repo=repository,
+            scope=ScopeSpec(paths=("src/auth/login.py", "docs")),
+            graphora="off",
+        )
+    ).to_dict()
+
+    assert [file["new_path"] for file in exact["files"]] == ["src/auth/login.py"]
+    assert {file["new_path"] for file in recursive["files"]} == {
+        "src/auth/login.py",
+        "src/auth/nested/token.py",
+    }
+    assert {file["new_path"] for file in multiple["files"]} == {
+        "docs/guide.md",
+        "src/auth/login.py",
+    }
+    assert recursive["comparison"]["paths"] == ["src/auth"]
+
+
+def test_path_scope_accepts_inside_absolute_and_rejects_unsafe_or_unmatched(repo_factory) -> None:
+    repository = repo_factory()
+    (repository / "app.py").write_text("def value():\n    return 2\n", encoding="utf-8")
+
+    absolute = analyze(
+        AnalyzeOptions(
+            repo=repository,
+            scope=ScopeSpec(paths=(str(repository / "app.py"),)),
+            graphora="off",
+        )
+    ).to_dict()
+
+    assert absolute["comparison"]["paths"] == ["app.py"]
+    assert [file["new_path"] for file in absolute["files"]] == ["app.py"]
+    for path, message in [
+        (str(repository.parent / "outside.py"), "outside the repository"),
+        ("src/../app.py", "traversal"),
+        (".", "Repository root"),
+        ("missing.py", "does not match any changed path"),
+    ]:
+        with pytest.raises(ScopeError, match=message):
+            analyze(
+                AnalyzeOptions(
+                    repo=repository,
+                    scope=ScopeSpec(paths=(path,)),
+                    graphora="off",
+                )
+            )
+
+
+def test_path_scope_matches_rename_sides_and_deleted_files_in_committed_scope(repo_factory) -> None:
+    repository = repo_factory()
+    (repository / "deleted.py").write_text("deleted = True\n", encoding="utf-8")
+    subprocess.run(["git", "add", "."], cwd=repository, check=True)
+    subprocess.run(["git", "commit", "-qm", "add paths"], cwd=repository, check=True)
+    base = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repository, text=True).strip()
+    subprocess.run(["git", "mv", "app.py", "renamed.py"], cwd=repository, check=True)
+    (repository / "deleted.py").unlink()
+    subprocess.run(["git", "add", "-A"], cwd=repository, check=True)
+    subprocess.run(["git", "commit", "-qm", "rename and delete"], cwd=repository, check=True)
+    head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repository, text=True).strip()
+
+    for selected in ("app.py", "renamed.py"):
+        result = analyze(
+            AnalyzeOptions(
+                repo=repository,
+                scope=ScopeSpec(range=f"{base}..{head}", paths=(selected,)),
+                graphora="off",
+            )
+        ).to_dict()
+        files = [(file["old_path"], file["new_path"], file["status"]) for file in result["files"]]
+        assert files == [("app.py", "renamed.py", "renamed")]
+    deleted = analyze(
+        AnalyzeOptions(
+            repo=repository,
+            scope=ScopeSpec(range=f"{base}..{head}", paths=("deleted.py",)),
+            graphora="off",
+        )
+    ).to_dict()
+    assert [(file["old_path"], file["new_path"], file["status"]) for file in deleted["files"]] == [
+        ("deleted.py", None, "deleted")
+    ]
+
+
+def test_path_scope_includes_untracked_files_and_is_identity_bound(repo_factory) -> None:
+    repository = repo_factory()
+    (repository / "app.py").write_text("def value():\n    return 2\n", encoding="utf-8")
+    nested = repository / "new"
+    nested.mkdir()
+    (nested / "one.py").write_text("one = 1\n", encoding="utf-8")
+    (nested / "two.py").write_text("two = 2\n", encoding="utf-8")
+
+    app = analyze(
+        AnalyzeOptions(repo=repository, scope=ScopeSpec(paths=("app.py",)), graphora="off")
+    ).to_dict()
+    new_first = analyze(
+        AnalyzeOptions(repo=repository, scope=ScopeSpec(paths=("new",)), graphora="off")
+    ).to_dict()
+    new_second = analyze(
+        AnalyzeOptions(repo=repository, scope=ScopeSpec(paths=("new",)), graphora="off")
+    ).to_dict()
+
+    assert {file["new_path"] for file in new_first["files"]} == {"new/one.py", "new/two.py"}
+    assert app["comparison"]["identity"] != new_first["comparison"]["identity"]
+    assert canonical_json(new_first) == canonical_json(new_second)
+
+
+def test_path_scope_treats_git_pathspec_syntax_literally(repo_factory) -> None:
+    repository = repo_factory()
+    literal = repository / ":(attr)odd.py"
+    literal.write_text("value = 1\n", encoding="utf-8")
+
+    result = analyze(
+        AnalyzeOptions(
+            repo=repository,
+            scope=ScopeSpec(paths=(":(attr)odd.py",)),
+            graphora="off",
+        )
+    ).to_dict()
+
+    assert [file["new_path"] for file in result["files"]] == [":(attr)odd.py"]
+
+
 @pytest.mark.parametrize("scope", [ScopeSpec(), ScopeSpec(unstaged=True), ScopeSpec(staged=True)])
 def test_diff_paths_ignore_configured_mnemonic_prefixes(repo_factory, scope: ScopeSpec) -> None:
     repository = repo_factory()
@@ -701,6 +845,55 @@ class CapturingProvider:
         assert (snapshot / "app.py").is_file()
         self.sides.append(side)
         return GraphResult("available", self.name, self.version)
+
+
+class PathScopeCapturingProvider:
+    name = "fake"
+    version = "0.2.1"
+
+    def __init__(self) -> None:
+        self.calls: list[tuple[str, tuple[str, ...], dict[str, tuple[int, ...]]]] = []
+
+    def enrich(
+        self,
+        snapshot,
+        *,
+        side="after",
+        changed_paths=(),
+        changed_lines=None,
+        **kwargs,
+    ) -> GraphResult:
+        assert (snapshot / "selected.py").is_file()
+        assert (snapshot / "context.py").is_file()
+        self.calls.append((side, changed_paths, changed_lines or {}))
+        return GraphResult("available", self.name, self.version)
+
+
+def test_path_scope_keeps_full_graphora_snapshots_with_selected_change_focus(repo_factory) -> None:
+    repository = repo_factory()
+    (repository / "selected.py").write_text("selected = 1\n", encoding="utf-8")
+    (repository / "context.py").write_text("context = 1\n", encoding="utf-8")
+    subprocess.run(["git", "add", "."], cwd=repository, check=True)
+    subprocess.run(["git", "commit", "-qm", "add graph files"], cwd=repository, check=True)
+    (repository / "selected.py").write_text("selected = 2\n", encoding="utf-8")
+    (repository / "context.py").write_text("context = 2\n", encoding="utf-8")
+    provider = PathScopeCapturingProvider()
+
+    analyze(
+        AnalyzeOptions(
+            repo=repository,
+            scope=ScopeSpec(paths=("selected.py",)),
+            graphora="auto",
+            cache_dir=repository.parent / f"{repository.name}-path-graphora",
+        ),
+        provider=provider,
+    )
+
+    assert [(side, paths) for side, paths, _lines in provider.calls] == [
+        ("before", ("selected.py",)),
+        ("after", ("selected.py",)),
+    ]
+    assert all(set(lines) == {"selected.py"} for _side, _paths, lines in provider.calls)
 
 
 def test_before_after_snapshots_and_warm_cache_are_deterministic(repo_factory) -> None:

@@ -92,9 +92,9 @@ Then make one request to the agent:
 > **Use Shiftory to explain my current Git changes.**
 
 Add the desired scope to that request when needed, for example, “Use Shiftory to
-explain commit `abc123`.” The skill delegates Git parsing, evidence generation,
-verification, and rendering to the CLI; it does not reproduce those systems in
-its prompt.
+explain commit `abc123`,” or “Use Shiftory to explain changes under `src/auth`.”
+The skill delegates Git parsing, evidence generation, verification, and rendering
+to the CLI; it does not reproduce those systems in its prompt.
 
 ## Comparison scopes
 
@@ -116,6 +116,24 @@ may contact a network: it uses an authenticated `gh` CLI and may fetch missing
 objects from `--remote` (default `origin`). Other scopes use local Git objects,
 the index, and the filesystem.
 
+Add `--path PATH` to `shiftory explain` or `shiftory analyze` to report only a
+changed file or the changed files recursively beneath a directory. Repeat
+`--path` to union selections:
+
+```bash
+shiftory explain --path src/auth --path tests/test_auth.py
+shiftory analyze --commit abc123 --path docs --output evidence.json
+```
+
+Paths are relative to the selected `--repo`; absolute paths are accepted only
+when they resolve inside it. File matching is exact, directory matching is
+recursive and component-aware, and renames match either their old or new path.
+Shiftory rejects repository-root, outside-repository, traversal, and unmatched
+selections instead of emitting a misleading empty report. Path scoping narrows
+the Git patch, evidence, metrics, IDs, and reported files. Graphora still indexes
+the complete before/after repository snapshots for structural context, while its
+changed-path and changed-line focus contains only the selected changes.
+
 ## Advanced CLI workflow
 
 Collect canonical JSON evidence for staged changes:
@@ -123,6 +141,7 @@ Collect canonical JSON evidence for staged changes:
 ```bash
 shiftory analyze \
   --staged \
+  --path src \
   --graphora auto \
   --context-lines 5 \
   --max-evidence-bytes 1000000 \

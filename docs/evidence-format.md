@@ -24,6 +24,14 @@ An evidence packet records comparison and repository identities, ordered file
 changes, optional graph facts, classifications/groups, diagnostics, omissions,
 and metrics.
 
+When `--path` is used, `comparison.paths` contains the sorted, normalized
+selection. Only matching changed files appear in the ledger and metrics:
+directories are recursive, repeated options are unioned, and file selections are
+exact. The comparison identity binds this selection. Graph facts may reference
+repository-wide structural context because Graphora indexes complete before/after
+snapshots, but its changed-path and changed-line seeds are limited to selected
+changes.
+
 ```text
 FileChange
 ├── ChangeUnit

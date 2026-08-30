@@ -25,10 +25,13 @@ class Comparison:
     identity: str
     after_fingerprint: str | None = None
     parent: int | None = None
+    paths: tuple[str, ...] = ()
 
     def portable(self) -> dict[str, Any]:
         value = asdict(self)
         value.pop("repository_root")
+        if not self.paths:
+            value.pop("paths")
         return value
 
 

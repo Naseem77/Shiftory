@@ -30,7 +30,13 @@
         "head_label": {"type": "string"},
         "identity": {"type": "string"},
         "after_fingerprint": {"type": ["string", "null"]},
-        "parent": {"type": ["integer", "null"]}
+        "parent": {"type": ["integer", "null"]},
+        "paths": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "minItems": 1,
+          "uniqueItems": true
+        }
       },
       "additionalProperties": false
     },

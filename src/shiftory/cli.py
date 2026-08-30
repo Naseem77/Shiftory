@@ -85,6 +85,14 @@ def _add_scope(parser: argparse.ArgumentParser) -> None:
     group.add_argument("--pr", type=int)
     parser.add_argument("--remote")
     parser.add_argument("--parent", type=int)
+    parser.add_argument(
+        "--path",
+        dest="paths",
+        action="append",
+        default=[],
+        metavar="PATH",
+        help="changed file or recursive directory to include; repeat to union selections",
+    )
 
 
 def _add_analysis_options(parser: argparse.ArgumentParser) -> None:
@@ -111,6 +119,7 @@ def _scope(args: argparse.Namespace) -> ScopeSpec:
         pr=args.pr,
         remote=args.remote if args.remote is not None else "origin",
         parent=args.parent,
+        paths=tuple(args.paths),
     )
 
 
@@ -381,6 +390,7 @@ def _validate_explain_args(args: argparse.Namespace) -> None:
             args.context_lines != 3,
             args.cache_dir is not None,
             args.no_cache,
+            args.paths,
         )
     )
     if incompatible:
@@ -443,9 +453,18 @@ def _explain_in_run(args: argparse.Namespace, run: Path, descriptor_path: Path |
         _descriptor_path(descriptor, "report", run, "report.md")
         _require_private_file(evidence_path, "Evidence")
         recorded_identity = descriptor.get("comparison_identity")
-        evidence_identity = load_json(evidence_path).get("comparison", {}).get("identity")
+        evidence_comparison = load_json(evidence_path).get("comparison", {})
+        evidence_identity = evidence_comparison.get("identity")
         if not isinstance(recorded_identity, str) or evidence_identity != recorded_identity:
             raise ValidationError("Evidence does not match the descriptor comparison identity")
+        recorded_paths = descriptor.get("path_scope")
+        evidence_paths = evidence_comparison.get("paths", [])
+        if (
+            not isinstance(recorded_paths, list)
+            or not all(isinstance(path, str) for path in recorded_paths)
+            or recorded_paths != evidence_paths
+        ):
+            raise ValidationError("Evidence does not match the descriptor path scope")
         explanation_path = args.explanation.expanduser().resolve()
         if explanation_path != recorded_explanation:
             raise ValidationError(
@@ -474,6 +493,7 @@ def _explain_in_run(args: argparse.Namespace, run: Path, descriptor_path: Path |
             "schema": "shiftory.run/v1",
             "status": "awaiting_explanation",
             "comparison_identity": evidence["comparison"]["identity"],
+            "path_scope": evidence["comparison"].get("paths", []),
             "evidence": str(evidence_path),
             "explanation": str(template_path),
             "report": str(run / "report.md"),

@@ -138,6 +138,75 @@ def test_default_explain_creates_private_recoverable_descriptor(repo_factory) ->
     assert descriptor["evidence_budget"]["actual_bytes"] <= 1_000_000
 
 
+def test_analyze_repeatable_path_scope_selects_union(repo_factory) -> None:
+    repository = repo_factory()
+    (repository / "app.py").write_text("def value():\n    return 2\n", encoding="utf-8")
+    source = repository / "src"
+    source.mkdir()
+    (source / "nested.py").write_text("nested = True\n", encoding="utf-8")
+    (repository / "other.py").write_text("other = True\n", encoding="utf-8")
+
+    result = run_cli(
+        repository,
+        "analyze",
+        "--graphora",
+        "off",
+        "--path",
+        "app.py",
+        "--path",
+        "src",
+    )
+    evidence = json.loads(result.stdout)
+
+    assert evidence["comparison"]["paths"] == ["app.py", "src"]
+    assert {file["new_path"] for file in evidence["files"]} == {"app.py", "src/nested.py"}
+
+
+def test_explain_descriptor_preserves_path_scope_and_resume_verifies_it(repo_factory) -> None:
+    repository = repo_factory()
+    (repository / "app.py").write_text("def value():\n    return 2\n", encoding="utf-8")
+    (repository / "other.py").write_text("other = True\n", encoding="utf-8")
+    descriptor = json.loads(
+        run_cli(
+            repository,
+            "explain",
+            "--graphora",
+            "off",
+            "--path",
+            "app.py",
+        ).stdout
+    )
+    evidence = json.loads(Path(descriptor["evidence"]).read_text(encoding="utf-8"))
+
+    assert descriptor["path_scope"] == ["app.py"]
+    assert evidence["comparison"]["paths"] == ["app.py"]
+    assert [file["new_path"] for file in evidence["files"]] == ["app.py"]
+    write_explanation(descriptor)
+    final = run_cli(repository, *descriptor["resume_command"][1:])
+    assert "# Shiftory explanation" in final.stdout
+
+    tampered = json.loads(
+        run_cli(
+            repository,
+            "explain",
+            "--graphora",
+            "off",
+            "--path",
+            "app.py",
+        ).stdout
+    )
+    tampered_path = Path(tampered["descriptor"])
+    stored = json.loads(tampered_path.read_text(encoding="utf-8"))
+    stored["path_scope"] = ["other.py"]
+    tampered_path.write_text(json.dumps(stored), encoding="utf-8")
+    tampered_path.chmod(0o600)
+    write_explanation(tampered)
+    rejected = run_cli(repository, *tampered["resume_command"][1:], check=False)
+
+    assert rejected.returncode == 2
+    assert "descriptor path scope" in json.loads(rejected.stderr)["message"]
+
+
 def test_explain_resume_verifies_renders_and_cleans_up(repo_factory) -> None:
     repository = repo_factory()
     (repository / "app.py").write_text("def value():\n    return 2\n", encoding="utf-8")

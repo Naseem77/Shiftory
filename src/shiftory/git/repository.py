@@ -451,8 +451,9 @@ def resolve_comparison(root: Path, scope: ScopeSpec | None = None) -> Comparison
         ),
         "head_tree": _tree(root, target) if target else after_fingerprint,
         "parent": parent,
-        "paths": paths,
     }
+    if paths:
+        payload["paths"] = paths
     return Comparison(
         repository_root=root,
         repository_id=repo_id,

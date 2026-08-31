@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import hashlib
+import heapq
 import json
+from bisect import bisect_left
 from collections import defaultdict
 from copy import deepcopy
 from dataclasses import dataclass
-from itertools import chain
+from itertools import islice
 from typing import Any, Literal, cast
 
 from shiftory.diff.identity import stable_id
@@ -101,6 +103,64 @@ class _DisjointSet:
         first, second = sorted((left_root, right_root))
         self._parent[second] = first
         return True
+
+
+@dataclass(frozen=True, slots=True)
+class _IndexedGraphFact:
+    value: dict[str, Any]
+    key: tuple[Any, ...]
+    path: str
+    id: str
+    fact_size: int
+    id_size: int
+
+    @property
+    def new_reference_size(self) -> int:
+        return self.fact_size + self.id_size
+
+
+@dataclass(frozen=True, slots=True)
+class _GraphFactLocation:
+    path: str
+    position: int
+    record: _IndexedGraphFact
+
+
+@dataclass(frozen=True, slots=True)
+class _GraphFactPathIndex:
+    records: tuple[_IndexedGraphFact, ...]
+    keys: tuple[tuple[Any, ...], ...]
+    minimum_new_reference_sizes: tuple[int, ...]
+    leaf_count: int
+
+    def first_new_reference_at_most(self, start: int, maximum: int) -> int | None:
+        if start >= len(self.records) or maximum < 0:
+            return None
+        return self._first_at_most(1, 0, self.leaf_count, start, maximum)
+
+    def _first_at_most(
+        self,
+        node: int,
+        left: int,
+        right: int,
+        start: int,
+        maximum: int,
+    ) -> int | None:
+        if right <= start or self.minimum_new_reference_sizes[node] > maximum:
+            return None
+        if right - left == 1:
+            return left if left < len(self.records) else None
+        middle = (left + right) // 2
+        candidate = self._first_at_most(node * 2, left, middle, start, maximum)
+        if candidate is not None:
+            return candidate
+        return self._first_at_most(node * 2 + 1, middle, right, start, maximum)
+
+
+@dataclass(frozen=True, slots=True)
+class _GraphFactIndex:
+    by_path: dict[str, _GraphFactPathIndex]
+    by_id: dict[str, _GraphFactLocation]
 
 
 def chunk_identity(chunk: dict[str, Any]) -> str:
@@ -828,49 +888,74 @@ def _inline_contexts(
 
 def _include_graph_facts(
     chunk: dict[str, Any],
-    facts_by_path: dict[str, tuple[dict[str, Any], ...]],
+    fact_index: _GraphFactIndex,
     budget: AgentBudget,
 ) -> dict[str, Any]:
-    paths = {
-        path
-        for item in chunk["work_items"]
-        for path in (item["file"]["old_path"], item["file"]["new_path"])
-        if isinstance(path, str)
+    indexes = {
+        path: fact_index.by_path[path]
+        for path in sorted(
+            {
+                path
+                for item in chunk["work_items"]
+                for path in (item["file"]["old_path"], item["file"]["new_path"])
+                if isinstance(path, str) and path in fact_index.by_path
+            }
+        )
     }
-    relevant = sorted(
-        chain.from_iterable(facts_by_path.get(path, ()) for path in paths),
-        key=_graph_fact_key,
-    )
     selected = deepcopy(chunk)
     estimated_size = int(selected["budget"]["actual_bytes"])
     original_allowed = set(selected["allowed_citation_ids"])
-    included: list[tuple[dict[str, Any], bool]] = []
+    cursors = {path: 0 for path in indexes}
+    included: list[tuple[_IndexedGraphFact, bool]] = []
     omitted: list[str] = []
-    for fact in relevant:
-        added_allowed = fact["id"] not in original_allowed
-        delta = _component_size(fact) + (1 if selected["graph_facts"] else 0)
+    omitted_bytes = 0
+    omissions_saturated = False
+
+    while indexes:
+        remaining = budget.effective_max_bytes - estimated_size
+        record = _next_fitting_graph_fact(
+            indexes,
+            cursors,
+            fact_index,
+            original_allowed,
+            remaining=remaining,
+            graph_separator=bool(selected["graph_facts"]),
+            allowed_separator=bool(selected["allowed_citation_ids"]),
+        )
+        omissions_saturated, omitted_bytes = _record_skipped_graph_facts(
+            indexes,
+            cursors,
+            before=record,
+            omitted=omitted,
+            omitted_bytes=omitted_bytes,
+            omissions_saturated=omissions_saturated,
+            maximum_bytes=budget.effective_max_bytes,
+        )
+        if record is None:
+            break
+        added_allowed = record.id not in original_allowed
+        delta = record.fact_size + (1 if selected["graph_facts"] else 0)
         if added_allowed:
-            delta += _component_size(fact["id"]) + (1 if selected["allowed_citation_ids"] else 0)
-        if estimated_size + delta <= budget.effective_max_bytes:
-            selected["graph_facts"].append(fact)
-            if added_allowed:
-                selected["allowed_citation_ids"].append(fact["id"])
-                selected["allowed_citation_ids"].sort()
-            included.append((fact, added_allowed))
-            estimated_size += delta
-        else:
-            omitted.append(fact["id"])
+            delta += record.id_size + (1 if selected["allowed_citation_ids"] else 0)
+        selected["graph_facts"].append(record.value)
+        if added_allowed:
+            selected["allowed_citation_ids"].append(record.id)
+            selected["allowed_citation_ids"].sort()
+        included.append((record, added_allowed))
+        estimated_size += delta
+
     selected = _finalize_chunk(selected)
     while int(selected["budget"]["actual_bytes"]) > budget.effective_max_bytes and included:
-        fact, added_allowed = included.pop()
+        record, added_allowed = included.pop()
         selected["graph_facts"].pop()
         if added_allowed:
-            selected["allowed_citation_ids"].remove(fact["id"])
-        omitted.insert(0, fact["id"])
+            selected["allowed_citation_ids"].remove(record.id)
+        omitted.insert(0, record.id)
         selected = _finalize_chunk(selected)
     omitted_size = int(selected["budget"]["actual_bytes"])
     for fact_id in omitted:
-        delta = _component_size(fact_id) + (1 if selected["omitted_graph_fact_ids"] else 0)
+        location = fact_index.by_id[fact_id]
+        delta = location.record.id_size + (1 if selected["omitted_graph_fact_ids"] else 0)
         if omitted_size + delta > budget.effective_max_bytes:
             break
         selected["omitted_graph_fact_ids"].append(fact_id)
@@ -880,6 +965,77 @@ def _include_graph_facts(
         selected["omitted_graph_fact_ids"].pop()
         selected = _finalize_chunk(selected)
     return selected
+
+
+def _next_fitting_graph_fact(
+    indexes: dict[str, _GraphFactPathIndex],
+    cursors: dict[str, int],
+    fact_index: _GraphFactIndex,
+    original_allowed: set[str],
+    *,
+    remaining: int,
+    graph_separator: bool,
+    allowed_separator: bool,
+) -> _IndexedGraphFact | None:
+    graph_separator_size = int(graph_separator)
+    allowed_separator_size = int(allowed_separator)
+    new_reference_maximum = remaining - graph_separator_size - allowed_separator_size
+    candidate: _IndexedGraphFact | None = None
+    for path, index in indexes.items():
+        position = index.first_new_reference_at_most(
+            cursors[path],
+            new_reference_maximum,
+        )
+        if position is not None:
+            value = index.records[position]
+            if candidate is None or value.key < candidate.key:
+                candidate = value
+
+    existing_reference_maximum = remaining - graph_separator_size
+    for fact_id in original_allowed:
+        location = fact_index.by_id.get(fact_id)
+        if (
+            location is None
+            or location.path not in indexes
+            or location.position < cursors[location.path]
+            or location.record.fact_size > existing_reference_maximum
+        ):
+            continue
+        if candidate is None or location.record.key < candidate.key:
+            candidate = location.record
+    return candidate
+
+
+def _record_skipped_graph_facts(
+    indexes: dict[str, _GraphFactPathIndex],
+    cursors: dict[str, int],
+    *,
+    before: _IndexedGraphFact | None,
+    omitted: list[str],
+    omitted_bytes: int,
+    omissions_saturated: bool,
+    maximum_bytes: int,
+) -> tuple[bool, int]:
+    skipped = []
+    for path, index in indexes.items():
+        start = cursors[path]
+        end = (
+            len(index.records) if before is None else bisect_left(index.keys, before.key, lo=start)
+        )
+        if end > start and not omissions_saturated:
+            skipped.append(islice(index.records, start, end))
+        cursors[path] = end
+    if before is not None:
+        cursors[before.path] += 1
+    if omissions_saturated:
+        return True, omitted_bytes
+    for record in heapq.merge(*skipped, key=lambda value: value.key):
+        delta = record.id_size + int(bool(omitted))
+        if omitted_bytes + delta > maximum_bytes:
+            return True, omitted_bytes
+        omitted.append(record.id)
+        omitted_bytes += delta
+    return False, omitted_bytes
 
 
 def _graph_fact_key(fact: dict[str, Any]) -> tuple[Any, ...]:
@@ -892,13 +1048,57 @@ def _graph_fact_key(fact: dict[str, Any]) -> tuple[Any, ...]:
     )
 
 
-def _index_graph_facts(facts: Any) -> dict[str, tuple[dict[str, Any], ...]]:
-    indexed: dict[str, list[dict[str, Any]]] = defaultdict(list)
-    for fact in sorted(
-        (fact for fact in facts if isinstance(fact, dict)),
-        key=_graph_fact_key,
-    ):
+def _index_graph_facts(facts: Any) -> _GraphFactIndex:
+    records = []
+    seen_ids: set[str] = set()
+    for fact in facts:
+        if not isinstance(fact, dict):
+            continue
         path = fact.get("path")
-        if isinstance(path, str):
-            indexed[path].append(fact)
-    return {path: tuple(values) for path, values in indexed.items()}
+        fact_id = fact.get("id")
+        if not isinstance(path, str) or not isinstance(fact_id, str):
+            continue
+        if fact_id in seen_ids:
+            raise CoverageError(f"Graph fact id {fact_id!r} is duplicated during chunk planning")
+        seen_ids.add(fact_id)
+        records.append(
+            _IndexedGraphFact(
+                fact,
+                _graph_fact_key(fact),
+                path,
+                fact_id,
+                _component_size(fact),
+                _component_size(fact_id),
+            )
+        )
+    records.sort(key=lambda value: value.key)
+    grouped: dict[str, list[_IndexedGraphFact]] = defaultdict(list)
+    for record in records:
+        grouped[record.path].append(record)
+    by_path = {path: _build_graph_fact_path_index(values) for path, values in grouped.items()}
+    by_id = {
+        record.id: _GraphFactLocation(path, position, record)
+        for path, index in by_path.items()
+        for position, record in enumerate(index.records)
+    }
+    return _GraphFactIndex(by_path, by_id)
+
+
+def _build_graph_fact_path_index(
+    records: list[_IndexedGraphFact],
+) -> _GraphFactPathIndex:
+    leaf_count = 1
+    while leaf_count < len(records):
+        leaf_count *= 2
+    infinity = max((record.new_reference_size for record in records), default=0) + 1
+    minimum_sizes = [infinity] * (leaf_count * 2)
+    for position, record in enumerate(records):
+        minimum_sizes[leaf_count + position] = record.new_reference_size
+    for node in range(leaf_count - 1, 0, -1):
+        minimum_sizes[node] = min(minimum_sizes[node * 2], minimum_sizes[node * 2 + 1])
+    return _GraphFactPathIndex(
+        tuple(records),
+        tuple(record.key for record in records),
+        tuple(minimum_sizes),
+        leaf_count,
+    )

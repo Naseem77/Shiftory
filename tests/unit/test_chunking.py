@@ -18,7 +18,7 @@ from shiftory.chunking.planner import (
     plan_identity,
     sha256_json,
 )
-from shiftory.errors import ChunkBudgetError, CompositionError
+from shiftory.errors import ChunkBudgetError, CompositionError, CoverageError
 from shiftory.evidence.builder import AnalyzeOptions, analyze_complete
 from shiftory.models.json import canonical_json
 from shiftory.schemas import load_schema
@@ -77,6 +77,113 @@ def _chunk_explanations(chunks: tuple[dict, ...]) -> tuple[dict, ...]:
             }
         )
     return tuple(outputs)
+
+
+def _same_path_atoms(count: int, padding: int = 1_000) -> tuple[planner_module._Atom, ...]:
+    atoms = []
+    for index in range(count):
+        target_id = f"span-{index:04d}"
+        value = {
+            "id": f"atom-{index:04d}",
+            "classification": "source",
+            "file": {
+                "old_path": "shared.py",
+                "new_path": "shared.py",
+                "status": "modified",
+                "classification": "source",
+                "classification_confidence": "extracted",
+            },
+            "unit": {
+                "id": f"unit-{index:04d}",
+                "kind": "text",
+                "metadata": {"padding": "x" * padding},
+            },
+            "hunk": None,
+            "ownership_targets": [
+                {
+                    "evidence_id": target_id,
+                    "kind": "span",
+                    "side": "after",
+                    "start_line": index + 1,
+                    "end_line": index + 1,
+                    "changed_line_count": 1,
+                }
+            ],
+            "contexts": [],
+        }
+        atoms.append(
+            planner_module._Atom(
+                f"atom-{index:04d}",
+                "source",
+                "shared.py",
+                ("shared.py", index),
+                value,
+            )
+        )
+    return tuple(atoms)
+
+
+def _graph_facts(count: int) -> list[dict]:
+    return [
+        {
+            "id": f"fact-{index:05d}",
+            "kind": "definition",
+            "side": "after",
+            "path": "shared.py",
+            "line": index + 1,
+            "symbol": f"symbol-{index:05d}",
+            "target": None,
+            "confidence": "extracted",
+            "provenance": "graphora:test",
+        }
+        for index in range(count)
+    ]
+
+
+def _naive_include_graph_facts(chunk: dict, facts: list[dict], budget: AgentBudget) -> dict:
+    selected = copy.deepcopy(chunk)
+    estimated_size = int(selected["budget"]["actual_bytes"])
+    original_allowed = set(selected["allowed_citation_ids"])
+    included = []
+    omitted = []
+    for fact in sorted(facts, key=planner_module._graph_fact_key):
+        added_allowed = fact["id"] not in original_allowed
+        delta = planner_module._component_size(fact) + int(bool(selected["graph_facts"]))
+        if added_allowed:
+            delta += planner_module._component_size(fact["id"]) + int(
+                bool(selected["allowed_citation_ids"])
+            )
+        if estimated_size + delta <= budget.effective_max_bytes:
+            selected["graph_facts"].append(fact)
+            if added_allowed:
+                selected["allowed_citation_ids"].append(fact["id"])
+                selected["allowed_citation_ids"].sort()
+            included.append((fact, added_allowed))
+            estimated_size += delta
+        else:
+            omitted.append(fact["id"])
+    selected = planner_module._finalize_chunk(selected)
+    while int(selected["budget"]["actual_bytes"]) > budget.effective_max_bytes and included:
+        fact, added_allowed = included.pop()
+        selected["graph_facts"].pop()
+        if added_allowed:
+            selected["allowed_citation_ids"].remove(fact["id"])
+        omitted.insert(0, fact["id"])
+        selected = planner_module._finalize_chunk(selected)
+    omitted_size = int(selected["budget"]["actual_bytes"])
+    for fact_id in omitted:
+        delta = planner_module._component_size(fact_id) + int(
+            bool(selected["omitted_graph_fact_ids"])
+        )
+        if omitted_size + delta > budget.effective_max_bytes:
+            break
+        selected["omitted_graph_fact_ids"].append(fact_id)
+        omitted_size += delta
+    selected = planner_module._finalize_chunk(selected)
+    while int(selected["budget"]["actual_bytes"]) > budget.effective_max_bytes:
+        selected["omitted_graph_fact_ids"].pop()
+        selected = planner_module._finalize_chunk(selected)
+    return selected
 
 
 def test_token_estimate_and_effective_budget_are_explicit() -> None:
@@ -324,6 +431,118 @@ def test_concentrated_omitted_graph_facts_bound_chunk_finalization(
     assert first["budget"]["actual_bytes"] <= budget.effective_max_bytes
     assert first_finalizations < 10
     assert finalizations < 10
+
+
+def test_indexed_graph_fact_selection_preserves_naive_chunk_bytes() -> None:
+    budget = AgentBudget(4_000)
+    atoms = list(_same_path_atoms(2, padding=0))
+    other_value = copy.deepcopy(atoms[1].value)
+    other_value["file"]["old_path"] = "other.py"
+    other_value["file"]["new_path"] = "other.py"
+    atoms[1] = planner_module._Atom(
+        atoms[1].id,
+        atoms[1].classification,
+        "other.py",
+        ("other.py", 1),
+        other_value,
+    )
+    chunk = planner_module._chunk_payload(
+        atoms,
+        index=1,
+        count=1,
+        comparison_identity="comparison",
+        ledger_sha256="0" * 64,
+        strategy="graph-guided",
+        budget=budget,
+    )
+    facts = list(reversed(_graph_facts(100)))
+    for index, fact in enumerate(facts):
+        if index % 3 == 0:
+            fact["path"] = "other.py"
+        fact["symbol"] += "x" * (index % 17)
+    chunk["allowed_citation_ids"].append(facts[33]["id"])
+    chunk["allowed_citation_ids"].sort()
+    chunk = planner_module._finalize_chunk(chunk)
+
+    expected = _naive_include_graph_facts(chunk, facts, budget)
+    actual = planner_module._include_graph_facts(
+        chunk, planner_module._index_graph_facts(facts), budget
+    )
+
+    assert canonical_json(actual) == canonical_json(expected)
+
+
+def test_combined_same_path_chunks_and_facts_have_budget_bounded_index_work(
+    monkeypatch,
+) -> None:
+    real_component_size = planner_module._component_size
+    real_graph_fact_key = planner_module._graph_fact_key
+    fact_serializations = 0
+    id_serializations = 0
+    key_computations = 0
+
+    def counted_component_size(value):
+        nonlocal fact_serializations, id_serializations
+        if isinstance(value, dict) and value.get("provenance") == "graphora:test":
+            fact_serializations += 1
+        elif isinstance(value, str) and value.startswith("fact-"):
+            id_serializations += 1
+        return real_component_size(value)
+
+    def counted_graph_fact_key(value):
+        nonlocal key_computations
+        key_computations += 1
+        return real_graph_fact_key(value)
+
+    monkeypatch.setattr(planner_module, "_component_size", counted_component_size)
+    monkeypatch.setattr(planner_module, "_graph_fact_key", counted_graph_fact_key)
+
+    for atom_count, fact_count in ((100, 1_000), (500, 5_000)):
+        atoms = _same_path_atoms(atom_count)
+        facts = list(reversed(_graph_facts(fact_count)))
+        evidence = {
+            "comparison": {"identity": "comparison"},
+            "graph": {"status": "available", "facts": facts},
+        }
+        monkeypatch.setattr(
+            planner_module,
+            "_atoms",
+            lambda *args, planned_atoms=atoms, **kwargs: planned_atoms,
+        )
+        before = (fact_serializations, id_serializations, key_computations)
+
+        first = plan_chunks(evidence, AgentBudget(3_000))
+        second = plan_chunks(evidence, AgentBudget(3_000))
+
+        work = tuple(
+            after - prior
+            for after, prior in zip(
+                (fact_serializations, id_serializations, key_computations),
+                before,
+                strict=True,
+            )
+        )
+        assert work == (fact_count * 2, fact_count * 2, fact_count * 2)
+        assert len(first.chunks) == atom_count
+        assert first == second
+        assert canonical_json(first.plan) == canonical_json(second.plan)
+        assert all(
+            chunk["budget"]["actual_bytes"] <= 3_000
+            and not list(Draft202012Validator(load_schema("chunk")).iter_errors(chunk))
+            for chunk in first.chunks
+        )
+        assert all(
+            {fact["id"] for fact in chunk["graph_facts"]} <= set(chunk["allowed_citation_ids"])
+            for chunk in first.chunks
+        )
+
+
+def test_graph_fact_index_rejects_duplicate_ids() -> None:
+    facts = _graph_facts(2)
+    facts[1]["id"] = facts[0]["id"]
+
+    with pytest.raises(CoverageError, match="duplicated during chunk planning"):
+        planner_module._index_graph_facts(facts)
 
 
 def test_irreducible_atom_fails_instead_of_breaking_the_cap(repo_factory) -> None:

@@ -98,10 +98,11 @@ too large, a v2 private run keeps the complete ledger outside agent payloads.
 Replacement-linked spans and non-text units become indivisible work atoms.
 Deterministic affinity prefers existing classifications, file/unit/hunk locality,
 and valid Graphora relationships between changed files. A union-find groups each
-symbol relationship through one deterministic representative, and graph facts are
-indexed by path once before chunk assembly. Graphora-unavailable runs use the same
-hierarchy-only order. Candidate chunks are accepted only after their final canonical
-JSON fits the effective byte/token-derived ceiling.
+symbol relationship through one deterministic representative. Graph fact sort keys
+and canonical component sizes are computed once, then per-path size indexes skip
+fact ranges that cannot fit a chunk's remaining budget. Graphora-unavailable runs
+use the same hierarchy-only order. Candidate chunks are accepted only after their
+final canonical JSON fits the effective byte/token-derived ceiling.
 
 ### 4. Enrich with Graphora
 

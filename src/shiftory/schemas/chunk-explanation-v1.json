@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shiftory.dev/schemas/chunk-explanation-v1.json",
+  "title": "Shiftory chunk explanation v1",
+  "type": "object",
+  "required": [
+    "schema", "chunk_id", "comparison_identity", "ledger_sha256",
+    "summary", "items", "coverage_owners"
+  ],
+  "properties": {
+    "schema": {"const": "shiftory.chunk-explanation/v1"},
+    "chunk_id": {"$ref": "#/$defs/nonEmptyString"},
+    "comparison_identity": {"$ref": "#/$defs/nonEmptyString"},
+    "ledger_sha256": {"$ref": "#/$defs/sha256"},
+    "summary": {"$ref": "#/$defs/nonEmptyString"},
+    "items": {"type": "array", "items": {"$ref": "#/$defs/item"}},
+    "coverage_owners": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/owner"}
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "nonEmptyString": {"type": "string", "minLength": 1, "pattern": "\\S"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "nullableStatement": {
+      "oneOf": [{"$ref": "#/$defs/nonEmptyString"}, {"type": "null"}]
+    },
+    "citation": {
+      "oneOf": [
+        {"$ref": "#/$defs/nonEmptyString"},
+        {
+          "type": "object",
+          "required": ["id"],
+          "properties": {"id": {"$ref": "#/$defs/nonEmptyString"}},
+          "additionalProperties": false
+        }
+      ]
+    },
+    "item": {
+      "type": "object",
+      "required": ["id", "kind", "title", "confidence", "citations"],
+      "properties": {
+        "id": {"$ref": "#/$defs/nonEmptyString"},
+        "kind": {
+          "enum": ["behavioral", "structural", "observer", "ambiguity", "unresolved"]
+        },
+        "title": {"$ref": "#/$defs/nonEmptyString"},
+        "before": {"$ref": "#/$defs/nullableStatement"},
+        "after": {"$ref": "#/$defs/nullableStatement"},
+        "absence": {"enum": ["before", "after", null]},
+        "statement": {"$ref": "#/$defs/nonEmptyString"},
+        "confidence": {
+          "enum": ["extracted", "inferred", "ambiguous", "unresolved", "unavailable"]
+        },
+        "citations": {"type": "array", "items": {"$ref": "#/$defs/citation"}}
+      },
+      "additionalProperties": false
+    },
+    "owner": {
+      "type": "object",
+      "required": ["evidence_id", "owner_id"],
+      "properties": {
+        "evidence_id": {"$ref": "#/$defs/nonEmptyString"},
+        "owner_id": {"$ref": "#/$defs/nonEmptyString"}
+      },
+      "additionalProperties": false
+    }
+  }
+}

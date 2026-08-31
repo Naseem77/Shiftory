@@ -50,3 +50,18 @@ class ValidationError(ShiftoryError):
 class CacheError(ShiftoryError):
     def __init__(self, message: str, *, details: dict[str, Any] | None = None) -> None:
         super().__init__(message, "cache_error", details)
+
+
+class ChunkBudgetError(ShiftoryError):
+    def __init__(self, message: str, *, details: dict[str, Any] | None = None) -> None:
+        super().__init__(message, "chunk_budget_error", details)
+
+
+class RetrievalError(ShiftoryError):
+    def __init__(self, message: str, *, details: dict[str, Any] | None = None) -> None:
+        super().__init__(message, "retrieval_error", details)
+
+
+class CompositionError(ShiftoryError):
+    def __init__(self, message: str, *, details: dict[str, Any] | None = None) -> None:
+        super().__init__(message, "composition_error", details)

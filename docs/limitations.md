@@ -165,6 +165,9 @@ Repository caches persist until `shiftory cache clear` or external retention
 removes them. Awaiting and failed explain runs persist for recovery. Successful
 finalized runs are deleted by default, but `--keep-artifacts` and
 `SHIFTORY_KEEP_ARTIFACTS=1` retain them. There is no automatic expiry.
+Configured run storage inside the analyzed repository is rejected because generated
+artifacts would otherwise change mutable comparison fingerprints or enter later
+working-tree comparisons.
 
 The current cache lock uses POSIX advisory file locking (`fcntl`), so native
 Windows support is not provided by this implementation.

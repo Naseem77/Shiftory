@@ -7,6 +7,7 @@ import subprocess
 import pytest
 from jsonschema import Draft202012Validator
 
+from shiftory.chunking import planner as planner_module
 from shiftory.chunking.composer import compose_chunks
 from shiftory.chunking.planner import (
     AgentBudget,
@@ -85,6 +86,27 @@ def test_token_estimate_and_effective_budget_are_explicit() -> None:
     budget = AgentBudget(10_000, 1_000)
     assert budget.effective_max_bytes == 4_000
     assert budget.to_dict()["token_estimate_formula"] == "ceil(canonical_utf8_bytes/4)"
+
+
+def test_chunk_explanation_schema_matches_final_item_constraints() -> None:
+    invalid = {
+        "schema": "shiftory.chunk-explanation/v1",
+        "chunk_id": "chunk",
+        "comparison_identity": "comparison",
+        "ledger_sha256": "0" * 64,
+        "summary": "Summary.",
+        "items": [
+            {
+                "id": "item",
+                "kind": "behavioral",
+                "title": "Missing before and after",
+                "confidence": "extracted",
+                "citations": [],
+            }
+        ],
+        "coverage_owners": [],
+    }
+    assert list(Draft202012Validator(load_schema("chunk-explanation")).iter_errors(invalid))
 
 
 def test_fallback_planning_is_strict_schema_valid_and_deterministic(repo_factory) -> None:
@@ -221,6 +243,39 @@ def test_one_oversized_source_line_fails_as_an_irreducible_retrieval(repo_factor
 
     with pytest.raises(ChunkBudgetError, match="single recorded source line"):
         plan_chunks(evidence, AgentBudget(3_000))
+
+
+def test_large_range_segmentation_bounds_serialized_probe_work(monkeypatch) -> None:
+    text = "\n".join(f"value_{index:05d}=" + "x" * 20 for index in range(5_000))
+    citation = {
+        "id": "citation",
+        "path": "large.py",
+        "side": "after",
+        "start_line": 1,
+        "end_line": 5_000,
+        "content_hash": "0" * 64,
+    }
+    real_retrieval_record = planner_module._retrieval_record
+    probed_characters = 0
+
+    def counted_retrieval_record(*args, **kwargs):
+        nonlocal probed_characters
+        probed_characters += len(kwargs["text"])
+        return real_retrieval_record(*args, **kwargs)
+
+    monkeypatch.setattr(planner_module, "_retrieval_record", counted_retrieval_record)
+    retrievals = {}
+    range_ids = planner_module._retrieval_ranges(
+        citation,
+        text=text,
+        comparison_identity="comparison",
+        ledger_sha256="0" * 64,
+        budget=AgentBudget(1_000),
+        retrievals=retrievals,
+    )
+
+    assert len(range_ids) > 1
+    assert probed_characters < len(text) * 8
 
 
 def test_non_text_units_are_atomic_and_compose_without_changed_lines(repo_factory) -> None:

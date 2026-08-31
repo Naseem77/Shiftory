@@ -318,23 +318,45 @@ def _require_private_file(path: Path, label: str) -> None:
         raise ValidationError(f"{label} must be owner-only (mode 0600): {path}")
 
 
-def _run_root() -> Path:
-    configured = os.environ.get("SHIFTORY_RUN_DIR")
+def _run_root(
+    repository_root: Path | None = None,
+    *,
+    use_environment: bool = True,
+) -> Path:
+    configured = os.environ.get("SHIFTORY_RUN_DIR") if use_environment else None
     candidate = (
         Path(configured).expanduser() if configured else user_state_path("shiftory") / "runs"
     )
     if candidate.is_symlink():
         raise ValidationError(f"Run root must not be a symbolic link: {candidate}")
-    candidate.mkdir(parents=True, exist_ok=True, mode=0o700)
     root = candidate.resolve()
     if root == Path(root.anchor):
         raise ValidationError(f"Refusing to use a filesystem root for runs: {root}")
+    if repository_root is not None:
+        repository = repository_root.resolve()
+        try:
+            root.relative_to(repository)
+        except ValueError:
+            pass
+        else:
+            raise ValidationError(
+                "Shiftory run storage must be outside the analyzed repository",
+                details={
+                    "unsafe_run_root": str(root),
+                    "repository_root": str(repository),
+                },
+            )
+    candidate.mkdir(parents=True, exist_ok=True, mode=0o700)
     _require_private_directory(root, "Run root")
     return root
 
 
-def _new_run() -> Path:
-    run = _run_root() / uuid.uuid4().hex
+def _new_run(
+    repository_root: Path | None = None,
+    *,
+    use_environment: bool = True,
+) -> Path:
+    run = _run_root(repository_root, use_environment=use_environment) / uuid.uuid4().hex
     run.mkdir(mode=0o700)
     run.chmod(stat.S_IRWXU)
     return run
@@ -462,11 +484,18 @@ def _explain(args: argparse.Namespace) -> int:
         if args.resume:
             run, descriptor_path = _resume_location(args.resume)
         else:
-            run, descriptor_path = _new_run(), None
+            run, descriptor_path = _new_run(resolve_repository(args.repo)), None
         return _explain_in_run(args, run, descriptor_path)
     except (ShiftoryError, OSError, ValueError) as error:
         if run is None:
-            run = _new_run()
+            unsafe_repository = (
+                Path(error.details["repository_root"])
+                if isinstance(error, ValidationError)
+                and error.details
+                and isinstance(error.details.get("repository_root"), str)
+                else None
+            )
+            run = _new_run(unsafe_repository, use_environment=unsafe_repository is None)
         diagnostic_path = run / "diagnostic.json"
         code = error.code if isinstance(error, ShiftoryError) else "validation_error"
         prior_details = error.details if isinstance(error, ShiftoryError) else None
@@ -731,6 +760,13 @@ def _load_v2_core(
     descriptor: dict[str, Any],
 ) -> tuple[Path, dict[str, Any], dict[str, Any], tuple[dict[str, Any], ...]]:
     _validate_schema(descriptor, "run")
+    repository_root = Path(descriptor["repository_root"]).resolve()
+    try:
+        run.relative_to(repository_root)
+    except ValueError:
+        pass
+    else:
+        raise ValidationError("A chunked run must be stored outside its repository")
     _run_artifact_path(
         descriptor["final_explanation"], run, "explanation.json", "Final explanation"
     )

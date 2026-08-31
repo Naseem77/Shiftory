@@ -367,6 +367,31 @@ def test_chunked_resume_rejects_missing_output_and_tampered_payload(repo_factory
     assert "digest is invalid" in json.loads(tampered.stderr)["message"]
 
 
+def test_explain_rejects_worktree_visible_run_storage(repo_factory) -> None:
+    repository = repo_factory()
+    (repository / "app.py").write_text("def value():\n    return 2\n", encoding="utf-8")
+    unsafe_root = repository / ".shiftory-runs"
+    safe_home = repository.parent / "safe-home"
+
+    result = run_cli(
+        repository,
+        "explain",
+        "--graphora",
+        "off",
+        check=False,
+        extra_env={
+            "SHIFTORY_RUN_DIR": str(unsafe_root),
+            "HOME": str(safe_home),
+        },
+    )
+
+    error = json.loads(result.stderr)
+    assert result.returncode == 2
+    assert "must be outside the analyzed repository" in error["message"]
+    assert not unsafe_root.exists()
+    assert not Path(error["details"]["diagnostic"]).is_relative_to(repository)
+
+
 def test_explain_retention_flag_and_environment_keep_complete_artifacts(repo_factory) -> None:
     repository = repo_factory()
     (repository / "app.py").write_text("def value():\n    return 2\n", encoding="utf-8")

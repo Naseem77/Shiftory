@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import os
 import subprocess
 
 import pytest
@@ -155,3 +156,31 @@ def test_committed_retrieval_uses_git_objects_not_mutable_checkout(repo_factory)
     )
 
     assert "new_120" in result["text"]
+
+
+@pytest.mark.skipif(os.name == "nt", reason="POSIX filename semantics")
+def test_retrieval_accepts_a_recorded_posix_backslash_filename(repo_factory) -> None:
+    repository = repo_factory()
+    path = repository / r"dir\large.py"
+    path.write_text(
+        "\n".join(f"old_{index:03d} = {index}" for index in range(1, 121)) + "\n",
+        encoding="utf-8",
+    )
+    subprocess.run(["git", "add", "."], cwd=repository, check=True)
+    subprocess.run(["git", "commit", "-qm", "add backslash path"], cwd=repository, check=True)
+    path.write_text(
+        "\n".join(f"new_{index:03d} = {index}" for index in range(1, 121)) + "\n",
+        encoding="utf-8",
+    )
+    evidence = analyze_complete(AnalyzeOptions(repo=repository, graphora="off")).to_dict()
+    planned = _plan(evidence)
+    record = next(
+        value for value in planned.plan["retrieval_ranges"] if value["path"] == r"dir\large.py"
+    )
+
+    result = retrieve_source_range(
+        _descriptor(repository, evidence), evidence, planned.plan, record["id"]
+    )
+
+    assert result["path"] == r"dir\large.py"
+    assert result["text"].startswith(("old_001", "new_001"))

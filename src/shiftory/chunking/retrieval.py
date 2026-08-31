@@ -148,7 +148,6 @@ def _safe_recorded_path(path: str) -> bool:
     return bool(
         path
         and "\x00" not in path
-        and "\\" not in path
         and not candidate.is_absolute()
         and ".." not in candidate.parts
         and "." not in candidate.parts

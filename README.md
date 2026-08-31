@@ -283,8 +283,10 @@ structural enrichment is wanted.
 
 `shiftory explain` stores runs under the platform state directory, or
 `SHIFTORY_RUN_DIR` when set. Directories are owner-only and files are written
-owner-readable/writable. An awaiting-explanation run remains available so the
-agent can resume it. A successfully finalized run is deleted unless either:
+owner-readable/writable. Run storage must be outside the analyzed repository so
+private artifacts cannot alter a working-tree fingerprint or enter a later diff.
+An awaiting-explanation run remains available so the agent can resume it. A
+successfully finalized run is deleted unless either:
 
 ```bash
 shiftory explain \

@@ -417,9 +417,48 @@ def _retrieval_ranges(
     citation_start = int(citation["start_line"])
     offset = 0
     while offset < len(lines):
-        low, high = offset + 1, len(lines)
-        best: tuple[dict[str, Any], int] | None = None
-        smallest_response_bytes = 0
+        best_record, best_response = _retrieval_record(
+            citation,
+            start_line=citation_start + offset,
+            end_line=citation_start + offset,
+            text=lines[offset],
+            comparison_identity=comparison_identity,
+            ledger_sha256=ledger_sha256,
+        )
+        smallest_response_bytes = canonical_size(best_response)
+        if smallest_response_bytes > budget.effective_max_bytes:
+            raise ChunkBudgetError(
+                "A single recorded source line cannot fit the effective agent budget",
+                details={
+                    "citation_id": citation["id"],
+                    "line": citation_start + offset,
+                    "required_bytes": smallest_response_bytes,
+                    "effective_max_bytes": budget.effective_max_bytes,
+                },
+            )
+        best_end = offset + 1
+        step = 2
+        first_failed_end: int | None = None
+        while best_end < len(lines):
+            end = min(len(lines), offset + step)
+            record, response = _retrieval_record(
+                citation,
+                start_line=citation_start + offset,
+                end_line=citation_start + end - 1,
+                text="\n".join(lines[offset:end]),
+                comparison_identity=comparison_identity,
+                ledger_sha256=ledger_sha256,
+            )
+            if canonical_size(response) <= budget.effective_max_bytes:
+                best_record, best_end = record, end
+                if end == len(lines):
+                    break
+                step *= 2
+            else:
+                first_failed_end = end
+                break
+        low = best_end + 1
+        high = (first_failed_end - 1) if first_failed_end is not None else best_end
         while low <= high:
             end = (low + high) // 2
             record, response = _retrieval_record(
@@ -431,26 +470,14 @@ def _retrieval_ranges(
                 ledger_sha256=ledger_sha256,
             )
             response_bytes = canonical_size(response)
-            if end == offset + 1:
-                smallest_response_bytes = response_bytes
             if response_bytes <= budget.effective_max_bytes:
-                best = record, end
+                best_record, best_end = record, end
                 low = end + 1
             else:
                 high = end - 1
-        if best is None:
-            raise ChunkBudgetError(
-                "A single recorded source line cannot fit the effective agent budget",
-                details={
-                    "citation_id": citation["id"],
-                    "line": citation_start + offset,
-                    "required_bytes": smallest_response_bytes,
-                    "effective_max_bytes": budget.effective_max_bytes,
-                },
-            )
-        finalized, offset = best
-        retrievals[finalized["id"]] = finalized
-        selected.append(finalized["id"])
+        retrievals[best_record["id"]] = best_record
+        selected.append(best_record["id"])
+        offset = best_end
     return tuple(selected)
 
 

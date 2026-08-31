@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from collections import defaultdict
 from copy import deepcopy
 from dataclasses import dataclass
@@ -24,6 +25,12 @@ def estimate_tokens(byte_count: int) -> int:
 
 def canonical_size(value: Any) -> int:
     return len(canonical_json(value).encode("utf-8"))
+
+
+def _component_size(value: Any) -> int:
+    return len(
+        json.dumps(value, ensure_ascii=True, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    )
 
 
 def sha256_json(value: Any) -> str:
@@ -295,17 +302,25 @@ def _atoms(
                             budget=budget,
                             retrievals=retrievals,
                         )
+                        retrieval_context = {
+                            "citation_id": citation["id"],
+                            "path": citation["path"],
+                            "side": citation["side"],
+                            "start_line": citation["start_line"],
+                            "end_line": citation["end_line"],
+                            "content_hash": citation["content_hash"],
+                            "text": None,
+                            "retrieval_range_ids": list(range_ids),
+                        }
+                        inline_context = {
+                            **retrieval_context,
+                            "text": text,
+                            "retrieval_range_ids": [],
+                        }
                         contexts.append(
-                            {
-                                "citation_id": citation["id"],
-                                "path": citation["path"],
-                                "side": citation["side"],
-                                "start_line": citation["start_line"],
-                                "end_line": citation["end_line"],
-                                "content_hash": citation["content_hash"],
-                                "text": None,
-                                "retrieval_range_ids": list(range_ids),
-                            }
+                            inline_context
+                            if _component_size(inline_context) <= _component_size(retrieval_context)
+                            else retrieval_context
                         )
                     value = {
                         "id": stable_id(
@@ -413,20 +428,39 @@ def _retrieval_ranges(
     retrievals: dict[str, dict[str, Any]],
 ) -> tuple[str, ...]:
     lines = text.split("\n")
+    json_content_prefix = [0]
+    for line in lines:
+        encoded = json.dumps(line, ensure_ascii=True, separators=(",", ":")).encode("utf-8")
+        json_content_prefix.append(json_content_prefix[-1] + len(encoded) - 2)
     selected: list[str] = []
     citation_start = int(citation["start_line"])
     offset = 0
     while offset < len(lines):
-        best_record, best_response = _retrieval_record(
-            citation,
-            start_line=citation_start + offset,
-            end_line=citation_start + offset,
-            text=lines[offset],
-            comparison_identity=comparison_identity,
-            ledger_sha256=ledger_sha256,
-        )
-        smallest_response_bytes = canonical_size(best_response)
-        if smallest_response_bytes > budget.effective_max_bytes:
+        low, high = offset + 1, len(lines)
+        best_end = offset
+        smallest_response_bytes = 0
+        while low <= high:
+            end = (low + high) // 2
+            line_count = end - offset
+            text_content_bytes = (
+                json_content_prefix[end] - json_content_prefix[offset] + 2 * (line_count - 1)
+            )
+            response_bytes = _retrieval_response_size(
+                citation,
+                start_line=citation_start + offset,
+                end_line=citation_start + end - 1,
+                text_content_bytes=text_content_bytes,
+                comparison_identity=comparison_identity,
+                ledger_sha256=ledger_sha256,
+            )
+            if line_count == 1:
+                smallest_response_bytes = response_bytes
+            if response_bytes <= budget.effective_max_bytes:
+                best_end = end
+                low = end + 1
+            else:
+                high = end - 1
+        if best_end == offset:
             raise ChunkBudgetError(
                 "A single recorded source line cannot fit the effective agent budget",
                 details={
@@ -436,49 +470,55 @@ def _retrieval_ranges(
                     "effective_max_bytes": budget.effective_max_bytes,
                 },
             )
-        best_end = offset + 1
-        step = 2
-        first_failed_end: int | None = None
-        while best_end < len(lines):
-            end = min(len(lines), offset + step)
-            record, response = _retrieval_record(
-                citation,
-                start_line=citation_start + offset,
-                end_line=citation_start + end - 1,
-                text="\n".join(lines[offset:end]),
-                comparison_identity=comparison_identity,
-                ledger_sha256=ledger_sha256,
-            )
-            if canonical_size(response) <= budget.effective_max_bytes:
-                best_record, best_end = record, end
-                if end == len(lines):
-                    break
-                step *= 2
-            else:
-                first_failed_end = end
-                break
-        low = best_end + 1
-        high = (first_failed_end - 1) if first_failed_end is not None else best_end
-        while low <= high:
-            end = (low + high) // 2
-            record, response = _retrieval_record(
-                citation,
-                start_line=citation_start + offset,
-                end_line=citation_start + end - 1,
-                text="\n".join(lines[offset:end]),
-                comparison_identity=comparison_identity,
-                ledger_sha256=ledger_sha256,
-            )
-            response_bytes = canonical_size(response)
-            if response_bytes <= budget.effective_max_bytes:
-                best_record, best_end = record, end
-                low = end + 1
-            else:
-                high = end - 1
+        best_record, response = _retrieval_record(
+            citation,
+            start_line=citation_start + offset,
+            end_line=citation_start + best_end - 1,
+            text="\n".join(lines[offset:best_end]),
+            comparison_identity=comparison_identity,
+            ledger_sha256=ledger_sha256,
+        )
+        if int(response["actual_bytes"]) > budget.effective_max_bytes:
+            raise AssertionError("Retrieval byte accounting disagrees with range planning")
         retrievals[best_record["id"]] = best_record
         selected.append(best_record["id"])
         offset = best_end
     return tuple(selected)
+
+
+def _retrieval_response_size(
+    citation: dict[str, Any],
+    *,
+    start_line: int,
+    end_line: int,
+    text_content_bytes: int,
+    comparison_identity: str,
+    ledger_sha256: str,
+) -> int:
+    zeroed = {
+        "schema": "shiftory.retrieval/v1",
+        "comparison_identity": comparison_identity,
+        "ledger_sha256": ledger_sha256,
+        "range_id": "source-range_" + "0" * 24,
+        "citation_id": citation["id"],
+        "path": citation["path"],
+        "side": citation["side"],
+        "start_line": start_line,
+        "end_line": end_line,
+        "content_hash": "0" * 64,
+        "text": "",
+        "actual_bytes": 0,
+        "estimated_tokens": 0,
+        "token_estimate_formula": TOKEN_ESTIMATE_FORMULA,
+    }
+    static_size = canonical_size(zeroed) + text_content_bytes
+    actual = static_size
+    while True:
+        tokens = estimate_tokens(actual)
+        adjusted = static_size + len(str(actual)) - 1 + len(str(tokens)) - 1
+        if adjusted == actual:
+            return actual
+        actual = adjusted
 
 
 def _retrieval_record(
@@ -599,24 +639,33 @@ def _pack(
     if not atoms:
         return ()
     partitions: list[list[_Atom]] = []
-    current: list[_Atom] = []
     count_hint = len(atoms)
-    for atom in atoms:
-        candidate = [*current, atom]
-        payload = _chunk_payload(
-            candidate,
-            index=len(partitions) + 1,
-            count=count_hint,
-            comparison_identity=comparison_identity,
-            ledger_sha256=ledger_sha256,
-            strategy=strategy,
-            budget=budget,
-        )
-        payload = _inline_contexts(payload, citation_text, budget)
-        if int(payload["budget"]["actual_bytes"]) <= budget.effective_max_bytes:
-            current = candidate
-            continue
-        if not current:
+    offset = 0
+    while offset < len(atoms):
+        best_end = offset
+        step = 1
+        first_failed_end: int | None = None
+        while best_end < len(atoms):
+            end = min(len(atoms), offset + step)
+            payload = _chunk_payload(
+                list(atoms[offset:end]),
+                index=len(partitions) + 1,
+                count=count_hint,
+                comparison_identity=comparison_identity,
+                ledger_sha256=ledger_sha256,
+                strategy=strategy,
+                budget=budget,
+            )
+            if int(payload["budget"]["actual_bytes"]) <= budget.effective_max_bytes:
+                best_end = end
+                if end == len(atoms):
+                    break
+                step *= 2
+            else:
+                first_failed_end = end
+                break
+        if best_end == offset:
+            atom = atoms[offset]
             raise ChunkBudgetError(
                 "An irreducible ownership atom cannot fit the effective agent budget",
                 details={
@@ -628,32 +677,26 @@ def _pack(
                     "effective_max_bytes": budget.effective_max_bytes,
                 },
             )
-        partitions.append(current)
-        single = _chunk_payload(
-            [atom],
-            index=len(partitions) + 1,
-            count=count_hint,
-            comparison_identity=comparison_identity,
-            ledger_sha256=ledger_sha256,
-            strategy=strategy,
-            budget=budget,
-        )
-        single = _inline_contexts(single, citation_text, budget)
-        if int(single["budget"]["actual_bytes"]) > budget.effective_max_bytes:
-            raise ChunkBudgetError(
-                "An irreducible ownership atom cannot fit the effective agent budget",
-                details={
-                    "atom_id": atom.id,
-                    "ownership_target_ids": [
-                        target["evidence_id"] for target in atom.value["ownership_targets"]
-                    ],
-                    "required_bytes": single["budget"]["actual_bytes"],
-                    "effective_max_bytes": budget.effective_max_bytes,
-                },
+        low = best_end + 1
+        high = first_failed_end - 1 if first_failed_end is not None else best_end
+        while low <= high:
+            end = (low + high) // 2
+            payload = _chunk_payload(
+                list(atoms[offset:end]),
+                index=len(partitions) + 1,
+                count=count_hint,
+                comparison_identity=comparison_identity,
+                ledger_sha256=ledger_sha256,
+                strategy=strategy,
+                budget=budget,
             )
-        current = [atom]
-    if current:
-        partitions.append(current)
+            if int(payload["budget"]["actual_bytes"]) <= budget.effective_max_bytes:
+                best_end = end
+                low = end + 1
+            else:
+                high = end - 1
+        partitions.append(list(atoms[offset:best_end]))
+        offset = best_end
 
     graph_facts = sorted(
         evidence.get("graph", {}).get("facts", []),
@@ -748,16 +791,35 @@ def _inline_contexts(
     citation_text: dict[str, str],
     budget: AgentBudget,
 ) -> dict[str, Any]:
-    selected = chunk
-    for item_index, item in enumerate(chunk["work_items"]):
+    selected = deepcopy(chunk)
+    estimated_size = int(selected["budget"]["actual_bytes"])
+    replacements: list[tuple[int, int, dict[str, Any], int]] = []
+    for item_index, item in enumerate(selected["work_items"]):
         for context_index, context in enumerate(item["contexts"]):
-            candidate = deepcopy(selected)
-            candidate_context = candidate["work_items"][item_index]["contexts"][context_index]
-            candidate_context["text"] = citation_text[context["citation_id"]]
-            candidate_context["retrieval_range_ids"] = []
-            candidate = _finalize_chunk(candidate)
-            if int(candidate["budget"]["actual_bytes"]) <= budget.effective_max_bytes:
-                selected = candidate
+            if context["text"] is not None:
+                continue
+            inline_context = {
+                **context,
+                "text": citation_text[context["citation_id"]],
+                "retrieval_range_ids": [],
+            }
+            delta = _component_size(inline_context) - _component_size(context)
+            if delta <= 0 or estimated_size + delta <= budget.effective_max_bytes:
+                replacements.append((item_index, context_index, context, delta))
+                selected["work_items"][item_index]["contexts"][context_index] = inline_context
+                estimated_size += delta
+    selected = _finalize_chunk(selected)
+    while int(selected["budget"]["actual_bytes"]) > budget.effective_max_bytes:
+        positive = next(
+            (replacement for replacement in reversed(replacements) if replacement[3] > 0),
+            None,
+        )
+        if positive is None:
+            return chunk
+        replacements.remove(positive)
+        item_index, context_index, original, _delta = positive
+        selected["work_items"][item_index]["contexts"][context_index] = original
+        selected = _finalize_chunk(selected)
     return selected
 
 
@@ -773,21 +835,39 @@ def _include_graph_facts(
         if isinstance(path, str)
     }
     relevant = [fact for fact in facts if fact.get("path") in paths]
-    selected = chunk
+    selected = deepcopy(chunk)
+    estimated_size = int(selected["budget"]["actual_bytes"])
+    original_allowed = set(selected["allowed_citation_ids"])
+    included: list[tuple[dict[str, Any], bool]] = []
     omitted: list[str] = []
     for fact in relevant:
-        candidate = deepcopy(selected)
-        candidate["graph_facts"].append(fact)
-        candidate["allowed_citation_ids"] = sorted({*candidate["allowed_citation_ids"], fact["id"]})
-        candidate = _finalize_chunk(candidate)
-        if int(candidate["budget"]["actual_bytes"]) <= budget.effective_max_bytes:
-            selected = candidate
+        added_allowed = fact["id"] not in original_allowed
+        delta = _component_size(fact) + (1 if selected["graph_facts"] else 0)
+        if added_allowed:
+            delta += _component_size(fact["id"]) + (1 if selected["allowed_citation_ids"] else 0)
+        if estimated_size + delta <= budget.effective_max_bytes:
+            selected["graph_facts"].append(fact)
+            if added_allowed:
+                selected["allowed_citation_ids"].append(fact["id"])
+                selected["allowed_citation_ids"].sort()
+            included.append((fact, added_allowed))
+            estimated_size += delta
         else:
             omitted.append(fact["id"])
-    if omitted:
-        candidate = deepcopy(selected)
-        candidate["omitted_graph_fact_ids"] = omitted
-        candidate = _finalize_chunk(candidate)
-        if int(candidate["budget"]["actual_bytes"]) <= budget.effective_max_bytes:
-            selected = candidate
+    selected = _finalize_chunk(selected)
+    while int(selected["budget"]["actual_bytes"]) > budget.effective_max_bytes and included:
+        fact, added_allowed = included.pop()
+        selected["graph_facts"].pop()
+        if added_allowed:
+            selected["allowed_citation_ids"].remove(fact["id"])
+        omitted.insert(0, fact["id"])
+        selected = _finalize_chunk(selected)
+    for fact_id in omitted:
+        delta = _component_size(fact_id) + (1 if selected["omitted_graph_fact_ids"] else 0)
+        if int(selected["budget"]["actual_bytes"]) + delta <= budget.effective_max_bytes:
+            selected["omitted_graph_fact_ids"].append(fact_id)
+    selected = _finalize_chunk(selected)
+    while int(selected["budget"]["actual_bytes"]) > budget.effective_max_bytes:
+        selected["omitted_graph_fact_ids"].pop()
+        selected = _finalize_chunk(selected)
     return selected

@@ -100,9 +100,11 @@ Deterministic affinity prefers existing classifications, file/unit/hunk locality
 and valid Graphora relationships between changed files. A union-find groups each
 symbol relationship through one deterministic representative. Graph fact sort keys
 and canonical component sizes are computed once, then per-path size indexes skip
-fact ranges that cannot fit a chunk's remaining budget. Graphora-unavailable runs
-use the same hierarchy-only order. Candidate chunks are accepted only after their
-final canonical JSON fits the effective byte/token-derived ceiling.
+fact ranges that cannot fit a chunk's remaining budget. Runs whose merged graph
+status is not `available` ignore all retained partial facts for both affinity and
+chunk payloads, using the same hierarchy-only order as graph-disabled runs.
+Candidate chunks are accepted only after their final canonical JSON fits the
+effective byte/token-derived ceiling.
 
 ### 4. Enrich with Graphora
 
@@ -185,8 +187,18 @@ lock. The cache contains local derived source and graph data, not prompts,
 telemetry, reports, or cross-repository product memory.
 
 Private run writes also use atomic replacement rather than truncating an existing
-inode. Run reads and writes reject symbolic links, multiple hard links, foreign
-ownership, and non-private modes before consuming or replacing an artifact.
+inode. Run and chunk directory inodes are opened without following links, validated
+against their path metadata, and retained for the command lifetime. File creation,
+open, rename, temporary cleanup, and recursive run removal are performed relative to
+those pinned descriptors. Run reads and writes reject directory swaps, symbolic
+links, multiple hard links, foreign ownership, and non-private modes before
+consuming or replacing an artifact. Unsupported directory-descriptor platforms fail
+closed.
+
+V2 composition validates chunk-local authorization and produces one in-memory final
+explanation. Verification data and the rendered report are derived from that exact
+object rather than reopening the generated explanation pathname, so a later
+pathname replacement cannot change the accepted result.
 
 ## Boundaries and invariants
 

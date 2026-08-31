@@ -7,11 +7,11 @@ import hashlib
 import json
 import os
 import re
-import shutil
 import stat
 import sys
-import tempfile
 import uuid
+from contextlib import suppress
+from dataclasses import dataclass
 from importlib.resources import files
 from pathlib import Path
 from typing import Any, NoReturn, cast
@@ -315,8 +315,22 @@ def _install_skill(args: argparse.Namespace) -> int:
 _RUN_NAME = re.compile(r"[0-9a-f]{32}")
 
 
-def _require_private_directory(path: Path, label: str) -> None:
-    metadata = path.stat()
+def _require_private_directory_fd_support() -> None:
+    required = (os.open, os.stat, os.unlink, os.mkdir, os.rmdir, os.rename)
+    if (
+        os.name != "posix"
+        or not hasattr(os, "O_DIRECTORY")
+        or not hasattr(os, "O_NOFOLLOW")
+        or any(function not in os.supports_dir_fd for function in required)
+    ):
+        raise ValidationError(
+            "Private run artifacts require POSIX no-follow directory descriptor support"
+        )
+
+
+def _validate_private_directory_metadata(metadata: os.stat_result, path: Path, label: str) -> None:
+    if stat.S_ISLNK(metadata.st_mode):
+        raise ValidationError(f"{label} must not be a symbolic link: {path}")
     if not stat.S_ISDIR(metadata.st_mode):
         raise ValidationError(f"{label} is not a directory: {path}")
     if hasattr(os, "getuid") and metadata.st_uid != os.getuid():
@@ -325,17 +339,158 @@ def _require_private_directory(path: Path, label: str) -> None:
         raise ValidationError(f"{label} must be owner-only (mode 0700): {path}")
 
 
-def _require_private_file(path: Path, label: str) -> None:
-    metadata = path.lstat()
-    _validate_private_file_metadata(metadata, path, label)
+@dataclass(slots=True)
+class _PrivateDirectory:
+    path: Path
+    descriptor: int
+    device: int
+    inode: int
+    label: str
+
+    def verify(self) -> None:
+        opened = os.fstat(self.descriptor)
+        _validate_private_directory_metadata(opened, self.path, self.label)
+        try:
+            current = self.path.lstat()
+        except FileNotFoundError as error:
+            raise ValidationError(f"{self.label} path was replaced: {self.path}") from error
+        _validate_private_directory_metadata(current, self.path, self.label)
+        identity = (self.device, self.inode)
+        if (opened.st_dev, opened.st_ino) != identity or (
+            current.st_dev,
+            current.st_ino,
+        ) != identity:
+            raise ValidationError(f"{self.label} path was replaced: {self.path}")
+
+    def close(self) -> None:
+        if self.descriptor >= 0:
+            os.close(self.descriptor)
+            self.descriptor = -1
+
+    def __enter__(self) -> _PrivateDirectory:
+        return self
+
+    def __exit__(self, *_args: object) -> None:
+        self.close()
 
 
-def _require_private_file_if_present(path: Path, label: str) -> None:
+def _open_private_directory(
+    path: Path,
+    label: str,
+    *,
+    parent: _PrivateDirectory | None = None,
+) -> _PrivateDirectory:
+    _require_private_directory_fd_support()
+    flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+    if parent is None:
+        descriptor = os.open(path, flags)
+    else:
+        if path.parent != parent.path:
+            raise ValidationError(f"{label} is not an immediate child of {parent.path}")
+        parent.verify()
+        descriptor = os.open(path.name, flags, dir_fd=parent.descriptor)
     try:
-        metadata = path.lstat()
-    except FileNotFoundError:
-        return
+        opened = os.fstat(descriptor)
+        _validate_private_directory_metadata(opened, path, label)
+        current = path.lstat()
+        _validate_private_directory_metadata(current, path, label)
+        if (opened.st_dev, opened.st_ino) != (current.st_dev, current.st_ino):
+            raise ValidationError(f"{label} changed while it was being opened: {path}")
+        directory = _PrivateDirectory(path, descriptor, opened.st_dev, opened.st_ino, label)
+        descriptor = -1
+        return directory
+    finally:
+        if descriptor >= 0:
+            os.close(descriptor)
+
+
+def _require_private_directory(path: Path, label: str) -> None:
+    with _open_private_directory(path, label):
+        pass
+
+
+def _private_artifact_parent(
+    path: Path,
+    directory: _PrivateDirectory | None,
+) -> tuple[_PrivateDirectory, bool]:
+    if directory is not None:
+        if path.parent != directory.path:
+            raise ValidationError(f"Private artifact {path} is not inside {directory.path}")
+        return directory, False
+    return _open_private_directory(path.parent, "Private artifact directory"), True
+
+
+def _private_file_metadata(
+    path: Path,
+    label: str,
+    directory: _PrivateDirectory,
+) -> os.stat_result:
+    directory.verify()
+    try:
+        metadata = os.stat(
+            path.name,
+            dir_fd=directory.descriptor,
+            follow_symlinks=False,
+        )
+    except OSError as error:
+        raise ValidationError(f"{label} could not be inspected safely: {path}") from error
     _validate_private_file_metadata(metadata, path, label)
+    directory.verify()
+    return metadata
+
+
+def _require_private_file(
+    path: Path,
+    label: str,
+    *,
+    directory: _PrivateDirectory | None = None,
+) -> None:
+    parent, close_parent = _private_artifact_parent(path, directory)
+    try:
+        _private_file_metadata(path, label, parent)
+    finally:
+        if close_parent:
+            parent.close()
+
+
+def _require_private_file_if_present(
+    path: Path,
+    label: str,
+    *,
+    directory: _PrivateDirectory | None = None,
+) -> None:
+    parent, close_parent = _private_artifact_parent(path, directory)
+    try:
+        parent.verify()
+        try:
+            metadata = os.stat(
+                path.name,
+                dir_fd=parent.descriptor,
+                follow_symlinks=False,
+            )
+        except FileNotFoundError:
+            return
+        _validate_private_file_metadata(metadata, path, label)
+        parent.verify()
+    finally:
+        if close_parent:
+            parent.close()
+
+
+def _private_file_exists(path: Path, directory: _PrivateDirectory) -> bool:
+    if path.parent != directory.path:
+        raise ValidationError(f"Private artifact {path} is not inside {directory.path}")
+    directory.verify()
+    try:
+        os.stat(
+            path.name,
+            dir_fd=directory.descriptor,
+            follow_symlinks=False,
+        )
+    except FileNotFoundError:
+        return False
+    directory.verify()
+    return True
 
 
 def _validate_private_file_metadata(metadata: os.stat_result, path: Path, label: str) -> None:
@@ -388,51 +543,90 @@ def _new_run(
     repository_root: Path | None = None,
     *,
     use_environment: bool = True,
-) -> Path:
-    run = _run_root(repository_root, use_environment=use_environment) / uuid.uuid4().hex
-    run.mkdir(mode=0o700)
-    run.chmod(stat.S_IRWXU)
-    return run
+) -> _PrivateDirectory:
+    root_path = _run_root(repository_root, use_environment=use_environment)
+    with _open_private_directory(root_path, "Run root") as root:
+        name = uuid.uuid4().hex
+        root.verify()
+        os.mkdir(name, mode=0o700, dir_fd=root.descriptor)
+        run = root.path / name
+        directory = _open_private_directory(run, "Run directory", parent=root)
+        root.verify()
+        return directory
 
 
-def _write_private(path: Path, payload: str) -> None:
-    _require_private_directory(path.parent, "Private artifact directory")
+def _write_private(
+    path: Path,
+    payload: str,
+    *,
+    directory: _PrivateDirectory | None = None,
+) -> None:
+    parent, close_parent = _private_artifact_parent(path, directory)
+    temporary_name = f".{path.name}.{uuid.uuid4().hex}.tmp"
+    descriptor = -1
     try:
-        metadata = path.lstat()
-    except FileNotFoundError:
-        pass
-    else:
-        _validate_private_file_metadata(metadata, path, "Existing private artifact")
-
-    descriptor, temporary_name = tempfile.mkstemp(
-        prefix=f".{path.name}.", suffix=".tmp", dir=path.parent
-    )
-    temporary = Path(temporary_name)
-    try:
+        parent.verify()
+        try:
+            metadata = os.stat(
+                path.name,
+                dir_fd=parent.descriptor,
+                follow_symlinks=False,
+            )
+        except FileNotFoundError:
+            pass
+        else:
+            _validate_private_file_metadata(metadata, path, "Existing private artifact")
+        descriptor = os.open(
+            temporary_name,
+            os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
+            stat.S_IRUSR | stat.S_IWUSR,
+            dir_fd=parent.descriptor,
+        )
         os.fchmod(descriptor, stat.S_IRUSR | stat.S_IWUSR)
         with os.fdopen(descriptor, "wb") as stream:
             descriptor = -1
             stream.write(payload.encode("utf-8"))
             stream.flush()
             os.fsync(stream.fileno())
-        os.replace(temporary, path)
-        _require_private_file(path, "Written private artifact")
+        parent.verify()
+        os.rename(
+            temporary_name,
+            path.name,
+            src_dir_fd=parent.descriptor,
+            dst_dir_fd=parent.descriptor,
+        )
+        _require_private_file(path, "Written private artifact", directory=parent)
     finally:
         if descriptor >= 0:
             os.close(descriptor)
-        temporary.unlink(missing_ok=True)
+        with suppress(FileNotFoundError):
+            os.unlink(temporary_name, dir_fd=parent.descriptor)
+        if close_parent:
+            parent.close()
 
 
-def _read_private_bytes(path: Path, label: str) -> bytes:
-    flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+def _read_private_bytes(
+    path: Path,
+    label: str,
+    *,
+    directory: _PrivateDirectory | None = None,
+) -> bytes:
+    parent, close_parent = _private_artifact_parent(path, directory)
+    descriptor = -1
     try:
-        descriptor = os.open(path, flags)
-    except OSError as error:
-        raise ValidationError(f"{label} could not be opened safely: {path}") from error
-    try:
+        parent.verify()
+        descriptor = os.open(
+            path.name,
+            os.O_RDONLY | os.O_NOFOLLOW,
+            dir_fd=parent.descriptor,
+        )
         opened = os.fstat(descriptor)
         _validate_private_file_metadata(opened, path, label)
-        current = path.lstat()
+        current = os.stat(
+            path.name,
+            dir_fd=parent.descriptor,
+            follow_symlinks=False,
+        )
         _validate_private_file_metadata(current, path, label)
         if (opened.st_dev, opened.st_ino) != (current.st_dev, current.st_ino):
             raise ValidationError(f"{label} changed while it was being opened: {path}")
@@ -442,13 +636,31 @@ def _read_private_bytes(path: Path, label: str) -> bytes:
         _validate_private_file_metadata(finished, path, label)
         if (opened.st_dev, opened.st_ino) != (finished.st_dev, finished.st_ino):
             raise ValidationError(f"{label} changed while it was being read: {path}")
+        current = os.stat(
+            path.name,
+            dir_fd=parent.descriptor,
+            follow_symlinks=False,
+        )
+        if (opened.st_dev, opened.st_ino) != (current.st_dev, current.st_ino):
+            raise ValidationError(f"{label} changed while it was being read: {path}")
+        parent.verify()
         return payload
+    except OSError as error:
+        raise ValidationError(f"{label} could not be opened safely: {path}") from error
     finally:
-        os.close(descriptor)
+        if descriptor >= 0:
+            os.close(descriptor)
+        if close_parent:
+            parent.close()
 
 
-def _read_private_json(path: Path, label: str) -> dict[str, Any]:
-    payload = _read_private_bytes(path, label)
+def _read_private_json(
+    path: Path,
+    label: str,
+    *,
+    directory: _PrivateDirectory | None = None,
+) -> dict[str, Any]:
+    payload = _read_private_bytes(path, label, directory=directory)
     try:
         return parse_json_bytes(payload, str(path))
     except ValueError as error:
@@ -461,8 +673,9 @@ def _load_bound_json(
     expected_sha256: str,
     *,
     max_bytes: int | None = None,
+    directory: _PrivateDirectory | None = None,
 ) -> tuple[dict[str, Any], bytes]:
-    payload = _read_private_bytes(path, label)
+    payload = _read_private_bytes(path, label, directory=directory)
     if max_bytes is not None and len(payload) > max_bytes:
         raise ValidationError(
             f"{label} exceeds the effective on-disk byte cap",
@@ -477,14 +690,14 @@ def _load_bound_json(
     return value, payload
 
 
-def _resume_location(resume: Path) -> tuple[Path, Path]:
-    root = _run_root()
+def _resume_location(resume: Path) -> tuple[_PrivateDirectory, Path]:
+    root_path = _run_root()
     supplied = resume.expanduser()
     if supplied.is_symlink():
         raise ValidationError(f"Resume descriptor must not be a symbolic link: {supplied}")
-    descriptor_path = supplied.resolve()
+    descriptor_path = Path(os.path.abspath(supplied))
     try:
-        relative = descriptor_path.relative_to(root)
+        relative = descriptor_path.relative_to(root_path)
     except ValueError as exc:
         raise ValidationError(
             f"Resume descriptor is outside the Shiftory run root: {descriptor_path}"
@@ -497,28 +710,34 @@ def _resume_location(resume: Path) -> tuple[Path, Path]:
         raise ValidationError(
             f"Resume descriptor must be an immediate generated run/run.json path: {descriptor_path}"
         )
-    run = root / relative.parts[0]
-    if run.is_symlink():
-        raise ValidationError(f"Run directory must not be a symbolic link: {run}")
-    _require_private_directory(run, "Run directory")
-    _require_private_file(descriptor_path, "Resume descriptor")
-    return run, descriptor_path
+    with _open_private_directory(root_path, "Run root") as root:
+        run = _open_private_directory(
+            root.path / relative.parts[0],
+            "Run directory",
+            parent=root,
+        )
+        try:
+            _require_private_file(
+                descriptor_path,
+                "Resume descriptor",
+                directory=run,
+            )
+            root.verify()
+            return run, descriptor_path
+        except Exception:
+            run.close()
+            raise
 
 
 def _descriptor_path(descriptor: dict[str, Any], key: str, run: Path, filename: str) -> Path:
     value = descriptor.get(key)
     if not isinstance(value, str):
         raise ValidationError(f"Resume descriptor field {key!r} must be a path string")
-    path = Path(value).expanduser()
-    if path.is_symlink():
-        raise ValidationError(f"Resume descriptor field {key!r} targets a symbolic link")
-    resolved = path.resolve()
-    expected = (run / filename).resolve()
-    if resolved != expected:
-        raise ValidationError(
-            f"Resume descriptor field {key!r} must target {expected}, not {resolved}"
-        )
-    return resolved
+    path = Path(os.path.abspath(Path(value).expanduser()))
+    expected = run / filename
+    if path != expected:
+        raise ValidationError(f"Resume descriptor field {key!r} must target {expected}, not {path}")
+    return path
 
 
 def _run_artifact_path(value: Any, run: Path, relative: str, label: str) -> Path:
@@ -536,10 +755,60 @@ def _run_artifact_path(value: Any, run: Path, relative: str, label: str) -> Path
     return expected
 
 
-def _private_subdirectory(path: Path, label: str) -> None:
-    path.mkdir(mode=0o700)
-    path.chmod(stat.S_IRWXU)
-    _require_private_directory(path, label)
+def _private_subdirectory(
+    parent: _PrivateDirectory,
+    name: str,
+    label: str,
+) -> _PrivateDirectory:
+    path = parent.path / name
+    parent.verify()
+    os.mkdir(name, mode=0o700, dir_fd=parent.descriptor)
+    directory = _open_private_directory(path, label, parent=parent)
+    parent.verify()
+    return directory
+
+
+def _remove_private_directory_contents(directory: _PrivateDirectory) -> None:
+    directory.verify()
+    for name in sorted(os.listdir(directory.descriptor)):
+        directory.verify()
+        metadata = os.stat(
+            name,
+            dir_fd=directory.descriptor,
+            follow_symlinks=False,
+        )
+        if stat.S_ISDIR(metadata.st_mode):
+            child = _open_private_directory(
+                directory.path / name,
+                "Private run subdirectory",
+                parent=directory,
+            )
+            try:
+                _remove_private_directory_contents(child)
+            finally:
+                child.close()
+            directory.verify()
+            os.rmdir(name, dir_fd=directory.descriptor)
+        else:
+            directory.verify()
+            os.unlink(name, dir_fd=directory.descriptor)
+    directory.verify()
+
+
+def _remove_private_run(run: _PrivateDirectory) -> None:
+    run.verify()
+    with _open_private_directory(run.path.parent, "Run root") as root:
+        metadata = os.stat(
+            run.path.name,
+            dir_fd=root.descriptor,
+            follow_symlinks=False,
+        )
+        if (metadata.st_dev, metadata.st_ino) != (run.device, run.inode):
+            raise ValidationError(f"Run directory path was replaced: {run.path}")
+        _remove_private_directory_contents(run)
+        run.verify()
+        root.verify()
+        os.rmdir(run.path.name, dir_fd=root.descriptor)
 
 
 def _validate_analysis_args(args: argparse.Namespace) -> None:
@@ -584,7 +853,7 @@ def _validate_explain_args(args: argparse.Namespace) -> None:
 
 
 def _explain(args: argparse.Namespace) -> int:
-    run: Path | None = None
+    run: _PrivateDirectory | None = None
     try:
         _validate_explain_args(args)
         if args.resume:
@@ -593,6 +862,12 @@ def _explain(args: argparse.Namespace) -> int:
             run, descriptor_path = _new_run(resolve_repository(args.repo)), None
         return _explain_in_run(args, run, descriptor_path)
     except (ShiftoryError, OSError, ValueError) as error:
+        if run is not None:
+            try:
+                run.verify()
+            except (ShiftoryError, OSError):
+                run.close()
+                run = None
         if run is None:
             unsafe_repository = (
                 Path(error.details["repository_root"])
@@ -602,12 +877,12 @@ def _explain(args: argparse.Namespace) -> int:
                 else None
             )
             run = _new_run(unsafe_repository, use_environment=unsafe_repository is None)
-        diagnostic_path = run / "diagnostic.json"
+        diagnostic_path = run.path / "diagnostic.json"
         code = error.code if isinstance(error, ShiftoryError) else "validation_error"
         prior_details = error.details if isinstance(error, ShiftoryError) else None
         details = {
             **(prior_details or {}),
-            "artifacts": str(run),
+            "artifacts": str(run.path),
             "diagnostic": str(diagnostic_path),
         }
         _write_private(
@@ -620,22 +895,34 @@ def _explain(args: argparse.Namespace) -> int:
                     "details": details,
                 }
             ),
+            directory=run,
         )
         if isinstance(error, ShiftoryError):
             error.details = details
             raise
         raise ValidationError(str(error), details=details) from error
+    finally:
+        if run is not None:
+            run.close()
 
 
-def _explain_in_run(args: argparse.Namespace, run: Path, descriptor_path: Path | None) -> int:
+def _explain_in_run(
+    args: argparse.Namespace,
+    run: _PrivateDirectory,
+    descriptor_path: Path | None,
+) -> int:
     keep = args.keep_artifacts or os.environ.get("SHIFTORY_KEEP_ARTIFACTS") == "1"
     if args.resume:
         assert descriptor_path is not None
-        descriptor = _read_private_json(descriptor_path, "Resume descriptor")
+        descriptor = _read_private_json(
+            descriptor_path,
+            "Resume descriptor",
+            directory=run,
+        )
         if descriptor.get("schema") == "shiftory.run/v1":
-            evidence_path, explanation_path = _resume_v1(args, run, descriptor)
+            evidence, explanation = _resume_v1(args, run, descriptor)
         elif descriptor.get("schema") == "shiftory.run/v2":
-            evidence_path, explanation_path = _resume_v2(args, run, descriptor)
+            evidence, explanation = _resume_v2(args, run, descriptor)
         else:
             raise ValidationError("The resume descriptor is not a supported Shiftory run")
     else:
@@ -647,8 +934,9 @@ def _explain_in_run(args: argparse.Namespace, run: Path, descriptor_path: Path |
         if int(bounded["metrics"]["evidence_bytes"]) <= budget.effective_max_bytes:
             return _start_v1(run, args, bounded, budget)
         return _start_v2(run, args, complete, budget)
-    report = _verify_manifest_paths(evidence_path, explanation_path, private=True)
-    verification_path = run / "verification.json"
+    report = build_report(evidence, explanation)
+    _validate_schema(report, "report")
+    verification_path = run.path / "verification.json"
     _write_private(
         verification_path,
         canonical_json(
@@ -658,33 +946,34 @@ def _explain_in_run(args: argparse.Namespace, run: Path, descriptor_path: Path |
                 "coverage": report["coverage"],
             }
         ),
+        directory=run,
     )
-    payload = _render_manifest_paths(evidence_path, explanation_path, "markdown", private=True)
-    report_path = run / "report.md"
-    _write_private(report_path, payload)
+    payload = render_report_markdown(report)
+    report_path = run.path / "report.md"
+    _write_private(report_path, payload, directory=run)
     _write_or_print(payload, args.output)
     if not keep:
-        shutil.rmtree(run)
+        _remove_private_run(run)
     else:
         assert descriptor_path is not None
         descriptor["status"] = "complete"
         descriptor["verification"] = str(verification_path)
         if descriptor.get("schema") == "shiftory.run/v2":
             _validate_schema(descriptor, "run")
-        _write_private(descriptor_path, pretty_json(descriptor))
-        sys.stderr.write(f"Shiftory artifacts retained at {run}\n")
+        _write_private(descriptor_path, pretty_json(descriptor), directory=run)
+        sys.stderr.write(f"Shiftory artifacts retained at {run.path}\n")
     return 0
 
 
 def _start_v1(
-    run: Path,
+    run: _PrivateDirectory,
     args: argparse.Namespace,
     evidence: dict[str, Any],
     budget: AgentBudget,
 ) -> int:
-    evidence_path = run / "evidence.json"
-    _write_private(evidence_path, canonical_json(evidence))
-    template_path = run / "explanation.json"
+    evidence_path = run.path / "evidence.json"
+    _write_private(evidence_path, canonical_json(evidence), directory=run)
+    template_path = run.path / "explanation.json"
     _write_private(
         template_path,
         pretty_json(
@@ -695,8 +984,9 @@ def _start_v1(
                 "coverage_owners": [],
             }
         ),
+        directory=run,
     )
-    descriptor_path = run / "run.json"
+    descriptor_path = run.path / "run.json"
     evidence_budget = {
         "requested_bytes": args.max_evidence_bytes,
         "actual_bytes": evidence["metrics"]["evidence_bytes"],
@@ -716,7 +1006,7 @@ def _start_v1(
         "comparison_identity": evidence["comparison"]["identity"],
         "evidence": str(evidence_path),
         "explanation": str(template_path),
-        "report": str(run / "report.md"),
+        "report": str(run.path / "report.md"),
         "evidence_budget": evidence_budget,
         "schema_command": ["shiftory", "schema", "explanation"],
         "verify_command": [
@@ -744,55 +1034,56 @@ def _start_v1(
             str(template_path),
         ],
     }
-    _write_private(descriptor_path, pretty_json(descriptor))
+    _write_private(descriptor_path, pretty_json(descriptor), directory=run)
     sys.stdout.write(pretty_json({**descriptor, "descriptor": str(descriptor_path)}))
     return 0
 
 
 def _start_v2(
-    run: Path,
+    run: _PrivateDirectory,
     args: argparse.Namespace,
     evidence: dict[str, Any],
     budget: AgentBudget,
 ) -> int:
     planned = plan_chunks(evidence, budget)
     _validate_schema(planned.plan, "chunk-plan")
-    ledger_path = run / "ledger.json"
-    plan_path = run / "chunk-plan.json"
-    chunks_directory = run / "chunks"
-    _private_subdirectory(chunks_directory, "Chunk directory")
-    _write_private(ledger_path, canonical_json(evidence))
-    _write_private(plan_path, canonical_json(planned.plan))
-    descriptor_path = run / "run.json"
-    chunk_entries = []
-    for chunk in planned.chunks:
-        _validate_schema(chunk, "chunk")
-        index = int(chunk["index"])
-        payload_path = chunks_directory / f"chunk-{index:04d}.json"
-        explanation_path = chunks_directory / f"chunk-{index:04d}.explanation.json"
-        _write_private(payload_path, canonical_json(chunk))
-        _write_private(
-            explanation_path,
-            pretty_json(
+    ledger_path = run.path / "ledger.json"
+    plan_path = run.path / "chunk-plan.json"
+    chunks_path = run.path / "chunks"
+    with _private_subdirectory(run, "chunks", "Chunk directory") as chunks_directory:
+        _write_private(ledger_path, canonical_json(evidence), directory=run)
+        _write_private(plan_path, canonical_json(planned.plan), directory=run)
+        descriptor_path = run.path / "run.json"
+        chunk_entries = []
+        for chunk in planned.chunks:
+            _validate_schema(chunk, "chunk")
+            index = int(chunk["index"])
+            payload_path = chunks_path / f"chunk-{index:04d}.json"
+            explanation_path = chunks_path / f"chunk-{index:04d}.explanation.json"
+            _write_private(payload_path, canonical_json(chunk), directory=chunks_directory)
+            _write_private(
+                explanation_path,
+                pretty_json(
+                    {
+                        "schema": "shiftory.chunk-explanation/v1",
+                        "chunk_id": chunk["id"],
+                        "comparison_identity": chunk["comparison_identity"],
+                        "ledger_sha256": chunk["ledger_sha256"],
+                        "summary": "",
+                        "items": [],
+                        "coverage_owners": [],
+                    }
+                ),
+                directory=chunks_directory,
+            )
+            chunk_entries.append(
                 {
-                    "schema": "shiftory.chunk-explanation/v1",
-                    "chunk_id": chunk["id"],
-                    "comparison_identity": chunk["comparison_identity"],
-                    "ledger_sha256": chunk["ledger_sha256"],
-                    "summary": "",
-                    "items": [],
-                    "coverage_owners": [],
+                    "id": chunk["id"],
+                    "payload": str(payload_path),
+                    "payload_sha256": sha256_json(chunk),
+                    "explanation": str(explanation_path),
                 }
-            ),
-        )
-        chunk_entries.append(
-            {
-                "id": chunk["id"],
-                "payload": str(payload_path),
-                "payload_sha256": sha256_json(chunk),
-                "explanation": str(explanation_path),
-            }
-        )
+            )
     root = resolve_repository(args.repo)
     descriptor = {
         "schema": "shiftory.run/v2",
@@ -805,8 +1096,8 @@ def _start_v2(
         "plan": str(plan_path),
         "plan_sha256": sha256_json(planned.plan),
         "chunks": chunk_entries,
-        "final_explanation": str(run / "explanation.json"),
-        "report": str(run / "report.md"),
+        "final_explanation": str(run.path / "explanation.json"),
+        "report": str(run.path / "report.md"),
         "verification": None,
         "budget": {
             **planned.plan["budget"],
@@ -830,70 +1121,98 @@ def _start_v2(
         "resume_command": ["shiftory", "explain", "--resume", str(descriptor_path)],
     }
     _validate_schema(descriptor, "run")
-    _write_private(descriptor_path, pretty_json(descriptor))
+    _write_private(descriptor_path, pretty_json(descriptor), directory=run)
     sys.stdout.write(pretty_json({**descriptor, "descriptor": str(descriptor_path)}))
     return 0
 
 
 def _resume_v1(
     args: argparse.Namespace,
-    run: Path,
+    run: _PrivateDirectory,
     descriptor: dict[str, Any],
-) -> tuple[Path, Path]:
+) -> tuple[dict[str, Any], dict[str, Any]]:
     if descriptor.get("status") != "awaiting_explanation":
         raise ValidationError("The resume descriptor is not awaiting an explanation")
     if args.explanation is None:
         raise ValidationError("--resume requires --explanation")
-    evidence_path = _descriptor_path(descriptor, "evidence", run, "evidence.json")
-    recorded_explanation = _descriptor_path(descriptor, "explanation", run, "explanation.json")
-    report_path = _descriptor_path(descriptor, "report", run, "report.md")
-    _require_private_file_if_present(report_path, "Report")
-    _require_private_file(evidence_path, "Evidence")
-    recorded_identity = descriptor.get("comparison_identity")
-    evidence_identity = (
-        _read_private_json(evidence_path, "Evidence").get("comparison", {}).get("identity")
+    evidence_path = _descriptor_path(descriptor, "evidence", run.path, "evidence.json")
+    recorded_explanation = _descriptor_path(
+        descriptor,
+        "explanation",
+        run.path,
+        "explanation.json",
     )
+    report_path = _descriptor_path(descriptor, "report", run.path, "report.md")
+    _require_private_file_if_present(report_path, "Report", directory=run)
+    _require_private_file(evidence_path, "Evidence", directory=run)
+    recorded_identity = descriptor.get("comparison_identity")
+    evidence = _read_private_json(evidence_path, "Evidence", directory=run)
+    evidence_identity = evidence.get("comparison", {}).get("identity")
     if not isinstance(recorded_identity, str) or evidence_identity != recorded_identity:
         raise ValidationError("Evidence does not match the descriptor comparison identity")
-    explanation_path = args.explanation.expanduser().resolve()
+    explanation_path = Path(os.path.abspath(args.explanation.expanduser()))
     if explanation_path != recorded_explanation:
         raise ValidationError(
             f"--explanation must be the run's recorded path: {recorded_explanation}"
         )
-    _require_private_file(explanation_path, "Explanation")
-    return evidence_path, explanation_path
+    _require_private_file(explanation_path, "Explanation", directory=run)
+    explanation = _read_private_json(explanation_path, "Explanation", directory=run)
+    _validate_schema(evidence, "evidence")
+    _validate_schema(explanation, "explanation")
+    return evidence, explanation
 
 
 def _load_v2_core(
-    run: Path,
+    run: _PrivateDirectory,
     descriptor: dict[str, Any],
 ) -> tuple[Path, dict[str, Any], dict[str, Any], tuple[dict[str, Any], ...]]:
     _validate_schema(descriptor, "run")
     repository_root = Path(descriptor["repository_root"]).resolve()
     try:
-        run.relative_to(repository_root)
+        run.path.relative_to(repository_root)
     except ValueError:
         pass
     else:
         raise ValidationError("A chunked run must be stored outside its repository")
     final_path = _run_artifact_path(
-        descriptor["final_explanation"], run, "explanation.json", "Final explanation"
+        descriptor["final_explanation"],
+        run.path,
+        "explanation.json",
+        "Final explanation",
     )
-    _require_private_file_if_present(final_path, "Final explanation")
-    report_path = _run_artifact_path(descriptor["report"], run, "report.md", "Report")
-    _require_private_file_if_present(report_path, "Report")
+    _require_private_file_if_present(final_path, "Final explanation", directory=run)
+    report_path = _run_artifact_path(descriptor["report"], run.path, "report.md", "Report")
+    _require_private_file_if_present(report_path, "Report", directory=run)
     verification_value = descriptor["verification"]
     if verification_value is not None:
         verification_path = _run_artifact_path(
-            verification_value, run, "verification.json", "Verification"
+            verification_value,
+            run.path,
+            "verification.json",
+            "Verification",
         )
-        _require_private_file_if_present(verification_path, "Verification")
-    ledger_path = _run_artifact_path(descriptor["ledger"], run, "ledger.json", "Ledger")
-    plan_path = _run_artifact_path(descriptor["plan"], run, "chunk-plan.json", "Chunk plan")
-    _require_private_file(ledger_path, "Ledger")
-    _require_private_file(plan_path, "Chunk plan")
-    evidence, ledger_payload = _load_bound_json(ledger_path, "Ledger", descriptor["ledger_sha256"])
-    plan, _plan_payload = _load_bound_json(plan_path, "Chunk plan", descriptor["plan_sha256"])
+        _require_private_file_if_present(verification_path, "Verification", directory=run)
+    ledger_path = _run_artifact_path(descriptor["ledger"], run.path, "ledger.json", "Ledger")
+    plan_path = _run_artifact_path(
+        descriptor["plan"],
+        run.path,
+        "chunk-plan.json",
+        "Chunk plan",
+    )
+    _require_private_file(ledger_path, "Ledger", directory=run)
+    _require_private_file(plan_path, "Chunk plan", directory=run)
+    evidence, ledger_payload = _load_bound_json(
+        ledger_path,
+        "Ledger",
+        descriptor["ledger_sha256"],
+        directory=run,
+    )
+    plan, _plan_payload = _load_bound_json(
+        plan_path,
+        "Chunk plan",
+        descriptor["plan_sha256"],
+        directory=run,
+    )
     _validate_schema(evidence, "evidence")
     _validate_schema(plan, "chunk-plan")
     if evidence["metrics"]["evidence_bytes"] != len(ledger_payload):
@@ -919,57 +1238,74 @@ def _load_v2_core(
     plan_chunks_value = plan["chunks"]
     if len(descriptor_chunks) != len(plan_chunks_value):
         raise ValidationError("The run and chunk plan contain different chunk sets")
-    for offset, (entry, plan_entry) in enumerate(
-        zip(descriptor_chunks, plan_chunks_value, strict=True), 1
-    ):
-        payload_path = _run_artifact_path(
-            entry["payload"], run, f"chunks/chunk-{offset:04d}.json", f"Chunk {offset}"
-        )
-        expected_explanation = f"chunks/chunk-{offset:04d}.explanation.json"
-        explanation_path = _run_artifact_path(
-            entry["explanation"], run, expected_explanation, f"Chunk explanation {offset}"
-        )
-        _require_private_file_if_present(explanation_path, f"Chunk explanation {offset}")
-        _require_private_file(payload_path, f"Chunk {offset}")
-        chunk, chunk_payload = _load_bound_json(
-            payload_path,
-            f"Chunk {offset}",
-            entry["payload_sha256"],
-            max_bytes=plan["budget"]["effective_max_bytes"],
-        )
-        _validate_schema(chunk, "chunk")
-        digest = hashlib.sha256(chunk_payload).hexdigest()
-        if (
-            entry["id"] != chunk["id"]
-            or plan_entry["id"] != chunk["id"]
-            or entry["payload_sha256"] != digest
-            or plan_entry["payload_sha256"] != digest
-            or chunk["id"] != chunk_identity(chunk)
+    chunks_path = run.path / "chunks"
+    with _open_private_directory(chunks_path, "Chunk directory", parent=run) as chunks_directory:
+        for offset, (entry, plan_entry) in enumerate(
+            zip(descriptor_chunks, plan_chunks_value, strict=True), 1
         ):
-            raise ValidationError(f"Chunk {offset} identity or digest is invalid")
-        target_ids = sorted(
-            target["evidence_id"]
-            for item in chunk["work_items"]
-            for target in item["ownership_targets"]
-        )
-        range_ids = sorted(
-            range_id
-            for item in chunk["work_items"]
-            for context in item["contexts"]
-            for range_id in context["retrieval_range_ids"]
-        )
-        if chunk["budget"]["actual_bytes"] != len(chunk_payload):
-            raise ValidationError(f"Chunk {offset} recorded byte size is invalid")
-        if len(chunk_payload) > plan["budget"]["effective_max_bytes"]:
-            raise ValidationError(f"Chunk {offset} exceeds the effective on-disk byte cap")
-        if (
-            plan_entry["index"] != offset
-            or plan_entry["ownership_target_ids"] != target_ids
-            or plan_entry["retrieval_range_ids"] != range_ids
-            or chunk["budget"]["estimated_tokens"] != estimate_tokens(len(chunk_payload))
-        ):
-            raise ValidationError(f"Chunk {offset} plan assignment or budget is invalid")
-        chunks.append(chunk)
+            payload_path = _run_artifact_path(
+                entry["payload"],
+                run.path,
+                f"chunks/chunk-{offset:04d}.json",
+                f"Chunk {offset}",
+            )
+            expected_explanation = f"chunks/chunk-{offset:04d}.explanation.json"
+            explanation_path = _run_artifact_path(
+                entry["explanation"],
+                run.path,
+                expected_explanation,
+                f"Chunk explanation {offset}",
+            )
+            _require_private_file_if_present(
+                explanation_path,
+                f"Chunk explanation {offset}",
+                directory=chunks_directory,
+            )
+            _require_private_file(
+                payload_path,
+                f"Chunk {offset}",
+                directory=chunks_directory,
+            )
+            chunk, chunk_payload = _load_bound_json(
+                payload_path,
+                f"Chunk {offset}",
+                entry["payload_sha256"],
+                max_bytes=plan["budget"]["effective_max_bytes"],
+                directory=chunks_directory,
+            )
+            _validate_schema(chunk, "chunk")
+            digest = hashlib.sha256(chunk_payload).hexdigest()
+            if (
+                entry["id"] != chunk["id"]
+                or plan_entry["id"] != chunk["id"]
+                or entry["payload_sha256"] != digest
+                or plan_entry["payload_sha256"] != digest
+                or chunk["id"] != chunk_identity(chunk)
+            ):
+                raise ValidationError(f"Chunk {offset} identity or digest is invalid")
+            target_ids = sorted(
+                target["evidence_id"]
+                for item in chunk["work_items"]
+                for target in item["ownership_targets"]
+            )
+            range_ids = sorted(
+                range_id
+                for item in chunk["work_items"]
+                for context in item["contexts"]
+                for range_id in context["retrieval_range_ids"]
+            )
+            if chunk["budget"]["actual_bytes"] != len(chunk_payload):
+                raise ValidationError(f"Chunk {offset} recorded byte size is invalid")
+            if len(chunk_payload) > plan["budget"]["effective_max_bytes"]:
+                raise ValidationError(f"Chunk {offset} exceeds the effective on-disk byte cap")
+            if (
+                plan_entry["index"] != offset
+                or plan_entry["ownership_target_ids"] != target_ids
+                or plan_entry["retrieval_range_ids"] != range_ids
+                or chunk["budget"]["estimated_tokens"] != estimate_tokens(len(chunk_payload))
+            ):
+                raise ValidationError(f"Chunk {offset} plan assignment or budget is invalid")
+            chunks.append(chunk)
     expected_budget["max_chunk_bytes"] = max(
         int(chunk["budget"]["actual_bytes"]) for chunk in chunks
     )
@@ -999,50 +1335,71 @@ def _load_v2_core(
 
 def _resume_v2(
     args: argparse.Namespace,
-    run: Path,
+    run: _PrivateDirectory,
     descriptor: dict[str, Any],
-) -> tuple[Path, Path]:
+) -> tuple[dict[str, Any], dict[str, Any]]:
     if descriptor.get("status") != "awaiting_chunks":
         raise ValidationError("The chunked run is not awaiting chunk explanations")
     if args.explanation is not None:
         raise ValidationError("A chunked resume uses its recorded per-chunk explanations")
-    ledger_path, evidence, plan, chunks = _load_v2_core(run, descriptor)
+    _ledger_path, evidence, plan, chunks = _load_v2_core(run, descriptor)
     explanations = []
-    for offset, entry in enumerate(descriptor["chunks"], 1):
-        explanation_path = _run_artifact_path(
-            entry["explanation"],
-            run,
-            f"chunks/chunk-{offset:04d}.explanation.json",
-            f"Chunk explanation {offset}",
-        )
-        if not explanation_path.exists():
-            raise CompositionError(
-                f"Chunk explanation {offset} is missing",
-                details={"path": str(explanation_path)},
+    with _open_private_directory(
+        run.path / "chunks",
+        "Chunk directory",
+        parent=run,
+    ) as chunks_directory:
+        for offset, entry in enumerate(descriptor["chunks"], 1):
+            explanation_path = _run_artifact_path(
+                entry["explanation"],
+                run.path,
+                f"chunks/chunk-{offset:04d}.explanation.json",
+                f"Chunk explanation {offset}",
             )
-        _require_private_file(explanation_path, f"Chunk explanation {offset}")
-        explanation = _read_private_json(explanation_path, f"Chunk explanation {offset}")
-        _validate_schema(explanation, "chunk-explanation")
-        explanations.append(explanation)
+            try:
+                explanation = _read_private_json(
+                    explanation_path,
+                    f"Chunk explanation {offset}",
+                    directory=chunks_directory,
+                )
+            except ValidationError as error:
+                if not _private_file_exists(explanation_path, chunks_directory):
+                    raise CompositionError(
+                        f"Chunk explanation {offset} is missing",
+                        details={"path": str(explanation_path)},
+                    ) from error
+                raise
+            _validate_schema(explanation, "chunk-explanation")
+            explanations.append(explanation)
     composed = compose_chunks(evidence, plan, chunks, tuple(explanations))
     _validate_schema(composed, "explanation")
     final_path = _run_artifact_path(
-        descriptor["final_explanation"], run, "explanation.json", "Final explanation"
+        descriptor["final_explanation"],
+        run.path,
+        "explanation.json",
+        "Final explanation",
     )
-    _write_private(final_path, canonical_json(composed))
-    return ledger_path, final_path
+    _write_private(final_path, canonical_json(composed), directory=run)
+    return evidence, composed
 
 
 def _retrieve(args: argparse.Namespace) -> int:
     run, descriptor_path = _resume_location(args.run)
-    descriptor = _read_private_json(descriptor_path, "Resume descriptor")
-    if descriptor.get("schema") != "shiftory.run/v2":
-        raise ValidationError("Recorded-range retrieval requires shiftory.run/v2")
-    _, evidence, plan, _ = _load_v2_core(run, descriptor)
-    response = retrieve_source_range(descriptor, evidence, plan, args.range_id)
-    _validate_schema(response, "retrieval")
-    sys.stdout.write(canonical_json(response))
-    return 0
+    try:
+        descriptor = _read_private_json(
+            descriptor_path,
+            "Resume descriptor",
+            directory=run,
+        )
+        if descriptor.get("schema") != "shiftory.run/v2":
+            raise ValidationError("Recorded-range retrieval requires shiftory.run/v2")
+        _, evidence, plan, _ = _load_v2_core(run, descriptor)
+        response = retrieve_source_range(descriptor, evidence, plan, args.range_id)
+        _validate_schema(response, "retrieval")
+        sys.stdout.write(canonical_json(response))
+        return 0
+    finally:
+        run.close()
 
 
 def _dispatch(args: argparse.Namespace) -> int:

@@ -181,6 +181,9 @@ and all of its related hashes.
 Run files must remain single-link, owner-only regular files. Shiftory atomically
 replaces generated outputs instead of truncating their existing inodes, and rejects
 symbolic or hard-linked artifacts rather than following or mutating them.
+Private run processing also requires POSIX no-follow and directory-relative file
+operations. Platforms without those primitives fail closed rather than falling back
+to pathname-based artifact access.
 
 ## Classification
 

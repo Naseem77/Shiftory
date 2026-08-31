@@ -4,6 +4,7 @@ import copy
 import os
 import subprocess
 import time
+from dataclasses import asdict
 
 import pytest
 from jsonschema import Draft202012Validator
@@ -19,7 +20,8 @@ from shiftory.chunking.planner import (
     sha256_json,
 )
 from shiftory.errors import ChunkBudgetError, CompositionError, CoverageError
-from shiftory.evidence.builder import AnalyzeOptions, analyze_complete
+from shiftory.evidence.builder import AnalyzeOptions, _merge_graph_results, analyze_complete
+from shiftory.models.core import GraphFact, GraphResult
 from shiftory.models.json import canonical_json
 from shiftory.schemas import load_schema
 
@@ -305,6 +307,74 @@ def test_graph_unavailable_uses_the_same_deterministic_hierarchy_order(
     ]
     assert unavailable.plan["grouping_strategy"] == "deterministic-fallback"
     assert unavailable_paths == disabled_paths
+
+
+def test_partially_unavailable_graph_ignores_all_retained_facts_for_chunks(
+    repo_factory,
+) -> None:
+    evidence = _large_evidence(repo_factory, file_count=3)
+    disabled = plan_chunks(evidence, AgentBudget(4_000))
+    definition = GraphFact(
+        "fact-definition",
+        "definition",
+        "after",
+        "file0.py",
+        1,
+        "shared",
+        None,
+        "extracted",
+        "graphora:tree-sitter",
+    )
+    caller = GraphFact(
+        "fact-caller",
+        "caller",
+        "after",
+        "file2.py",
+        None,
+        "shared",
+        "caller",
+        "unavailable",
+        "graphora:unsupported-language",
+    )
+    merged = _merge_graph_results(
+        GraphResult("available", "graphora", "0.2.1", (definition,)),
+        GraphResult(
+            "unavailable",
+            "graphora",
+            "0.2.1",
+            (caller,),
+            ({"code": "graphora_unavailable", "message": "after failed"},),
+        ),
+    )
+    unavailable_evidence = copy.deepcopy(evidence)
+    unavailable_evidence["graph"] = asdict(merged)
+
+    unavailable = plan_chunks(unavailable_evidence, AgentBudget(4_000))
+
+    disabled_work = [[item["id"] for item in chunk["work_items"]] for chunk in disabled.chunks]
+    unavailable_work = [
+        [item["id"] for item in chunk["work_items"]] for chunk in unavailable.chunks
+    ]
+
+    def fallback_payload(chunk):
+        value = copy.deepcopy(chunk)
+        value["id"] = ""
+        value["ledger_sha256"] = ""
+        return value
+
+    assert merged.status == "unavailable"
+    assert merged.facts
+    assert unavailable.plan["grouping_strategy"] == "deterministic-fallback"
+    assert unavailable_work == disabled_work
+    assert [fallback_payload(chunk) for chunk in unavailable.chunks] == [
+        fallback_payload(chunk) for chunk in disabled.chunks
+    ]
+    assert all(not chunk["graph_facts"] for chunk in unavailable.chunks)
+    assert all(not chunk["omitted_graph_fact_ids"] for chunk in unavailable.chunks)
+    assert all(
+        not ({definition.id, caller.id} & set(chunk["allowed_citation_ids"]))
+        for chunk in unavailable.chunks
+    )
 
 
 def test_repeated_symbol_grouping_uses_bounded_union_work(monkeypatch) -> None:

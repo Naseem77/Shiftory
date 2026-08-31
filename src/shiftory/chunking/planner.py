@@ -666,8 +666,11 @@ def _graph_components(
     evidence: dict[str, Any],
     changed_paths: set[str],
 ) -> tuple[Literal["graph-guided", "deterministic-fallback"], dict[str, str]]:
+    graph = evidence.get("graph", {})
+    if not isinstance(graph, dict) or graph.get("status") != "available":
+        return "deterministic-fallback", {path: path for path in sorted(changed_paths)}
     disjoint = _DisjointSet(changed_paths)
-    facts = evidence.get("graph", {}).get("facts", [])
+    facts = graph.get("facts", [])
     definitions: dict[tuple[str, str], set[str]] = defaultdict(set)
     relations: dict[tuple[str, str], set[str]] = defaultdict(set)
     for fact in facts:
@@ -691,9 +694,8 @@ def _graph_components(
         for path in sorted(participants):
             linked = disjoint.union(representative, path) or linked
     component_by_path = {path: disjoint.find(path) for path in sorted(changed_paths)}
-    status = evidence.get("graph", {}).get("status")
     strategy: Literal["graph-guided", "deterministic-fallback"] = (
-        "graph-guided" if status == "available" and linked else "deterministic-fallback"
+        "graph-guided" if linked else "deterministic-fallback"
     )
     return strategy, component_by_path
 
@@ -770,7 +772,13 @@ def _pack(
         partitions.append(list(atoms[offset:best_end]))
         offset = best_end
 
-    graph_facts_by_path = _index_graph_facts(evidence.get("graph", {}).get("facts", []))
+    graph = evidence.get("graph", {})
+    graph_facts = (
+        graph.get("facts", [])
+        if isinstance(graph, dict) and graph.get("status") == "available"
+        else []
+    )
+    graph_facts_by_path = _index_graph_facts(graph_facts)
     finalized = []
     for index, partition in enumerate(partitions, 1):
         chunk = _chunk_payload(

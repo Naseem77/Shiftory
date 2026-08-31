@@ -24,16 +24,22 @@ Git patch acquisition ──► parser ──► line/span/hunk/unit ledger
                                                                   ▼
                                                          normalized optional facts
                                            │
-ledger + citations + facts ────────────────┴──► evidence/v1
+ledger + citations + facts ────────────────┴──► complete evidence/v1 ledger
                                                     │
-                                                    ▼
-                                         agent explanation/v1
-                                                    │
-                                                    ▼
-                                    schema + ownership + policy validation
-                                                    │
-                                                    ▼
-                                          report/v1 or Markdown
+                                     fits budget ───┴── exceeds budget
+                                         │                    │
+                                         ▼                    ▼
+                                  agent explanation/v1   chunk plan + bounded chunks
+                                                              │
+                                                              ▼
+                                                  chunk explanations + composition
+                                         │                    │
+                                         └─────────┬──────────┘
+                                                   ▼
+                                     schema + ownership + policy validation
+                                                   │
+                                                   ▼
+                                         report/v1 or Markdown
 ```
 
 ## Runtime stages
@@ -84,8 +90,16 @@ organize evidence; they are not judgments about impact or correctness.
 
 Changed spans become exact before/after source citations. Metrics count files,
 units, hunks, spans, added/deleted lines, patch bytes, evidence bytes, and graph
-facts. If `--max-evidence-bytes` is exceeded, the current implementation retains
-the complete ledger and records a diagnostic rather than silently truncating it.
+facts. Direct `analyze` preserves the complete ledger and records a diagnostic when
+its mandatory floor exceeds `--max-evidence-bytes`.
+
+`explain` first attempts that compatible v1 packet. If the mandatory floor is still
+too large, a v2 private run keeps the complete ledger outside agent payloads.
+Replacement-linked spans and non-text units become indivisible work atoms.
+Deterministic affinity prefers existing classifications, file/unit/hunk locality,
+and valid Graphora relationships between changed files. Graphora-unavailable runs
+use the same hierarchy-only order. Candidate chunks are accepted only after their
+final canonical JSON fits the effective byte/token-derived ceiling.
 
 ### 4. Enrich with Graphora
 
@@ -120,10 +134,22 @@ parser provenance and confidence; regex-extracted definitions cannot remain
 `--graphora required` fails instead. `--graphora off` skips source snapshot
 materialization and enrichment.
 
-### 5. Explain, verify, and render
+### 5. Retrieve omitted source safely
 
-The evidence packet is deterministic. An agent reads it and writes a separate
-`shiftory.explanation/v1` manifest. The validator then:
+Chunk source text that does not fit is represented by pre-recorded inclusive source
+ranges. `shiftory retrieve` accepts only a generated run and range ID: there is no
+path or coordinate input. It revalidates private artifact paths, schemas, identities,
+digests, repository/comparison identity, mutable fingerprints, exact source
+coordinates, and content hashes. Any mismatch fails closed.
+
+### 6. Explain, verify, and render
+
+The v1 evidence packet and every v2 chunk are deterministic. A v1 agent writes
+`shiftory.explanation/v1`. A v2 agent writes one bound
+`shiftory.chunk-explanation/v1` per chunk, directly owning each assigned span or
+non-text unit. Composition rejects missing/duplicate/stale/tampered chunks, expands
+span owners to every global changed-line ID, and emits the existing explanation/v1.
+The validator then:
 
 - validates both schemas;
 - validates item kinds and confidence;
@@ -142,6 +168,8 @@ It never upgrades accounting success into a claim of semantic correctness.
 |---|---|---|
 | Git objects, index, working files | repository/user | Read-only to Shiftory |
 | Evidence JSON | Shiftory | Deterministic command output or run artifact |
+| Chunk plan/payloads | Shiftory | Deterministic private v2 run artifacts |
+| Recorded retrieval range | Shiftory | Served only after source/hash revalidation |
 | Explanation manifest | agent/user | Authored after evidence collection |
 | Report | Shiftory | Built only after validation |
 | Source/Graphora cache | Shiftory | Repository-scoped; retained until `cache clear` |
@@ -166,7 +194,9 @@ The invariants that define Shiftory's correctness boundary are:
 4. changed source ranges fit the corresponding before/after source;
 5. every ownable evidence ID has exactly one explanation owner;
 6. all lines in a span have the same effective owner as that span; and
-7. citations are valid references but never affect ownership counts.
+7. citations are valid references but never affect ownership counts;
+8. each v2 span or non-text ownership target occurs in exactly one chunk; and
+9. Graphora affinity never creates, removes, or owns Git ledger work.
 
 Violating one of these invariants is an error, not a partial-success report.
 

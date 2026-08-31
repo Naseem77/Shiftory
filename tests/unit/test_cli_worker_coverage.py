@@ -133,6 +133,11 @@ def test_cli_main_exercises_real_workflow_in_process(repo_factory, monkeypatch, 
     assert caught.value.code == 2
     assert json.loads(capsys.readouterr().err)["error"] == "validation_error"
 
+    with pytest.raises(SystemExit) as caught:
+        cli.main(["explain", "--graphora", "off", "--max-evidence-tokens", "-1"])
+    assert caught.value.code == 2
+    assert json.loads(capsys.readouterr().err)["error"] == "validation_error"
+
 
 def test_cli_main_explain_resume_in_process(repo_factory, monkeypatch, capsys) -> None:
     repository = repo_factory()

@@ -1,12 +1,17 @@
 # Evidence and explanation formats
 
-Shiftory bundles three JSON Schema Draft 2020-12 contracts:
+Shiftory bundles these JSON Schema Draft 2020-12 contracts:
 
 | Schema | Purpose |
 |---|---|
 | `shiftory.evidence/v1` | Deterministic Git/source ledger plus optional graph facts |
 | `shiftory.explanation/v1` | Agent-authored explanation and exact ownership table |
 | `shiftory.report/v1` | Verified, renderable result |
+| `shiftory.run/v2` | Private chunked-run descriptor |
+| `shiftory.chunk-plan/v1` | Global assignment and recorded retrieval ledger |
+| `shiftory.chunk/v1` | Strictly bounded agent work payload |
+| `shiftory.chunk-explanation/v1` | Agent output bound to one chunk |
+| `shiftory.retrieval/v1` | Hash-verified recorded-range response |
 
 Print the authoritative schemas:
 
@@ -14,6 +19,11 @@ Print the authoritative schemas:
 shiftory schema evidence
 shiftory schema explanation
 shiftory schema report
+shiftory schema run
+shiftory schema chunk-plan
+shiftory schema chunk
+shiftory schema chunk-explanation
+shiftory schema retrieval
 ```
 
 This guide explains the contracts but does not replace those bundled schemas.
@@ -116,19 +126,19 @@ The two systems answer different questions:
 
 ### Exact ownership rules
 
-`coverage_owners` must directly map each of these ownable IDs exactly once:
+`coverage_owners` must directly map each of these IDs exactly once:
 
-1. every added or deleted changed-line ID;
-2. every change-span ID; and
-3. every non-text unit ID (`binary`, `mode`, `rename`, `copy`, `submodule`, or
+1. every added or deleted changed-line ID; and
+2. every non-text unit ID (`binary`, `mode`, `rename`, `copy`, `submodule`, or
    `unsupported`).
 
 Every `owner_id` must identify an explanation item. Duplicate entries are invalid
 even when they repeat the same owner. Missing entries are invalid.
 
-All changed lines in a span must share one effective owner, and the span's direct
-owner must be that same item. This prevents a contiguous canonical span from
-being split across unrelated explanations.
+Every span must also have exactly one effective owner. Its changed lines must all
+share one owner; the span inherits that owner when it has no direct entry. If a
+span is listed directly, its owner must match the inherited line owner. This
+prevents a contiguous canonical span from splitting across unrelated explanations.
 
 Text hunk and text-unit IDs are not placed in `coverage_owners`. A textual hunk is
 covered when every descendant changed line is owned. A text unit is covered when
@@ -220,8 +230,42 @@ citation references were verified, not semantic correctness.
 
 ## Size budget behavior
 
-`--max-evidence-bytes` defaults to 1,000,000 bytes. In the current v1
-implementation, exceeding that value does not remove ledger records or source
-citations. The complete evidence is retained and an `evidence_budget_exceeded`
-diagnostic records requested and actual sizes. Consumers must not treat that
-diagnostic as truncation or as successful compliance with the requested size.
+`--max-evidence-bytes` defaults to 1,000,000 bytes. Direct `analyze` preserves v1
+compatibility: it first omits source citation text, but if the mandatory ledger
+still exceeds the value it retains the ledger and emits
+`evidence_budget_exceeded`. Consumers must not treat that direct-analyze diagnostic
+as successful compliance.
+
+`explain` instead switches to `shiftory.run/v2` when that mandatory floor cannot
+fit. The complete evidence/v1 ledger remains a private, authoritative artifact.
+Each chunk owns whole replacement-linked span atoms or whole non-text units. Chunk
+explanations own span IDs; deterministic composition expands them to all descendant
+changed-line IDs before the existing explanation/v1 validator runs.
+
+Every v2 chunk and recorded retrieval response is measured as final canonical UTF-8
+JSON and must fit the effective ceiling. `--max-evidence-tokens` optionally adds the
+deterministic estimate `ceil(bytes / 4)`; the effective byte ceiling is
+`min(--max-evidence-bytes, 4 * --max-evidence-tokens)`. It is unset by default and
+is not a model-specific tokenizer count. An irreducible atom or source line that
+cannot fit raises `chunk_budget_error` rather than splitting ownership or exceeding
+the cap.
+
+## Chunk retrieval and composition
+
+An omitted chunk context lists one or more recorded range IDs. The retrieval CLI is:
+
+```bash
+shiftory retrieve --run /private/run/run.json --range source-range_ID
+```
+
+It deliberately has no source-path, side, or coordinate option. A range must match
+the hashed plan and one exact global citation. Committed content is read from Git
+objects; index and working content must still match the captured comparison
+fingerprint. Traversal, arbitrary paths, stale mutable state, missing objects,
+coordinate changes, and hash mismatches fail closed.
+
+Each chunk output binds its chunk ID, comparison identity, and global ledger digest.
+It must own every assigned span or non-text unit exactly once and may cite only IDs
+listed by that chunk. Composition rejects missing chunks, duplicate item IDs,
+duplicate/cross-chunk ownership, stale identities, and modified plan, ledger, or
+payload digests before producing the final explanation/report.

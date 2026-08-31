@@ -110,9 +110,9 @@ can be faithfully read from source and still be irrelevant to runtime behavior.
 An inferred statement can be correct but is not upgraded merely because it sounds
 confident.
 
-Agent-authored prose is bounded by the evidence the agent reads. The validator
-can reject obvious uncertainty mislabeled as extracted, but it cannot generally
-detect hallucinated or misleading prose.
+Agent-authored prose is bounded by the evidence chunks and retrieved ranges the
+agent reads. The validator can reject obvious uncertainty mislabeled as extracted,
+but it cannot generally detect hallucinated or misleading prose.
 
 ## Policy validation is bounded
 
@@ -124,23 +124,32 @@ paraphrase is rejected.
 
 ## Evidence size
 
-The current `--max-evidence-bytes` behavior records a diagnostic after the
-complete packet exceeds the requested budget. It does not truncate the ledger or
-force output below the threshold. Large diffs can therefore produce large JSON
-and Markdown output and significant Graphora indexing work.
+Direct `analyze` remains a v1 compatibility surface. It can omit citation text, but
+when the mandatory ledger itself exceeds `--max-evidence-bytes` it records a
+diagnostic and remains larger than the requested threshold.
 
-The byte metrics are serialized byte counts, not model-token estimates.
+The low-friction `explain` workflow handles that case with bounded v2 chunks and
+recorded retrieval responses while retaining the complete authoritative ledger
+outside agent payloads. It cannot split a replacement-linked span atom, non-text
+unit, or individual source line. If the smallest such payload cannot fit, the run
+fails with `chunk_budget_error` instead of weakening ownership or silently
+exceeding the cap.
+
+Byte metrics are exact canonical serialized counts. Token values use the documented
+`ceil(bytes / 4)` estimate and are not model-tokenizer measurements.
 
 ## Privacy and retention
 
 Git analysis and Graphora enrichment run locally. `--pr` uses `gh pr view` and
 may fetch missing Git objects; all other comparison modes are network-free. The
 Shiftory CLI has no telemetry and does not itself send source to an LLM. The
-agent workflow intentionally gives the invoked agent the bounded evidence file,
-so that agent and its host's data-handling policy apply. Artifacts remain
-sensitive:
+agent workflow intentionally gives the invoked agent bounded chunks and requested
+recorded ranges, so that agent and its host's data-handling policy apply. Artifacts
+remain sensitive:
 
 - evidence embeds changed source text;
+- v2 global ledgers and plans remain private run artifacts that the skill does not
+  instruct the agent to read;
 - explanation and report files can contain source-derived prose;
 - Graphora cache snapshots can contain eligible tracked and non-ignored
   untracked repository files, not only changed files; and
@@ -159,6 +168,10 @@ finalized runs are deleted by default, but `--keep-artifacts` and
 
 The current cache lock uses POSIX advisory file locking (`fcntl`), so native
 Windows support is not provided by this implementation.
+
+Run hashes detect partial, stale, or accidental artifact modification; they are not
+a signature against the local owner deliberately rewriting an entire private run
+and all of its related hashes.
 
 ## Classification
 

@@ -19,8 +19,25 @@ from platformdirs import user_state_path
 
 from shiftory import __version__
 from shiftory.cache.store import CacheStore
-from shiftory.errors import ScopeError, ShiftoryError, ValidationError
-from shiftory.evidence.builder import AnalyzeOptions, analyze
+from shiftory.chunking.composer import compose_chunks
+from shiftory.chunking.planner import (
+    AgentBudget,
+    canonical_size,
+    chunk_identity,
+    estimate_tokens,
+    plan_chunks,
+    plan_identity,
+    sha256_json,
+    source_range_identity,
+)
+from shiftory.chunking.retrieval import retrieve_source_range
+from shiftory.errors import CompositionError, ScopeError, ShiftoryError, ValidationError
+from shiftory.evidence.builder import (
+    AnalyzeOptions,
+    analyze,
+    analyze_complete,
+    apply_evidence_budget,
+)
 from shiftory.git.repository import ScopeSpec, repository_identity, resolve_repository
 from shiftory.models.json import canonical_json, load_json, pretty_json
 from shiftory.render.evidence import render_evidence_markdown
@@ -50,7 +67,19 @@ def _parser() -> argparse.ArgumentParser:
     render_parser.add_argument("--output", type=Path)
 
     schema_parser = commands.add_parser("schema", help="print a bundled JSON Schema")
-    schema_parser.add_argument("name", choices=("evidence", "explanation", "report"))
+    schema_parser.add_argument(
+        "name",
+        choices=(
+            "evidence",
+            "explanation",
+            "report",
+            "run",
+            "chunk-plan",
+            "chunk",
+            "chunk-explanation",
+            "retrieval",
+        ),
+    )
 
     cache_parser = commands.add_parser("cache", help="inspect or clear repository cache")
     cache_parser.add_argument("action", choices=("status", "clear"))
@@ -68,10 +97,21 @@ def _parser() -> argparse.ArgumentParser:
     )
     _add_scope(explain_parser)
     _add_analysis_options(explain_parser)
+    explain_parser.add_argument(
+        "--max-evidence-tokens",
+        type=int,
+        help="optional estimated-token cap for each agent payload",
+    )
     explain_parser.add_argument("--resume", type=Path, help="run descriptor from an earlier phase")
     explain_parser.add_argument("--explanation", type=Path)
     explain_parser.add_argument("--output", type=Path)
     explain_parser.add_argument("--keep-artifacts", action="store_true")
+
+    retrieve_parser = commands.add_parser(
+        "retrieve", help="retrieve one source range recorded by a chunked run"
+    )
+    retrieve_parser.add_argument("--run", type=Path, required=True)
+    retrieve_parser.add_argument("--range", dest="range_id", required=True)
     return parser
 
 
@@ -353,6 +393,27 @@ def _descriptor_path(descriptor: dict[str, Any], key: str, run: Path, filename: 
     return resolved
 
 
+def _run_artifact_path(value: Any, run: Path, relative: str, label: str) -> Path:
+    if not isinstance(value, str):
+        raise ValidationError(f"{label} path must be a string")
+    expected = run / relative
+    supplied = Path(value).expanduser()
+    if not supplied.is_absolute() or supplied != expected:
+        raise ValidationError(f"{label} must target the generated path {expected}")
+    current = run
+    for component in Path(relative).parts:
+        current /= component
+        if current.is_symlink():
+            raise ValidationError(f"{label} must not traverse a symbolic link at {current}")
+    return expected
+
+
+def _private_subdirectory(path: Path, label: str) -> None:
+    path.mkdir(mode=0o700)
+    path.chmod(stat.S_IRWXU)
+    _require_private_directory(path, label)
+
+
 def _validate_analysis_args(args: argparse.Namespace) -> None:
     if args.remote is not None and args.pr is None:
         raise ScopeError("--remote is only valid with --pr")
@@ -360,6 +421,9 @@ def _validate_analysis_args(args: argparse.Namespace) -> None:
         raise ValidationError("--max-evidence-bytes must be non-negative")
     if args.context_lines < 0:
         raise ValidationError("--context-lines must be non-negative")
+    max_tokens = getattr(args, "max_evidence_tokens", None)
+    if max_tokens is not None and max_tokens < 0:
+        raise ValidationError("--max-evidence-tokens must be non-negative")
 
 
 def _validate_explain_args(args: argparse.Namespace) -> None:
@@ -381,6 +445,7 @@ def _validate_explain_args(args: argparse.Namespace) -> None:
             args.context_lines != 3,
             args.cache_dir is not None,
             args.no_cache,
+            args.max_evidence_tokens is not None,
         )
     )
     if incompatible:
@@ -432,84 +497,21 @@ def _explain_in_run(args: argparse.Namespace, run: Path, descriptor_path: Path |
     if args.resume:
         assert descriptor_path is not None
         descriptor = load_json(descriptor_path)
-        if descriptor.get("schema") != "shiftory.run/v1":
-            raise ValidationError("The resume descriptor is not shiftory.run/v1")
-        if descriptor.get("status") != "awaiting_explanation":
-            raise ValidationError("The resume descriptor is not awaiting an explanation")
-        if args.explanation is None:
-            raise ValidationError("--resume requires --explanation")
-        evidence_path = _descriptor_path(descriptor, "evidence", run, "evidence.json")
-        recorded_explanation = _descriptor_path(descriptor, "explanation", run, "explanation.json")
-        _descriptor_path(descriptor, "report", run, "report.md")
-        _require_private_file(evidence_path, "Evidence")
-        recorded_identity = descriptor.get("comparison_identity")
-        evidence_identity = load_json(evidence_path).get("comparison", {}).get("identity")
-        if not isinstance(recorded_identity, str) or evidence_identity != recorded_identity:
-            raise ValidationError("Evidence does not match the descriptor comparison identity")
-        explanation_path = args.explanation.expanduser().resolve()
-        if explanation_path != recorded_explanation:
-            raise ValidationError(
-                f"--explanation must be the run's recorded path: {recorded_explanation}"
-            )
-        _require_private_file(explanation_path, "Explanation")
+        if descriptor.get("schema") == "shiftory.run/v1":
+            evidence_path, explanation_path = _resume_v1(args, run, descriptor)
+        elif descriptor.get("schema") == "shiftory.run/v2":
+            evidence_path, explanation_path = _resume_v2(args, run, descriptor)
+        else:
+            raise ValidationError("The resume descriptor is not a supported Shiftory run")
     else:
-        evidence_path = run / "evidence.json"
-        evidence = analyze(_options(args)).to_dict()
-        _validate_schema(evidence, "evidence")
-        _write_private(evidence_path, canonical_json(evidence))
-        template_path = run / "explanation.json"
-        _write_private(
-            template_path,
-            pretty_json(
-                {
-                    "schema": "shiftory.explanation/v1",
-                    "summary": "",
-                    "items": [],
-                    "coverage_owners": [],
-                }
-            ),
-        )
-        descriptor_path = run / "run.json"
-        descriptor = {
-            "schema": "shiftory.run/v1",
-            "status": "awaiting_explanation",
-            "comparison_identity": evidence["comparison"]["identity"],
-            "evidence": str(evidence_path),
-            "explanation": str(template_path),
-            "report": str(run / "report.md"),
-            "evidence_budget": {
-                "requested_bytes": args.max_evidence_bytes,
-                "actual_bytes": evidence["metrics"]["evidence_bytes"],
-            },
-            "schema_command": ["shiftory", "schema", "explanation"],
-            "verify_command": [
-                "shiftory",
-                "verify",
-                "--evidence",
-                str(evidence_path),
-                "--explanation",
-                str(template_path),
-            ],
-            "render_command": [
-                "shiftory",
-                "render",
-                "--evidence",
-                str(evidence_path),
-                "--explanation",
-                str(template_path),
-            ],
-            "resume_command": [
-                "shiftory",
-                "explain",
-                "--resume",
-                str(descriptor_path),
-                "--explanation",
-                str(template_path),
-            ],
-        }
-        _write_private(descriptor_path, pretty_json(descriptor))
-        sys.stdout.write(pretty_json({**descriptor, "descriptor": str(descriptor_path)}))
-        return 0
+        budget = AgentBudget(args.max_evidence_bytes, args.max_evidence_tokens)
+        complete_model = analyze_complete(_options(args))
+        complete = complete_model.to_dict()
+        _validate_schema(complete, "evidence")
+        bounded = apply_evidence_budget(complete_model, budget.effective_max_bytes).to_dict()
+        if int(bounded["metrics"]["evidence_bytes"]) <= budget.effective_max_bytes:
+            return _start_v1(run, args, bounded, budget)
+        return _start_v2(run, args, complete, budget)
     report = _verify_manifest_paths(evidence_path, explanation_path)
     verification_path = run / "verification.json"
     _write_private(
@@ -532,8 +534,359 @@ def _explain_in_run(args: argparse.Namespace, run: Path, descriptor_path: Path |
         assert descriptor_path is not None
         descriptor["status"] = "complete"
         descriptor["verification"] = str(verification_path)
+        if descriptor.get("schema") == "shiftory.run/v2":
+            _validate_schema(descriptor, "run")
         _write_private(descriptor_path, pretty_json(descriptor))
         sys.stderr.write(f"Shiftory artifacts retained at {run}\n")
+    return 0
+
+
+def _start_v1(
+    run: Path,
+    args: argparse.Namespace,
+    evidence: dict[str, Any],
+    budget: AgentBudget,
+) -> int:
+    evidence_path = run / "evidence.json"
+    _write_private(evidence_path, canonical_json(evidence))
+    template_path = run / "explanation.json"
+    _write_private(
+        template_path,
+        pretty_json(
+            {
+                "schema": "shiftory.explanation/v1",
+                "summary": "",
+                "items": [],
+                "coverage_owners": [],
+            }
+        ),
+    )
+    descriptor_path = run / "run.json"
+    evidence_budget = {
+        "requested_bytes": args.max_evidence_bytes,
+        "actual_bytes": evidence["metrics"]["evidence_bytes"],
+    }
+    if args.max_evidence_tokens is not None:
+        evidence_budget.update(
+            {
+                "requested_estimated_tokens": args.max_evidence_tokens,
+                "effective_max_bytes": budget.effective_max_bytes,
+                "estimated_tokens": (int(evidence["metrics"]["evidence_bytes"]) + 3) // 4,
+                "token_estimate_formula": "ceil(canonical_utf8_bytes/4)",
+            }
+        )
+    descriptor = {
+        "schema": "shiftory.run/v1",
+        "status": "awaiting_explanation",
+        "comparison_identity": evidence["comparison"]["identity"],
+        "evidence": str(evidence_path),
+        "explanation": str(template_path),
+        "report": str(run / "report.md"),
+        "evidence_budget": evidence_budget,
+        "schema_command": ["shiftory", "schema", "explanation"],
+        "verify_command": [
+            "shiftory",
+            "verify",
+            "--evidence",
+            str(evidence_path),
+            "--explanation",
+            str(template_path),
+        ],
+        "render_command": [
+            "shiftory",
+            "render",
+            "--evidence",
+            str(evidence_path),
+            "--explanation",
+            str(template_path),
+        ],
+        "resume_command": [
+            "shiftory",
+            "explain",
+            "--resume",
+            str(descriptor_path),
+            "--explanation",
+            str(template_path),
+        ],
+    }
+    _write_private(descriptor_path, pretty_json(descriptor))
+    sys.stdout.write(pretty_json({**descriptor, "descriptor": str(descriptor_path)}))
+    return 0
+
+
+def _start_v2(
+    run: Path,
+    args: argparse.Namespace,
+    evidence: dict[str, Any],
+    budget: AgentBudget,
+) -> int:
+    planned = plan_chunks(evidence, budget)
+    _validate_schema(planned.plan, "chunk-plan")
+    ledger_path = run / "ledger.json"
+    plan_path = run / "chunk-plan.json"
+    chunks_directory = run / "chunks"
+    _private_subdirectory(chunks_directory, "Chunk directory")
+    _write_private(ledger_path, canonical_json(evidence))
+    _write_private(plan_path, canonical_json(planned.plan))
+    descriptor_path = run / "run.json"
+    chunk_entries = []
+    for chunk in planned.chunks:
+        _validate_schema(chunk, "chunk")
+        index = int(chunk["index"])
+        payload_path = chunks_directory / f"chunk-{index:04d}.json"
+        explanation_path = chunks_directory / f"chunk-{index:04d}.explanation.json"
+        _write_private(payload_path, canonical_json(chunk))
+        _write_private(
+            explanation_path,
+            pretty_json(
+                {
+                    "schema": "shiftory.chunk-explanation/v1",
+                    "chunk_id": chunk["id"],
+                    "comparison_identity": chunk["comparison_identity"],
+                    "ledger_sha256": chunk["ledger_sha256"],
+                    "summary": "",
+                    "items": [],
+                    "coverage_owners": [],
+                }
+            ),
+        )
+        chunk_entries.append(
+            {
+                "id": chunk["id"],
+                "payload": str(payload_path),
+                "payload_sha256": sha256_json(chunk),
+                "explanation": str(explanation_path),
+            }
+        )
+    root = resolve_repository(args.repo)
+    descriptor = {
+        "schema": "shiftory.run/v2",
+        "status": "awaiting_chunks",
+        "comparison_identity": evidence["comparison"]["identity"],
+        "repository_id": evidence["repository"]["id"],
+        "repository_root": str(root),
+        "ledger": str(ledger_path),
+        "ledger_sha256": sha256_json(evidence),
+        "plan": str(plan_path),
+        "plan_sha256": sha256_json(planned.plan),
+        "chunks": chunk_entries,
+        "final_explanation": str(run / "explanation.json"),
+        "report": str(run / "report.md"),
+        "verification": None,
+        "budget": {
+            **planned.plan["budget"],
+            "ledger_bytes": evidence["metrics"]["evidence_bytes"],
+            "chunk_count": len(planned.chunks),
+            "max_chunk_bytes": max(
+                int(chunk["budget"]["actual_bytes"]) for chunk in planned.chunks
+            ),
+            "max_chunk_estimated_tokens": max(
+                int(chunk["budget"]["estimated_tokens"]) for chunk in planned.chunks
+            ),
+        },
+        "schema_command": ["shiftory", "schema", "chunk-explanation"],
+        "retrieve_command": [
+            "shiftory",
+            "retrieve",
+            "--run",
+            str(descriptor_path),
+            "--range",
+        ],
+        "resume_command": ["shiftory", "explain", "--resume", str(descriptor_path)],
+    }
+    _validate_schema(descriptor, "run")
+    _write_private(descriptor_path, pretty_json(descriptor))
+    sys.stdout.write(pretty_json({**descriptor, "descriptor": str(descriptor_path)}))
+    return 0
+
+
+def _resume_v1(
+    args: argparse.Namespace,
+    run: Path,
+    descriptor: dict[str, Any],
+) -> tuple[Path, Path]:
+    if descriptor.get("status") != "awaiting_explanation":
+        raise ValidationError("The resume descriptor is not awaiting an explanation")
+    if args.explanation is None:
+        raise ValidationError("--resume requires --explanation")
+    evidence_path = _descriptor_path(descriptor, "evidence", run, "evidence.json")
+    recorded_explanation = _descriptor_path(descriptor, "explanation", run, "explanation.json")
+    _descriptor_path(descriptor, "report", run, "report.md")
+    _require_private_file(evidence_path, "Evidence")
+    recorded_identity = descriptor.get("comparison_identity")
+    evidence_identity = load_json(evidence_path).get("comparison", {}).get("identity")
+    if not isinstance(recorded_identity, str) or evidence_identity != recorded_identity:
+        raise ValidationError("Evidence does not match the descriptor comparison identity")
+    explanation_path = args.explanation.expanduser().resolve()
+    if explanation_path != recorded_explanation:
+        raise ValidationError(
+            f"--explanation must be the run's recorded path: {recorded_explanation}"
+        )
+    _require_private_file(explanation_path, "Explanation")
+    return evidence_path, explanation_path
+
+
+def _load_v2_core(
+    run: Path,
+    descriptor: dict[str, Any],
+) -> tuple[Path, dict[str, Any], dict[str, Any], tuple[dict[str, Any], ...]]:
+    _validate_schema(descriptor, "run")
+    _run_artifact_path(
+        descriptor["final_explanation"], run, "explanation.json", "Final explanation"
+    )
+    _run_artifact_path(descriptor["report"], run, "report.md", "Report")
+    verification_value = descriptor["verification"]
+    if verification_value is not None:
+        _run_artifact_path(verification_value, run, "verification.json", "Verification")
+    ledger_path = _run_artifact_path(descriptor["ledger"], run, "ledger.json", "Ledger")
+    plan_path = _run_artifact_path(descriptor["plan"], run, "chunk-plan.json", "Chunk plan")
+    _require_private_file(ledger_path, "Ledger")
+    _require_private_file(plan_path, "Chunk plan")
+    evidence = load_json(ledger_path)
+    plan = load_json(plan_path)
+    _validate_schema(evidence, "evidence")
+    _validate_schema(plan, "chunk-plan")
+    if descriptor["ledger_sha256"] != sha256_json(evidence):
+        raise ValidationError("The global evidence ledger digest is invalid")
+    if descriptor["plan_sha256"] != sha256_json(plan):
+        raise ValidationError("The chunk plan digest is invalid")
+    if plan["id"] != plan_identity(plan):
+        raise ValidationError("The chunk plan identity is invalid")
+    if (
+        plan["comparison_identity"] != descriptor["comparison_identity"]
+        or plan["ledger_sha256"] != descriptor["ledger_sha256"]
+        or evidence["comparison"]["identity"] != descriptor["comparison_identity"]
+        or evidence["repository"]["id"] != descriptor["repository_id"]
+    ):
+        raise ValidationError("The chunked run identities are inconsistent")
+    expected_budget = {
+        **plan["budget"],
+        "ledger_bytes": evidence["metrics"]["evidence_bytes"],
+        "chunk_count": len(plan["chunks"]),
+        "max_chunk_bytes": 0,
+        "max_chunk_estimated_tokens": 0,
+    }
+    chunks = []
+    descriptor_chunks = descriptor["chunks"]
+    plan_chunks_value = plan["chunks"]
+    if len(descriptor_chunks) != len(plan_chunks_value):
+        raise ValidationError("The run and chunk plan contain different chunk sets")
+    for offset, (entry, plan_entry) in enumerate(
+        zip(descriptor_chunks, plan_chunks_value, strict=True), 1
+    ):
+        payload_path = _run_artifact_path(
+            entry["payload"], run, f"chunks/chunk-{offset:04d}.json", f"Chunk {offset}"
+        )
+        expected_explanation = f"chunks/chunk-{offset:04d}.explanation.json"
+        _run_artifact_path(
+            entry["explanation"], run, expected_explanation, f"Chunk explanation {offset}"
+        )
+        _require_private_file(payload_path, f"Chunk {offset}")
+        chunk = load_json(payload_path)
+        _validate_schema(chunk, "chunk")
+        digest = sha256_json(chunk)
+        if (
+            entry["id"] != chunk["id"]
+            or plan_entry["id"] != chunk["id"]
+            or entry["payload_sha256"] != digest
+            or plan_entry["payload_sha256"] != digest
+            or chunk["id"] != chunk_identity(chunk)
+        ):
+            raise ValidationError(f"Chunk {offset} identity or digest is invalid")
+        target_ids = sorted(
+            target["evidence_id"]
+            for item in chunk["work_items"]
+            for target in item["ownership_targets"]
+        )
+        range_ids = sorted(
+            range_id
+            for item in chunk["work_items"]
+            for context in item["contexts"]
+            for range_id in context["retrieval_range_ids"]
+        )
+        if (
+            plan_entry["index"] != offset
+            or plan_entry["ownership_target_ids"] != target_ids
+            or plan_entry["retrieval_range_ids"] != range_ids
+            or chunk["budget"]["actual_bytes"] != canonical_size(chunk)
+            or chunk["budget"]["estimated_tokens"]
+            != estimate_tokens(chunk["budget"]["actual_bytes"])
+            or chunk["budget"]["actual_bytes"] > plan["budget"]["effective_max_bytes"]
+        ):
+            raise ValidationError(f"Chunk {offset} plan assignment or budget is invalid")
+        chunks.append(chunk)
+    expected_budget["max_chunk_bytes"] = max(
+        int(chunk["budget"]["actual_bytes"]) for chunk in chunks
+    )
+    expected_budget["max_chunk_estimated_tokens"] = max(
+        int(chunk["budget"]["estimated_tokens"]) for chunk in chunks
+    )
+    if descriptor["budget"] != expected_budget:
+        raise ValidationError("The run descriptor budget summary is invalid")
+    if any(value["id"] != source_range_identity(value) for value in plan["retrieval_ranges"]):
+        raise ValidationError("The chunk plan contains an invalid retrieval-range identity")
+    if any(
+        value["response_bytes"] > plan["budget"]["effective_max_bytes"]
+        or value["estimated_tokens"] != estimate_tokens(value["response_bytes"])
+        for value in plan["retrieval_ranges"]
+    ):
+        raise ValidationError("The chunk plan contains an invalid retrieval-range budget")
+    planned_range_ids = [value["id"] for value in plan["retrieval_ranges"]]
+    assigned_range_ids = [
+        range_id for entry in plan_chunks_value for range_id in entry["retrieval_range_ids"]
+    ]
+    if len(planned_range_ids) != len(set(planned_range_ids)) or sorted(planned_range_ids) != sorted(
+        assigned_range_ids
+    ):
+        raise ValidationError("The chunk plan retrieval-range assignment is invalid")
+    return ledger_path, evidence, plan, tuple(chunks)
+
+
+def _resume_v2(
+    args: argparse.Namespace,
+    run: Path,
+    descriptor: dict[str, Any],
+) -> tuple[Path, Path]:
+    if descriptor.get("status") != "awaiting_chunks":
+        raise ValidationError("The chunked run is not awaiting chunk explanations")
+    if args.explanation is not None:
+        raise ValidationError("A chunked resume uses its recorded per-chunk explanations")
+    ledger_path, evidence, plan, chunks = _load_v2_core(run, descriptor)
+    explanations = []
+    for offset, entry in enumerate(descriptor["chunks"], 1):
+        explanation_path = _run_artifact_path(
+            entry["explanation"],
+            run,
+            f"chunks/chunk-{offset:04d}.explanation.json",
+            f"Chunk explanation {offset}",
+        )
+        if not explanation_path.exists():
+            raise CompositionError(
+                f"Chunk explanation {offset} is missing",
+                details={"path": str(explanation_path)},
+            )
+        _require_private_file(explanation_path, f"Chunk explanation {offset}")
+        explanation = load_json(explanation_path)
+        _validate_schema(explanation, "chunk-explanation")
+        explanations.append(explanation)
+    composed = compose_chunks(evidence, plan, chunks, tuple(explanations))
+    _validate_schema(composed, "explanation")
+    final_path = _run_artifact_path(
+        descriptor["final_explanation"], run, "explanation.json", "Final explanation"
+    )
+    _write_private(final_path, canonical_json(composed))
+    return ledger_path, final_path
+
+
+def _retrieve(args: argparse.Namespace) -> int:
+    run, descriptor_path = _resume_location(args.run)
+    descriptor = load_json(descriptor_path)
+    if descriptor.get("schema") != "shiftory.run/v2":
+        raise ValidationError("Recorded-range retrieval requires shiftory.run/v2")
+    _, evidence, plan, _ = _load_v2_core(run, descriptor)
+    response = retrieve_source_range(descriptor, evidence, plan, args.range_id)
+    _validate_schema(response, "retrieval")
+    sys.stdout.write(canonical_json(response))
     return 0
 
 
@@ -546,6 +899,7 @@ def _dispatch(args: argparse.Namespace) -> int:
         "cache": _cache,
         "install-skill": _install_skill,
         "explain": _explain,
+        "retrieve": _retrieve,
     }
     return handlers[args.command](args)
 

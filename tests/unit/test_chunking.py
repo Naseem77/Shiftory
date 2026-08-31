@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import os
 import subprocess
+import time
 
 import pytest
 from jsonschema import Draft202012Validator
@@ -197,6 +198,90 @@ def test_graph_unavailable_uses_the_same_deterministic_hierarchy_order(
     ]
     assert unavailable.plan["grouping_strategy"] == "deterministic-fallback"
     assert unavailable_paths == disabled_paths
+
+
+def test_repeated_symbol_grouping_uses_bounded_union_work(monkeypatch) -> None:
+    path_count = 2_000
+    paths = {f"file-{index:04d}.py" for index in range(path_count)}
+    facts = [
+        {
+            "kind": kind,
+            "side": "after",
+            "symbol": "shared",
+            "path": path,
+        }
+        for kind in ("definition", "caller")
+        for path in sorted(paths)
+    ]
+    unions = 0
+    real_union = planner_module._DisjointSet.union
+
+    def counted_union(self, left, right):
+        nonlocal unions
+        unions += 1
+        return real_union(self, left, right)
+
+    monkeypatch.setattr(planner_module._DisjointSet, "union", counted_union)
+    started = time.perf_counter()
+    strategy, components = planner_module._graph_components(
+        {"graph": {"status": "available", "facts": facts}}, paths
+    )
+    elapsed = time.perf_counter() - started
+
+    assert strategy == "graph-guided"
+    assert set(components.values()) == {"file-0000.py"}
+    assert unions < path_count * 2
+    assert elapsed < 2
+
+
+def test_many_small_chunks_index_graph_facts_once_and_remain_deterministic(
+    repo_factory,
+) -> None:
+    evidence = _large_evidence(repo_factory, file_count=200)
+
+    class CountingFact(dict):
+        path_reads = 0
+
+        def get(self, key, default=None):
+            if key == "path":
+                type(self).path_reads += 1
+            return super().get(key, default)
+
+    evidence["graph"] = {
+        **evidence["graph"],
+        "status": "available",
+        "facts": [
+            CountingFact(
+                {
+                    "id": f"fact-{kind}-{index:04d}",
+                    "kind": kind,
+                    "side": "after",
+                    "path": f"file{index}.py",
+                    "line": 1 if kind == "definition" else None,
+                    "symbol": "shared",
+                    "target": None if kind == "definition" else "shared",
+                    "confidence": "extracted",
+                    "provenance": "graphora:test",
+                }
+            )
+            for kind in ("definition", "caller")
+            for index in range(200)
+        ],
+    }
+    budget = AgentBudget(3_000)
+
+    first = plan_chunks(evidence, budget)
+    path_reads = CountingFact.path_reads
+    CountingFact.path_reads = 0
+    second = plan_chunks(evidence, budget)
+
+    assert len(first.chunks) >= 50
+    assert first == second
+    assert path_reads < 5_000
+    assert CountingFact.path_reads < 5_000
+    assert all(
+        chunk["budget"]["actual_bytes"] <= budget.effective_max_bytes for chunk in first.chunks
+    )
 
 
 def test_irreducible_atom_fails_instead_of_breaking_the_cap(repo_factory) -> None:

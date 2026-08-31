@@ -97,9 +97,11 @@ its mandatory floor exceeds `--max-evidence-bytes`.
 too large, a v2 private run keeps the complete ledger outside agent payloads.
 Replacement-linked spans and non-text units become indivisible work atoms.
 Deterministic affinity prefers existing classifications, file/unit/hunk locality,
-and valid Graphora relationships between changed files. Graphora-unavailable runs
-use the same hierarchy-only order. Candidate chunks are accepted only after their
-final canonical JSON fits the effective byte/token-derived ceiling.
+and valid Graphora relationships between changed files. A union-find groups each
+symbol relationship through one deterministic representative, and graph facts are
+indexed by path once before chunk assembly. Graphora-unavailable runs use the same
+hierarchy-only order. Candidate chunks are accepted only after their final canonical
+JSON fits the effective byte/token-derived ceiling.
 
 ### 4. Enrich with Graphora
 
@@ -139,8 +141,9 @@ materialization and enrichment.
 Chunk source text that does not fit is represented by pre-recorded inclusive source
 ranges. `shiftory retrieve` accepts only a generated run and range ID: there is no
 path or coordinate input. It revalidates private artifact paths, schemas, identities,
-digests, repository/comparison identity, mutable fingerprints, exact source
-coordinates, and content hashes. Any mismatch fails closed.
+exact canonical on-disk bytes, digests, recorded sizes, repository/comparison
+identity, mutable fingerprints, exact source coordinates, and content hashes. Any
+mismatch fails closed.
 
 ### 6. Explain, verify, and render
 
@@ -179,6 +182,10 @@ Cache paths are keyed by a repository hash and source snapshot fingerprints.
 Writes use private permissions, atomic replacement, and a per-repository advisory
 lock. The cache contains local derived source and graph data, not prompts,
 telemetry, reports, or cross-repository product memory.
+
+Private run writes also use atomic replacement rather than truncating an existing
+inode. Run reads and writes reject symbolic links, multiple hard links, foreign
+ownership, and non-private modes before consuming or replacing an artifact.
 
 ## Boundaries and invariants
 

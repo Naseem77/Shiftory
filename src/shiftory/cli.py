@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
 import shutil
 import stat
 import sys
+import tempfile
 import uuid
 from importlib.resources import files
 from pathlib import Path
@@ -22,7 +24,6 @@ from shiftory.cache.store import CacheStore
 from shiftory.chunking.composer import compose_chunks
 from shiftory.chunking.planner import (
     AgentBudget,
-    canonical_size,
     chunk_identity,
     estimate_tokens,
     plan_chunks,
@@ -39,7 +40,13 @@ from shiftory.evidence.builder import (
     apply_evidence_budget,
 )
 from shiftory.git.repository import ScopeSpec, repository_identity, resolve_repository
-from shiftory.models.json import canonical_json, load_json, pretty_json
+from shiftory.models.json import (
+    canonical_json,
+    load_json,
+    parse_canonical_json_bytes,
+    parse_json_bytes,
+    pretty_json,
+)
 from shiftory.render.evidence import render_evidence_markdown
 from shiftory.render.report import build_report, render_report_markdown
 from shiftory.schemas import SchemaName, load_schema
@@ -214,10 +221,14 @@ def _load_manifests(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str,
 
 
 def _load_manifest_paths(
-    evidence_path: Path, explanation_path: Path
+    evidence_path: Path, explanation_path: Path, *, private: bool = False
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    evidence = load_json(evidence_path)
-    explanation = load_json(explanation_path)
+    if private:
+        evidence = _read_private_json(evidence_path, "Evidence")
+        explanation = _read_private_json(explanation_path, "Explanation")
+    else:
+        evidence = load_json(evidence_path)
+        explanation = load_json(explanation_path)
     _validate_schema(evidence, "evidence")
     _validate_schema(explanation, "explanation")
     return evidence, explanation
@@ -237,8 +248,10 @@ def _verify(args: argparse.Namespace) -> int:
     return 0
 
 
-def _verify_manifest_paths(evidence_path: Path, explanation_path: Path) -> dict[str, Any]:
-    evidence, explanation = _load_manifest_paths(evidence_path, explanation_path)
+def _verify_manifest_paths(
+    evidence_path: Path, explanation_path: Path, *, private: bool = False
+) -> dict[str, Any]:
+    evidence, explanation = _load_manifest_paths(evidence_path, explanation_path, private=private)
     return build_report(evidence, explanation)
 
 
@@ -248,8 +261,14 @@ def _render(args: argparse.Namespace) -> int:
     return 0
 
 
-def _render_manifest_paths(evidence_path: Path, explanation_path: Path, output_format: str) -> str:
-    evidence, explanation = _load_manifest_paths(evidence_path, explanation_path)
+def _render_manifest_paths(
+    evidence_path: Path,
+    explanation_path: Path,
+    output_format: str,
+    *,
+    private: bool = False,
+) -> str:
+    evidence, explanation = _load_manifest_paths(evidence_path, explanation_path, private=private)
     report = build_report(evidence, explanation)
     _validate_schema(report, "report")
     return pretty_json(report) if output_format == "json" else render_report_markdown(report)
@@ -307,11 +326,25 @@ def _require_private_directory(path: Path, label: str) -> None:
 
 
 def _require_private_file(path: Path, label: str) -> None:
-    if path.is_symlink():
+    metadata = path.lstat()
+    _validate_private_file_metadata(metadata, path, label)
+
+
+def _require_private_file_if_present(path: Path, label: str) -> None:
+    try:
+        metadata = path.lstat()
+    except FileNotFoundError:
+        return
+    _validate_private_file_metadata(metadata, path, label)
+
+
+def _validate_private_file_metadata(metadata: os.stat_result, path: Path, label: str) -> None:
+    if stat.S_ISLNK(metadata.st_mode):
         raise ValidationError(f"{label} must not be a symbolic link: {path}")
-    metadata = path.stat()
     if not stat.S_ISREG(metadata.st_mode):
         raise ValidationError(f"{label} is not a regular file: {path}")
+    if getattr(metadata, "st_nlink", None) != 1:
+        raise ValidationError(f"{label} must not have multiple hard links: {path}")
     if hasattr(os, "getuid") and metadata.st_uid != os.getuid():
         raise ValidationError(f"{label} is not owned by the current user: {path}")
     if stat.S_IMODE(metadata.st_mode) & 0o077:
@@ -363,12 +396,85 @@ def _new_run(
 
 
 def _write_private(path: Path, payload: str) -> None:
-    if path.is_symlink():
+    _require_private_directory(path.parent, "Private artifact directory")
+    try:
+        metadata = path.lstat()
+    except FileNotFoundError:
+        pass
+    else:
+        _validate_private_file_metadata(metadata, path, "Existing private artifact")
+
+    descriptor, temporary_name = tempfile.mkstemp(
+        prefix=f".{path.name}.", suffix=".tmp", dir=path.parent
+    )
+    temporary = Path(temporary_name)
+    try:
+        os.fchmod(descriptor, stat.S_IRUSR | stat.S_IWUSR)
+        with os.fdopen(descriptor, "wb") as stream:
+            descriptor = -1
+            stream.write(payload.encode("utf-8"))
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+        _require_private_file(path, "Written private artifact")
+    finally:
+        if descriptor >= 0:
+            os.close(descriptor)
+        temporary.unlink(missing_ok=True)
+
+
+def _read_private_bytes(path: Path, label: str) -> bytes:
+    flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+    try:
+        descriptor = os.open(path, flags)
+    except OSError as error:
+        raise ValidationError(f"{label} could not be opened safely: {path}") from error
+    try:
+        opened = os.fstat(descriptor)
+        _validate_private_file_metadata(opened, path, label)
+        current = path.lstat()
+        _validate_private_file_metadata(current, path, label)
+        if (opened.st_dev, opened.st_ino) != (current.st_dev, current.st_ino):
+            raise ValidationError(f"{label} changed while it was being opened: {path}")
+        with os.fdopen(descriptor, "rb", closefd=False) as stream:
+            payload = stream.read()
+        finished = os.fstat(descriptor)
+        _validate_private_file_metadata(finished, path, label)
+        if (opened.st_dev, opened.st_ino) != (finished.st_dev, finished.st_ino):
+            raise ValidationError(f"{label} changed while it was being read: {path}")
+        return payload
+    finally:
+        os.close(descriptor)
+
+
+def _read_private_json(path: Path, label: str) -> dict[str, Any]:
+    payload = _read_private_bytes(path, label)
+    try:
+        return parse_json_bytes(payload, str(path))
+    except ValueError as error:
+        raise ValidationError(f"{label} is invalid: {error}") from error
+
+
+def _load_bound_json(
+    path: Path,
+    label: str,
+    expected_sha256: str,
+    *,
+    max_bytes: int | None = None,
+) -> tuple[dict[str, Any], bytes]:
+    payload = _read_private_bytes(path, label)
+    if max_bytes is not None and len(payload) > max_bytes:
         raise ValidationError(
-            f"Refusing to write a private artifact through a symbolic link: {path}"
+            f"{label} exceeds the effective on-disk byte cap",
+            details={"actual_bytes": len(payload), "effective_max_bytes": max_bytes},
         )
-    path.write_text(payload, encoding="utf-8")
-    path.chmod(stat.S_IRUSR | stat.S_IWUSR)
+    try:
+        value = parse_canonical_json_bytes(payload, str(path))
+    except ValueError as error:
+        raise ValidationError(f"{label} is not exact canonical JSON: {error}") from error
+    if hashlib.sha256(payload).hexdigest() != expected_sha256:
+        raise ValidationError(f"{label} digest is invalid")
+    return value, payload
 
 
 def _resume_location(resume: Path) -> tuple[Path, Path]:
@@ -525,7 +631,7 @@ def _explain_in_run(args: argparse.Namespace, run: Path, descriptor_path: Path |
     keep = args.keep_artifacts or os.environ.get("SHIFTORY_KEEP_ARTIFACTS") == "1"
     if args.resume:
         assert descriptor_path is not None
-        descriptor = load_json(descriptor_path)
+        descriptor = _read_private_json(descriptor_path, "Resume descriptor")
         if descriptor.get("schema") == "shiftory.run/v1":
             evidence_path, explanation_path = _resume_v1(args, run, descriptor)
         elif descriptor.get("schema") == "shiftory.run/v2":
@@ -541,7 +647,7 @@ def _explain_in_run(args: argparse.Namespace, run: Path, descriptor_path: Path |
         if int(bounded["metrics"]["evidence_bytes"]) <= budget.effective_max_bytes:
             return _start_v1(run, args, bounded, budget)
         return _start_v2(run, args, complete, budget)
-    report = _verify_manifest_paths(evidence_path, explanation_path)
+    report = _verify_manifest_paths(evidence_path, explanation_path, private=True)
     verification_path = run / "verification.json"
     _write_private(
         verification_path,
@@ -553,7 +659,7 @@ def _explain_in_run(args: argparse.Namespace, run: Path, descriptor_path: Path |
             }
         ),
     )
-    payload = _render_manifest_paths(evidence_path, explanation_path, "markdown")
+    payload = _render_manifest_paths(evidence_path, explanation_path, "markdown", private=True)
     report_path = run / "report.md"
     _write_private(report_path, payload)
     _write_or_print(payload, args.output)
@@ -740,10 +846,13 @@ def _resume_v1(
         raise ValidationError("--resume requires --explanation")
     evidence_path = _descriptor_path(descriptor, "evidence", run, "evidence.json")
     recorded_explanation = _descriptor_path(descriptor, "explanation", run, "explanation.json")
-    _descriptor_path(descriptor, "report", run, "report.md")
+    report_path = _descriptor_path(descriptor, "report", run, "report.md")
+    _require_private_file_if_present(report_path, "Report")
     _require_private_file(evidence_path, "Evidence")
     recorded_identity = descriptor.get("comparison_identity")
-    evidence_identity = load_json(evidence_path).get("comparison", {}).get("identity")
+    evidence_identity = (
+        _read_private_json(evidence_path, "Evidence").get("comparison", {}).get("identity")
+    )
     if not isinstance(recorded_identity, str) or evidence_identity != recorded_identity:
         raise ValidationError("Evidence does not match the descriptor comparison identity")
     explanation_path = args.explanation.expanduser().resolve()
@@ -767,25 +876,28 @@ def _load_v2_core(
         pass
     else:
         raise ValidationError("A chunked run must be stored outside its repository")
-    _run_artifact_path(
+    final_path = _run_artifact_path(
         descriptor["final_explanation"], run, "explanation.json", "Final explanation"
     )
-    _run_artifact_path(descriptor["report"], run, "report.md", "Report")
+    _require_private_file_if_present(final_path, "Final explanation")
+    report_path = _run_artifact_path(descriptor["report"], run, "report.md", "Report")
+    _require_private_file_if_present(report_path, "Report")
     verification_value = descriptor["verification"]
     if verification_value is not None:
-        _run_artifact_path(verification_value, run, "verification.json", "Verification")
+        verification_path = _run_artifact_path(
+            verification_value, run, "verification.json", "Verification"
+        )
+        _require_private_file_if_present(verification_path, "Verification")
     ledger_path = _run_artifact_path(descriptor["ledger"], run, "ledger.json", "Ledger")
     plan_path = _run_artifact_path(descriptor["plan"], run, "chunk-plan.json", "Chunk plan")
     _require_private_file(ledger_path, "Ledger")
     _require_private_file(plan_path, "Chunk plan")
-    evidence = load_json(ledger_path)
-    plan = load_json(plan_path)
+    evidence, ledger_payload = _load_bound_json(ledger_path, "Ledger", descriptor["ledger_sha256"])
+    plan, _plan_payload = _load_bound_json(plan_path, "Chunk plan", descriptor["plan_sha256"])
     _validate_schema(evidence, "evidence")
     _validate_schema(plan, "chunk-plan")
-    if descriptor["ledger_sha256"] != sha256_json(evidence):
-        raise ValidationError("The global evidence ledger digest is invalid")
-    if descriptor["plan_sha256"] != sha256_json(plan):
-        raise ValidationError("The chunk plan digest is invalid")
+    if evidence["metrics"]["evidence_bytes"] != len(ledger_payload):
+        raise ValidationError("The global evidence ledger recorded byte size is invalid")
     if plan["id"] != plan_identity(plan):
         raise ValidationError("The chunk plan identity is invalid")
     if (
@@ -814,13 +926,19 @@ def _load_v2_core(
             entry["payload"], run, f"chunks/chunk-{offset:04d}.json", f"Chunk {offset}"
         )
         expected_explanation = f"chunks/chunk-{offset:04d}.explanation.json"
-        _run_artifact_path(
+        explanation_path = _run_artifact_path(
             entry["explanation"], run, expected_explanation, f"Chunk explanation {offset}"
         )
+        _require_private_file_if_present(explanation_path, f"Chunk explanation {offset}")
         _require_private_file(payload_path, f"Chunk {offset}")
-        chunk = load_json(payload_path)
+        chunk, chunk_payload = _load_bound_json(
+            payload_path,
+            f"Chunk {offset}",
+            entry["payload_sha256"],
+            max_bytes=plan["budget"]["effective_max_bytes"],
+        )
         _validate_schema(chunk, "chunk")
-        digest = sha256_json(chunk)
+        digest = hashlib.sha256(chunk_payload).hexdigest()
         if (
             entry["id"] != chunk["id"]
             or plan_entry["id"] != chunk["id"]
@@ -840,14 +958,15 @@ def _load_v2_core(
             for context in item["contexts"]
             for range_id in context["retrieval_range_ids"]
         )
+        if chunk["budget"]["actual_bytes"] != len(chunk_payload):
+            raise ValidationError(f"Chunk {offset} recorded byte size is invalid")
+        if len(chunk_payload) > plan["budget"]["effective_max_bytes"]:
+            raise ValidationError(f"Chunk {offset} exceeds the effective on-disk byte cap")
         if (
             plan_entry["index"] != offset
             or plan_entry["ownership_target_ids"] != target_ids
             or plan_entry["retrieval_range_ids"] != range_ids
-            or chunk["budget"]["actual_bytes"] != canonical_size(chunk)
-            or chunk["budget"]["estimated_tokens"]
-            != estimate_tokens(chunk["budget"]["actual_bytes"])
-            or chunk["budget"]["actual_bytes"] > plan["budget"]["effective_max_bytes"]
+            or chunk["budget"]["estimated_tokens"] != estimate_tokens(len(chunk_payload))
         ):
             raise ValidationError(f"Chunk {offset} plan assignment or budget is invalid")
         chunks.append(chunk)
@@ -902,7 +1021,7 @@ def _resume_v2(
                 details={"path": str(explanation_path)},
             )
         _require_private_file(explanation_path, f"Chunk explanation {offset}")
-        explanation = load_json(explanation_path)
+        explanation = _read_private_json(explanation_path, f"Chunk explanation {offset}")
         _validate_schema(explanation, "chunk-explanation")
         explanations.append(explanation)
     composed = compose_chunks(evidence, plan, chunks, tuple(explanations))
@@ -916,7 +1035,7 @@ def _resume_v2(
 
 def _retrieve(args: argparse.Namespace) -> int:
     run, descriptor_path = _resume_location(args.run)
-    descriptor = load_json(descriptor_path)
+    descriptor = _read_private_json(descriptor_path, "Resume descriptor")
     if descriptor.get("schema") != "shiftory.run/v2":
         raise ValidationError("Recorded-range retrieval requires shiftory.run/v2")
     _, evidence, plan, _ = _load_v2_core(run, descriptor)

@@ -7,6 +7,7 @@ import json
 from collections import defaultdict
 from copy import deepcopy
 from dataclasses import dataclass
+from itertools import chain
 from typing import Any, Literal, cast
 
 from shiftory.diff.identity import stable_id
@@ -76,6 +77,30 @@ class _Atom:
     path: str
     order: tuple[Any, ...]
     value: dict[str, Any]
+
+
+class _DisjointSet:
+    def __init__(self, values: set[str]) -> None:
+        self._parent = {value: value for value in values}
+
+    def find(self, value: str) -> str:
+        root = value
+        while self._parent[root] != root:
+            root = self._parent[root]
+        while self._parent[value] != value:
+            parent = self._parent[value]
+            self._parent[value] = root
+            value = parent
+        return root
+
+    def union(self, left: str, right: str) -> bool:
+        left_root = self.find(left)
+        right_root = self.find(right)
+        if left_root == right_root:
+            return False
+        first, second = sorted((left_root, right_root))
+        self._parent[second] = first
+        return True
 
 
 def chunk_identity(chunk: dict[str, Any]) -> str:
@@ -581,10 +606,10 @@ def _graph_components(
     evidence: dict[str, Any],
     changed_paths: set[str],
 ) -> tuple[Literal["graph-guided", "deterministic-fallback"], dict[str, str]]:
-    adjacency = {path: {path} for path in changed_paths}
+    disjoint = _DisjointSet(changed_paths)
     facts = evidence.get("graph", {}).get("facts", [])
     definitions: dict[tuple[str, str], set[str]] = defaultdict(set)
-    relations: list[tuple[str, str, str]] = []
+    relations: dict[tuple[str, str], set[str]] = defaultdict(set)
     for fact in facts:
         if not isinstance(fact, dict):
             continue
@@ -596,32 +621,19 @@ def _graph_components(
         if fact.get("kind") in {"definition", "changed_symbol", "enclosing_symbol"}:
             definitions[(side, symbol)].add(path)
         elif fact.get("kind") in {"caller", "callee", "importer", "static_test"}:
-            relations.append((side, symbol, path))
-    edge_count = 0
-    for side, symbol, related_path in sorted(relations):
-        for definition_path in sorted(definitions.get((side, symbol), ())):
-            if definition_path == related_path:
-                continue
-            adjacency[definition_path].add(related_path)
-            adjacency[related_path].add(definition_path)
-            edge_count += 1
-    component_by_path: dict[str, str] = {}
-    for path in sorted(changed_paths):
-        if path in component_by_path:
+            relations[(side, symbol)].add(path)
+    linked = False
+    for key in sorted(definitions.keys() & relations.keys()):
+        participants = definitions[key] | relations[key]
+        if len(participants) < 2:
             continue
-        pending = [path]
-        component: set[str] = set()
-        while pending:
-            current = pending.pop()
-            if current in component:
-                continue
-            component.add(current)
-            pending.extend(sorted(adjacency[current] - component, reverse=True))
-        component_id = min(component)
-        component_by_path.update({item: component_id for item in component})
+        representative = min(participants)
+        for path in sorted(participants):
+            linked = disjoint.union(representative, path) or linked
+    component_by_path = {path: disjoint.find(path) for path in sorted(changed_paths)}
     status = evidence.get("graph", {}).get("status")
     strategy: Literal["graph-guided", "deterministic-fallback"] = (
-        "graph-guided" if status == "available" and edge_count else "deterministic-fallback"
+        "graph-guided" if status == "available" and linked else "deterministic-fallback"
     )
     return strategy, component_by_path
 
@@ -698,16 +710,7 @@ def _pack(
         partitions.append(list(atoms[offset:best_end]))
         offset = best_end
 
-    graph_facts = sorted(
-        evidence.get("graph", {}).get("facts", []),
-        key=lambda fact: (
-            fact.get("side", ""),
-            fact.get("path", ""),
-            fact.get("line") or 0,
-            fact.get("kind", ""),
-            fact.get("id", ""),
-        ),
-    )
+    graph_facts_by_path = _index_graph_facts(evidence.get("graph", {}).get("facts", []))
     finalized = []
     for index, partition in enumerate(partitions, 1):
         chunk = _chunk_payload(
@@ -720,7 +723,7 @@ def _pack(
             budget=budget,
         )
         chunk = _inline_contexts(chunk, citation_text, budget)
-        chunk = _include_graph_facts(chunk, graph_facts, budget)
+        chunk = _include_graph_facts(chunk, graph_facts_by_path, budget)
         if int(chunk["budget"]["actual_bytes"]) > budget.effective_max_bytes:
             raise AssertionError("Final chunk exceeds its effective byte budget")
         finalized.append(chunk)
@@ -825,7 +828,7 @@ def _inline_contexts(
 
 def _include_graph_facts(
     chunk: dict[str, Any],
-    facts: list[dict[str, Any]],
+    facts_by_path: dict[str, tuple[dict[str, Any], ...]],
     budget: AgentBudget,
 ) -> dict[str, Any]:
     paths = {
@@ -834,7 +837,10 @@ def _include_graph_facts(
         for path in (item["file"]["old_path"], item["file"]["new_path"])
         if isinstance(path, str)
     }
-    relevant = [fact for fact in facts if fact.get("path") in paths]
+    relevant = sorted(
+        chain.from_iterable(facts_by_path.get(path, ()) for path in paths),
+        key=_graph_fact_key,
+    )
     selected = deepcopy(chunk)
     estimated_size = int(selected["budget"]["actual_bytes"])
     original_allowed = set(selected["allowed_citation_ids"])
@@ -871,3 +877,25 @@ def _include_graph_facts(
         selected["omitted_graph_fact_ids"].pop()
         selected = _finalize_chunk(selected)
     return selected
+
+
+def _graph_fact_key(fact: dict[str, Any]) -> tuple[Any, ...]:
+    return (
+        fact.get("side", ""),
+        fact.get("path", ""),
+        fact.get("line") or 0,
+        fact.get("kind", ""),
+        fact.get("id", ""),
+    )
+
+
+def _index_graph_facts(facts: Any) -> dict[str, tuple[dict[str, Any], ...]]:
+    indexed: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for fact in sorted(
+        (fact for fact in facts if isinstance(fact, dict)),
+        key=_graph_fact_key,
+    ):
+        path = fact.get("path")
+        if isinstance(path, str):
+            indexed[path].append(fact)
+    return {path: tuple(values) for path, values in indexed.items()}

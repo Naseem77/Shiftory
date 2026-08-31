@@ -4,7 +4,15 @@ import json
 import os
 import subprocess
 import sys
+from hashlib import sha256
 from pathlib import Path
+
+import pytest
+
+from shiftory.chunking.planner import estimate_tokens, plan_identity
+from shiftory.models.json import canonical_json, pretty_json
+
+SOURCE_ROOT = Path(__file__).parents[2] / "src"
 
 
 def run_cli(repository, *args, check=True, extra_env=None):
@@ -14,6 +22,9 @@ def run_cli(repository, *args, check=True, extra_env=None):
         **os.environ,
         "SHIFTORY_RUN_DIR": str(run_root),
         "SHIFTORY_CACHE_DIR": str(cache_root),
+        "PYTHONPATH": os.pathsep.join(
+            filter(None, (str(SOURCE_ROOT), os.environ.get("PYTHONPATH", "")))
+        ),
         **(extra_env or {}),
     }
     return subprocess.run(
@@ -364,7 +375,181 @@ def test_chunked_resume_rejects_missing_output_and_tampered_payload(repo_factory
     )
 
     assert tampered.returncode == 2
-    assert "digest is invalid" in json.loads(tampered.stderr)["message"]
+    assert "exact canonical JSON" in json.loads(tampered.stderr)["message"]
+
+
+def _chunked_descriptor(repository) -> dict:
+    return json.loads(
+        run_cli(
+            repository,
+            "explain",
+            "--graphora",
+            "off",
+            "--max-evidence-bytes",
+            "3000",
+        ).stdout
+    )
+
+
+def _large_changed_repository(repo_factory):
+    repository = repo_factory()
+    (repository / "large.py").write_text(
+        "\n".join(f"old_{index:03d} = {index}" for index in range(1, 121)) + "\n",
+        encoding="utf-8",
+    )
+    subprocess.run(["git", "add", "."], cwd=repository, check=True)
+    subprocess.run(["git", "commit", "-qm", "add large source"], cwd=repository, check=True)
+    (repository / "large.py").write_text(
+        "\n".join(f"new_{index:03d} = {index}" for index in range(1, 121)) + "\n",
+        encoding="utf-8",
+    )
+    return repository
+
+
+@pytest.mark.skipif(os.name != "posix" or not hasattr(os, "link"), reason="POSIX hard links")
+def test_chunked_run_rejects_hard_linked_artifacts_without_mutating_sources(
+    repo_factory,
+) -> None:
+    repository = _large_changed_repository(repo_factory)
+    descriptor = _chunked_descriptor(repository)
+    write_chunk_explanations(descriptor)
+    run = Path(descriptor["descriptor"]).parent
+    targets = [
+        Path(descriptor["descriptor"]),
+        Path(descriptor["ledger"]),
+        Path(descriptor["plan"]),
+        Path(descriptor["chunks"][0]["payload"]),
+        Path(descriptor["chunks"][0]["explanation"]),
+        Path(descriptor["final_explanation"]),
+        Path(descriptor["verification"] or run / "verification.json"),
+        Path(descriptor["report"]),
+    ]
+
+    for index, target in enumerate(targets):
+        original = target.read_bytes() if target.exists() else None
+        source = repository / f"linked-source-{index}"
+        source.write_bytes(original if original is not None else b"repository content\n")
+        source.chmod(0o600)
+        target.unlink(missing_ok=True)
+        os.link(source, target)
+        before = source.read_bytes()
+
+        result = run_cli(repository, *descriptor["resume_command"][1:], check=False)
+
+        assert result.returncode == 2
+        assert "hard links" in json.loads(result.stderr)["message"]
+        assert source.read_bytes() == before
+        target.unlink(missing_ok=True)
+        if original is not None:
+            target.write_bytes(original)
+            target.chmod(0o600)
+
+
+@pytest.mark.parametrize(
+    "mutation,expected",
+    [
+        ("whitespace", "canonical JSON"),
+        ("pretty", "canonical JSON"),
+        ("key-order", "canonical JSON"),
+        ("duplicate", "duplicate JSON key"),
+        ("invalid-utf8", "valid UTF-8"),
+        ("over-cap", "on-disk byte cap"),
+    ],
+)
+def test_chunk_payload_requires_exact_canonical_capped_bytes(
+    repo_factory, mutation, expected
+) -> None:
+    repository = _large_changed_repository(repo_factory)
+    descriptor = _chunked_descriptor(repository)
+    path = Path(descriptor["chunks"][0]["payload"])
+    raw = path.read_bytes()
+    value = json.loads(raw)
+    if mutation == "whitespace":
+        changed = raw + b" "
+    elif mutation == "pretty":
+        changed = pretty_json(value).encode()
+    elif mutation == "key-order":
+        changed = (
+            json.dumps(
+                dict(reversed(list(value.items()))), ensure_ascii=True, separators=(",", ":")
+            )
+            + "\n"
+        ).encode()
+    elif mutation == "duplicate":
+        changed = b'{"schema":"shiftory.chunk/v1",' + raw[1:]
+    elif mutation == "invalid-utf8":
+        changed = raw + b"\xff"
+    else:
+        changed = raw + b" " * 3_001
+    path.write_bytes(changed)
+    path.chmod(0o600)
+
+    result = run_cli(
+        repository,
+        *descriptor["retrieve_command"][1:],
+        "unused-range",
+        check=False,
+    )
+
+    assert result.returncode == 2
+    assert expected in json.loads(result.stderr)["message"]
+
+
+def test_chunk_payload_rejects_recorded_size_mismatch_even_when_hashes_are_rebound(
+    repo_factory,
+) -> None:
+    repository = _large_changed_repository(repo_factory)
+    descriptor = _chunked_descriptor(repository)
+    descriptor_path = Path(descriptor["descriptor"])
+    chunk_path = Path(descriptor["chunks"][0]["payload"])
+    plan_path = Path(descriptor["plan"])
+    chunk = json.loads(chunk_path.read_bytes())
+    chunk["budget"]["actual_bytes"] = 1
+    chunk["budget"]["estimated_tokens"] = estimate_tokens(1)
+    chunk_payload = canonical_json(chunk).encode()
+    chunk_digest = sha256(chunk_payload).hexdigest()
+    chunk_path.write_bytes(chunk_payload)
+    chunk_path.chmod(0o600)
+    plan = json.loads(plan_path.read_bytes())
+    plan["chunks"][0]["payload_sha256"] = chunk_digest
+    plan["id"] = plan_identity(plan)
+    plan_payload = canonical_json(plan).encode()
+    plan_path.write_bytes(plan_payload)
+    plan_path.chmod(0o600)
+    stored_descriptor = {key: value for key, value in descriptor.items() if key != "descriptor"}
+    stored_descriptor["chunks"][0]["payload_sha256"] = chunk_digest
+    stored_descriptor["plan_sha256"] = sha256(plan_payload).hexdigest()
+    descriptor_path.write_text(pretty_json(stored_descriptor), encoding="utf-8")
+    descriptor_path.chmod(0o600)
+
+    result = run_cli(
+        repository,
+        *descriptor["retrieve_command"][1:],
+        "unused-range",
+        check=False,
+    )
+
+    assert result.returncode == 2
+    assert "recorded byte size is invalid" in json.loads(result.stderr)["message"]
+
+
+@pytest.mark.parametrize("field", ["ledger", "plan"])
+def test_bound_generated_json_requires_exact_canonical_bytes(repo_factory, field) -> None:
+    repository = _large_changed_repository(repo_factory)
+    descriptor = _chunked_descriptor(repository)
+    path = Path(descriptor[field])
+    path.write_bytes(path.read_bytes() + b" ")
+    path.chmod(0o600)
+
+    result = run_cli(
+        repository,
+        *descriptor["retrieve_command"][1:],
+        "unused-range",
+        check=False,
+    )
+
+    assert result.returncode == 2
+    assert "canonical JSON" in json.loads(result.stderr)["message"]
 
 
 def test_explain_rejects_worktree_visible_run_storage(repo_factory) -> None:

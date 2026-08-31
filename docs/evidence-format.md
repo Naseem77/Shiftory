@@ -248,7 +248,10 @@ deterministic estimate `ceil(bytes / 4)`; the effective byte ceiling is
 `min(--max-evidence-bytes, 4 * --max-evidence-tokens)`. It is unset by default and
 is not a model-specific tokenizer count. An irreducible atom or source line that
 cannot fit raises `chunk_budget_error` rather than splitting ownership or exceeding
-the cap.
+the cap. Resume and retrieval hash the exact stored bytes and require bound ledger,
+plan, and chunk JSON to match the canonical UTF-8 encoding byte for byte, with unique
+object keys. The chunk's recorded size and effective ceiling are checked against the
+same on-disk bytes.
 
 ## Chunk retrieval and composition
 

@@ -135,7 +135,9 @@ unit, or individual source line. If the smallest such payload cannot fit, the ru
 fails with `chunk_budget_error` instead of weakening ownership or silently
 exceeding the cap.
 
-Byte metrics are exact canonical serialized counts. Token values use the documented
+Byte metrics are exact canonical serialized counts. Bound v2 JSON must retain that
+exact UTF-8 byte encoding on disk; alternate formatting, duplicate keys, invalid
+UTF-8, and appended bytes fail closed. Token values use the documented
 `ceil(bytes / 4)` estimate and are not model-tokenizer measurements.
 
 ## Privacy and retention
@@ -175,6 +177,10 @@ Windows support is not provided by this implementation.
 Run hashes detect partial, stale, or accidental artifact modification; they are not
 a signature against the local owner deliberately rewriting an entire private run
 and all of its related hashes.
+
+Run files must remain single-link, owner-only regular files. Shiftory atomically
+replaces generated outputs instead of truncating their existing inodes, and rejects
+symbolic or hard-linked artifacts rather than following or mutating them.
 
 ## Classification
 

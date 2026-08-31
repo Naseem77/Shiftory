@@ -284,6 +284,48 @@ def test_many_small_chunks_index_graph_facts_once_and_remain_deterministic(
     )
 
 
+def test_concentrated_omitted_graph_facts_bound_chunk_finalization(
+    repo_factory, monkeypatch
+) -> None:
+    evidence = _large_evidence(repo_factory, file_count=1)
+    budget = AgentBudget(3_000)
+    chunk = plan_chunks(evidence, budget).chunks[0]
+    facts = [
+        {
+            "id": f"fact-{index:05d}",
+            "kind": "definition",
+            "side": "after",
+            "path": "file0.py",
+            "line": 1,
+            "symbol": f"symbol-{index:05d}",
+            "target": None,
+            "confidence": "extracted",
+            "provenance": "graphora:test",
+        }
+        for index in range(5_000)
+    ]
+    indexed = planner_module._index_graph_facts(facts)
+    finalizations = 0
+    real_finalize = planner_module._finalize_chunk
+
+    def counted_finalize(value):
+        nonlocal finalizations
+        finalizations += 1
+        return real_finalize(value)
+
+    monkeypatch.setattr(planner_module, "_finalize_chunk", counted_finalize)
+    first = planner_module._include_graph_facts(chunk, indexed, budget)
+    first_finalizations = finalizations
+    finalizations = 0
+    second = planner_module._include_graph_facts(chunk, indexed, budget)
+
+    assert first == second
+    assert 0 < len(first["omitted_graph_fact_ids"]) < len(facts)
+    assert first["budget"]["actual_bytes"] <= budget.effective_max_bytes
+    assert first_finalizations < 10
+    assert finalizations < 10
+
+
 def test_irreducible_atom_fails_instead_of_breaking_the_cap(repo_factory) -> None:
     evidence = _large_evidence(repo_factory, file_count=1)
     with pytest.raises(ChunkBudgetError, match="irreducible ownership atom") as caught:

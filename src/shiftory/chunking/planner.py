@@ -868,10 +868,13 @@ def _include_graph_facts(
             selected["allowed_citation_ids"].remove(fact["id"])
         omitted.insert(0, fact["id"])
         selected = _finalize_chunk(selected)
+    omitted_size = int(selected["budget"]["actual_bytes"])
     for fact_id in omitted:
         delta = _component_size(fact_id) + (1 if selected["omitted_graph_fact_ids"] else 0)
-        if int(selected["budget"]["actual_bytes"]) + delta <= budget.effective_max_bytes:
-            selected["omitted_graph_fact_ids"].append(fact_id)
+        if omitted_size + delta > budget.effective_max_bytes:
+            break
+        selected["omitted_graph_fact_ids"].append(fact_id)
+        omitted_size += delta
     selected = _finalize_chunk(selected)
     while int(selected["budget"]["actual_bytes"]) > budget.effective_max_bytes:
         selected["omitted_graph_fact_ids"].pop()

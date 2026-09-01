@@ -124,7 +124,7 @@ def validate_explanation(
         else:
             item_ids.add(item_id)
         _validate_item(item, index, errors)
-    _validate_policy(explanation, items, errors, _source_corpus(evidence))
+    _validate_policy(explanation, items, errors, _ClaimTextPolicy(_source_corpus(evidence)))
 
     ledger = _evidence_ledger(evidence, errors)
     owners_value = explanation.get("coverage_owners")
@@ -456,8 +456,9 @@ def _validate_policy(
     explanation: dict[str, Any],
     items: list[Any],
     errors: list[dict[str, Any]],
-    source_corpus: str = "",
+    policy: _ClaimTextPolicy | None = None,
 ) -> None:
+    policy = policy or _ClaimTextPolicy("")
     for field in sorted(explanation):
         normalized = field.lower().replace("-", "_")
         if normalized not in _DISALLOWED_FIELDS:
@@ -496,7 +497,7 @@ def _validate_policy(
                 continue
             unquoted = _QUOTED_OR_CODE.sub("", value)
             _validate_policy_text(unquoted, f"$.items[{index}].{field}", errors)
-        _validate_grounding_policy(raw_item, index, errors, source_corpus)
+        _validate_grounding_policy(raw_item, index, errors, policy)
     summary = explanation.get("summary")
     if isinstance(summary, str):
         unquoted = _QUOTED_OR_CODE.sub("", summary)
@@ -507,7 +508,7 @@ def _validate_grounding_policy(
     item: dict[str, Any],
     index: int,
     errors: list[dict[str, Any]],
-    source_corpus: str = "",
+    policy: _ClaimTextPolicy,
 ) -> None:
     grounding = item.get("grounding")
     if not isinstance(grounding, dict):
@@ -533,7 +534,7 @@ def _validate_grounding_policy(
         limits = claim.get("limits")
         if isinstance(limits, str):
             _validate_policy_text(_QUOTED_OR_CODE.sub("", limits), f"{claim_path}.limits", errors)
-        _validate_claim_values(claim, claim_path, errors, source_corpus)
+        _validate_claim_values(claim, claim_path, errors, policy)
         shared = claim.get("shared_support")
         if not isinstance(shared, list):
             continue
@@ -563,7 +564,7 @@ def _validate_claim_values(
     claim: dict[str, Any],
     claim_path: str,
     errors: list[dict[str, Any]],
-    source_corpus: str,
+    policy: _ClaimTextPolicy,
 ) -> None:
     """Scan every claim value that is not forced to come from the evidence.
 
@@ -585,7 +586,7 @@ def _validate_claim_values(
             continue
         value = claim.get(name)
         if isinstance(value, str):
-            _scan_claim_value(value, f"{claim_path}.{name}", errors, source_corpus)
+            policy.scan(value, f"{claim_path}.{name}", errors)
     if level == "verified":
         return
     metadata = claim.get("metadata")
@@ -594,20 +595,40 @@ def _validate_claim_values(
     for key in sorted(metadata):
         value = metadata[key]
         if isinstance(key, str):
-            _scan_claim_value(key, f"{claim_path}.metadata", errors, source_corpus)
+            policy.scan(key, f"{claim_path}.metadata", errors)
         if isinstance(value, str):
-            _scan_claim_value(value, f"{claim_path}.metadata.{key}", errors, source_corpus)
+            policy.scan(value, f"{claim_path}.metadata.{key}", errors)
 
 
-def _scan_claim_value(
-    value: str,
-    path: str,
-    errors: list[dict[str, Any]],
-    source_corpus: str,
-) -> None:
-    if value in source_corpus:
-        return
-    _validate_policy_text(_QUOTED_OR_CODE.sub("", value), path, errors)
+class _ClaimTextPolicy:
+    """Explanation-not-review scanning for authored grounding values.
+
+    The pattern scan runs first because it reads only the bounded value, while
+    the source-derived exemption has to search the whole packet. A value that
+    matches no pattern is accepted without touching the corpus, so the corpus is
+    searched only for text that already reads like a review, and each distinct
+    searched value is looked up once per validation.
+    """
+
+    def __init__(self, source_corpus: str) -> None:
+        self._corpus = source_corpus
+        self._derived: dict[str, bool] = {}
+        self.corpus_lookups = 0
+
+    def scan(self, value: str, path: str, errors: list[dict[str, Any]]) -> None:
+        flagged: list[dict[str, Any]] = []
+        _validate_policy_text(_QUOTED_OR_CODE.sub("", value), path, flagged)
+        if not flagged or self._source_derived(value):
+            return
+        errors.extend(flagged)
+
+    def _source_derived(self, value: str) -> bool:
+        cached = self._derived.get(value)
+        if cached is None:
+            self.corpus_lookups += 1
+            cached = value in self._corpus
+            self._derived[value] = cached
+        return cached
 
 
 def _validate_policy_text(

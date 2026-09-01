@@ -11,7 +11,7 @@ from typing import Any
 import pytest
 
 from shiftory.errors import ValidationError
-from shiftory.explain import grounding
+from shiftory.explain import grounding, validator
 from shiftory.explain.validator import validate_explanation
 from shiftory.models.json import canonical_json
 from shiftory.render.report import build_report
@@ -662,3 +662,207 @@ def test_narrowing_cache_does_not_leak_between_items() -> None:
     assert [entry["code"] for entry in error.value.details["errors"]] == [
         "grounding.operand_missing"
     ]
+
+
+def sliced_manifest(line_ids: list[str], items: int, claims: int, support: str) -> dict[str, Any]:
+    """`items` items owning disjoint slices, each citing the same coarse support."""
+    per_item = len(line_ids) // items
+    return {
+        "schema": "shiftory.explanation/v1",
+        "summary": "Many values are added.",
+        "items": [
+            {
+                "id": f"slice-{index}",
+                "kind": "behavioral",
+                "title": f"Slice {index}",
+                "before": None,
+                "after": "Values are added.",
+                "absence": "before",
+                "confidence": "extracted",
+                "citations": [],
+                "grounding": {
+                    "claims": [
+                        {
+                            "id": f"claim-{number}",
+                            "type": "addition",
+                            "support_level": "verified",
+                            "support": [support],
+                            "literal": f"value_{index * per_item + (number % per_item)} = 1",
+                        }
+                        for number in range(claims)
+                    ]
+                },
+            }
+            for index in range(items)
+        ],
+        "coverage_owners": [
+            {"evidence_id": line_id, "owner_id": f"slice-{position // per_item}"}
+            for position, line_id in enumerate(line_ids)
+        ],
+    }
+
+
+def counted_validation(
+    packet: dict[str, Any], manifest: dict[str, Any], monkeypatch: Any
+) -> tuple[Any, int, int]:
+    """Validate while counting coarse binding work and residual candidates."""
+    bind_work = 0
+    residual_work = 0
+    original_bound = grounding._is_bound
+    original_residual = grounding._residual_lines
+
+    def counting_bound(support: Any, scope: Any, index: Any) -> Any:
+        nonlocal bind_work
+        bind_work += (
+            len(scope.owned_lines)
+            if support.kind in {"hunk", "unit"}
+            else max(len(support.line_ids), 1)
+        )
+        return original_bound(support, scope, index)
+
+    def counting_residual(regions: Any, index: Any, other: str, literal: str) -> Any:
+        nonlocal residual_work
+        files = {
+            index.spans[region.span_id].file_index
+            for region in regions
+            if region.span_id in index.spans
+        }
+        residual_work += sum(
+            len(index.lines_by_file_side.get((file_index, other), ())) for file_index in files
+        )
+        return original_residual(regions, index, other, literal)
+
+    monkeypatch.setattr(grounding, "_is_bound", counting_bound)
+    monkeypatch.setattr(grounding, "_residual_lines", counting_residual)
+    result = validate_explanation(packet, manifest, require_grounding=True)
+    return result, bind_work, residual_work
+
+
+@pytest.mark.parametrize(("spans", "items"), [(1000, 5), (2000, 10), (4000, 20)])
+def test_many_items_and_claims_stay_bounded(spans: int, items: int, monkeypatch: Any) -> None:
+    """Work must scale with the comparison, not with items times claims."""
+    claims = 32
+    packet, line_ids = wide_packet(spans)
+    manifest = sliced_manifest(line_ids, items, claims, "u")
+
+    result, bind_work, residual_work = counted_validation(packet, manifest, monkeypatch)
+
+    assert result.grounding is not None
+    assert result.grounding.claim_total == items * claims
+    # One coarse binding decision per item, each reading only that item's lines.
+    assert bind_work == spans
+    # No before-side changed lines exist, so no residual candidate is inspected.
+    assert residual_work == 0
+
+
+def test_one_item_per_changed_line_stays_bounded(monkeypatch: Any) -> None:
+    spans, claims = 400, 32
+    packet, line_ids = wide_packet(spans)
+    manifest = sliced_manifest(line_ids, spans, claims, "u")
+
+    result, bind_work, residual_work = counted_validation(packet, manifest, monkeypatch)
+
+    assert result.grounding is not None
+    assert result.grounding.claim_total == spans * claims
+    assert bind_work == spans
+    assert residual_work == 0
+
+
+def test_residual_checks_read_only_opposite_side_candidates(monkeypatch: Any) -> None:
+    """A real deletion candidate set is inspected; unrelated files are not."""
+    packet, line_ids = wide_packet(6)
+    packet["files"].append(
+        {
+            "old_path": "other.py",
+            "new_path": "other.py",
+            "units": [{"id": "u2", "kind": "text", "hunk_ids": ["h2"], "metadata": {}}],
+            "hunks": [
+                {
+                    "id": "h2",
+                    "span_ids": ["s100"],
+                    "lines": [{"id": "l100", "side": "before", "content": "    value_0 = 1"}],
+                }
+            ],
+            "spans": [
+                {
+                    "id": "s100",
+                    "side": "before",
+                    "start_line": 1,
+                    "end_line": 1,
+                    "line_ids": ["l100"],
+                    "replacement_span_id": None,
+                }
+            ],
+            "citations": [],
+        }
+    )
+    manifest = sliced_manifest(line_ids, 1, 1, "u")
+    manifest["items"].append(
+        {
+            "id": "other",
+            "kind": "behavioral",
+            "title": "Other",
+            "before": "The other module set the value.",
+            "after": None,
+            "absence": "after",
+            "confidence": "extracted",
+            "citations": [],
+            "grounding": {
+                "claims": [
+                    {
+                        "id": "gone",
+                        "type": "deletion",
+                        "support_level": "verified",
+                        "support": ["s100"],
+                        "literal": "value_0 = 1",
+                    }
+                ]
+            },
+        }
+    )
+    manifest["coverage_owners"].append({"evidence_id": "l100", "owner_id": "other"})
+
+    result, _, residual_work = counted_validation(packet, manifest, monkeypatch)
+
+    assert result.grounding is not None
+    # Only `other.py` has an after side to inspect for the deletion, and it has none;
+    # the addition claim in `wide.py` finds no before-side candidates either.
+    assert residual_work == 0
+
+
+def test_repeated_policy_values_scan_the_source_corpus_once() -> None:
+    """A flagged value is looked up once per validation, however many claims use it."""
+    packet, line_ids = wide_packet(8)
+    manifest = sliced_manifest(line_ids, 1, 4, "u")
+    for claim in manifest["items"][0]["grounding"]["claims"]:
+        claim.update(
+            type="text_absence",
+            side="after",
+            literal="I recommend reverting this change.",
+        )
+        claim.pop("literal", None)
+        claim["literal"] = "I recommend reverting this change."
+    policy = validator._ClaimTextPolicy(validator._source_corpus(packet))
+    errors: list[dict[str, Any]] = []
+    for claim in manifest["items"][0]["grounding"]["claims"]:
+        policy.scan(str(claim["literal"]), "$.x", errors)
+    assert len(errors) == 4
+    assert policy.corpus_lookups == 1
+
+
+def test_clean_policy_values_never_touch_the_source_corpus() -> None:
+    policy = validator._ClaimTextPolicy("    value_0 = 1")
+    errors: list[dict[str, Any]] = []
+    for index in range(500):
+        policy.scan(f"value_{index} = 1", "$.x", errors)
+    assert errors == []
+    assert policy.corpus_lookups == 0
+
+
+def test_distinct_flagged_values_each_resolve_against_the_corpus() -> None:
+    policy = validator._ClaimTextPolicy("I recommend reverting change 3.")
+    errors: list[dict[str, Any]] = []
+    for index in range(5):
+        policy.scan(f"I recommend reverting change {index}.", "$.x", errors)
+    assert len(errors) == 4
+    assert policy.corpus_lookups == 5

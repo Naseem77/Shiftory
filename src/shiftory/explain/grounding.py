@@ -93,6 +93,7 @@ class LineRecord:
     hunk_id: str
     span_id: str | None
     file_index: int
+    position: int = 0
 
 
 @dataclass(frozen=True, slots=True)
@@ -149,6 +150,7 @@ class EvidenceIndex:
     graph_status: str = "disabled"
     changed_paths: frozenset[str] = frozenset()
     supports: dict[str, Support] = field(default_factory=dict)
+    lines_by_file_side: dict[tuple[int, str], tuple[LineRecord, ...]] = field(default_factory=dict)
 
 
 @dataclass(frozen=True, slots=True)
@@ -188,6 +190,7 @@ class Support:
     unit_id: str | None = None
     fact: dict[str, Any] | None = None
     shared: bool = False
+    line_set: frozenset[str] = frozenset()
 
 
 @dataclass(frozen=True, slots=True)
@@ -290,8 +293,9 @@ def index_evidence(evidence: dict[str, Any]) -> EvidenceIndex:
             record.hunk_id,
             line_span.get(line_id),
             record.file_index,
+            position,
         )
-        for line_id, record in lines.items()
+        for position, (line_id, record) in enumerate(lines.items())
     }
     return EvidenceIndex(
         resolved_lines,
@@ -303,7 +307,23 @@ def index_evidence(evidence: dict[str, Any]) -> EvidenceIndex:
         status if isinstance(status, str) else "disabled",
         frozenset(changed_paths),
         _index_supports(resolved_lines, spans, hunks, units, citations, facts),
+        _index_lines_by_file_side(resolved_lines),
     )
+
+
+def _index_lines_by_file_side(
+    lines: dict[str, LineRecord],
+) -> dict[tuple[int, str], tuple[LineRecord, ...]]:
+    """Group changed lines by file and side in stable evidence order.
+
+    An addition or deletion only has to look at the opposite side of the files
+    its support touches, so the residual check reads a candidate list instead of
+    walking every changed line in the comparison.
+    """
+    grouped: dict[tuple[int, str], list[LineRecord]] = {}
+    for record in lines.values():
+        grouped.setdefault((record.file_index, record.side), []).append(record)
+    return {key: tuple(records) for key, records in grouped.items()}
 
 
 def _index_hunks(
@@ -531,6 +551,10 @@ def _index_supports(
                 _span_regions_for(hunk.line_ids, lines, span_regions),
                 (hunk_id,),
                 _paths_for_lines(hunk.line_ids, lines),
+                None,
+                None,
+                False,
+                frozenset(hunk.line_ids),
             ),
         )
     for unit_id, unit in units.items():
@@ -544,6 +568,9 @@ def _index_supports(
                 _hunks_for(unit.line_ids, lines),
                 unit.paths,
                 unit_id,
+                None,
+                False,
+                frozenset(unit.line_ids),
             ),
         )
     for fact_id, fact in facts.items():
@@ -716,10 +743,11 @@ def _evaluate_item(
     observed_sides: set[str] = set()
     weakest = _LEVEL_STRENGTH["verified"]
     failures = 0
-    # Narrowing depends only on the support and this item's owned lines, so it is
-    # computed once per support id here rather than once per citing claim. The
-    # cache lives and dies with this item; it is never keyed on object identity.
-    narrowed: dict[str, Support] = {}
+    # Binding and narrowing depend only on the support and this item's owned
+    # lines, so both are decided once per support id here rather than once per
+    # citing claim; `None` records an unbound support. The cache lives and dies
+    # with this item and is never keyed on object identity.
+    narrowed: dict[str, Support | None] = {}
     for position, raw_claim in enumerate(raw_claims):
         path = f"{item_path}.grounding.claims[{position}]"
         claim = _claim_shape(raw_claim, path, claim_ids, diagnostics)
@@ -905,7 +933,7 @@ def _resolve_support(
     scopes: dict[str, ItemScope],
     declared_owners: dict[str, str],
     diagnostics: _Diagnostics,
-    narrowed: dict[str, Support],
+    narrowed: dict[str, Support | None],
 ) -> tuple[Support, ...] | None:
     level = str(claim["support_level"])
     raw_support = claim.get("support", [])
@@ -940,7 +968,12 @@ def _resolve_support(
             )
             failed = True
             continue
-        if not _is_bound(support, scope, index):
+        if value in narrowed:
+            cached = narrowed[value]
+        else:
+            cached = _narrowed(support, scope, index) if _is_bound(support, scope, index) else None
+            narrowed[value] = cached
+        if cached is None:
             diagnostics.add(
                 "grounding.support_unbound",
                 entry_path,
@@ -951,10 +984,6 @@ def _resolve_support(
             )
             failed = True
             continue
-        cached = narrowed.get(value)
-        if cached is None:
-            cached = _narrowed(support, scope, index)
-            narrowed[value] = cached
         resolved.append(cached)
     shared = _resolve_shared(
         claim, path, index, scope, scopes, declared_owners, resolved, diagnostics
@@ -1152,28 +1181,56 @@ def _narrowed(support: Support, scope: ItemScope, index: EvidenceIndex) -> Suppo
     if support.kind not in {"hunk", "unit"}:
         return support
     owned = scope.owned_lines
-    regions = tuple(
-        region for region in support.regions if all(line_id in owned for line_id in region.line_ids)
+    line_ids = tuple(
+        sorted(
+            (line_id for line_id in owned if line_id in support.line_set),
+            key=lambda line_id: index.lines[line_id].position,
+        )
     )
-    line_ids = tuple(line_id for line_id in support.line_ids if line_id in owned)
     return Support(
         support.id,
         support.kind,
         line_ids,
-        regions,
+        _owned_regions(line_ids, owned, index),
         _hunks_for(line_ids, index.lines),
         support.paths,
         support.unit_id,
         support.fact,
         support.shared,
+        frozenset(line_ids),
     )
+
+
+def _owned_regions(
+    line_ids: tuple[str, ...],
+    owned: frozenset[str],
+    index: EvidenceIndex,
+) -> tuple[Region, ...]:
+    """The wholly owned span regions covering `line_ids`, in evidence order."""
+    seen: set[str] = set()
+    regions: list[Region] = []
+    for line_id in line_ids:
+        span_id = index.lines[line_id].span_id
+        if span_id is None or span_id in seen:
+            continue
+        seen.add(span_id)
+        support = index.supports.get(span_id)
+        if support is None or not support.regions:
+            continue
+        region = support.regions[0]
+        if all(member in owned for member in region.line_ids):
+            regions.append(region)
+    return tuple(regions)
 
 
 def _is_bound(support: Support, scope: ItemScope, index: EvidenceIndex) -> bool:
     if support.kind in {"line", "span", "citation"}:
         return bool(support.line_ids) and set(support.line_ids) <= scope.owned_lines
     if support.kind in {"hunk", "unit"}:
-        return bool(scope.owned_lines.intersection(support.line_ids))
+        # Iterate the item's own lines: their total across all items is the
+        # comparison size, while every item would otherwise rescan the whole
+        # coarse reference.
+        return any(line_id in support.line_set for line_id in scope.owned_lines)
     if support.kind == "non_text_unit":
         return support.id in scope.owned_units
     if support.kind == "fact":
@@ -1506,16 +1563,18 @@ def _residual_lines(
     lines this item owns, so narrow ownership cannot manufacture a verified
     addition or deletion for text that merely moved.
     """
-    files = {
-        index.spans[region.span_id].file_index
-        for region in regions
-        if region.span_id in index.spans
-    }
-    return sorted(
-        line_id
-        for line_id, record in index.lines.items()
-        if record.side == other and record.file_index in files and literal in record.content
-    )
+    candidates: list[LineRecord] = []
+    for file_index in sorted(
+        {
+            index.spans[region.span_id].file_index
+            for region in regions
+            if region.span_id in index.spans
+        }
+    ):
+        candidates.extend(index.lines_by_file_side.get((file_index, other), ()))
+    if not candidates:
+        return []
+    return sorted(record.id for record in candidates if literal in record.content)
 
 
 def _source_order(

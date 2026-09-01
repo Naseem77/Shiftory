@@ -716,6 +716,10 @@ def _evaluate_item(
     observed_sides: set[str] = set()
     weakest = _LEVEL_STRENGTH["verified"]
     failures = 0
+    # Narrowing depends only on the support and this item's owned lines, so it is
+    # computed once per support id here rather than once per citing claim. The
+    # cache lives and dies with this item; it is never keyed on object identity.
+    narrowed: dict[str, Support] = {}
     for position, raw_claim in enumerate(raw_claims):
         path = f"{item_path}.grounding.claims[{position}]"
         claim = _claim_shape(raw_claim, path, claim_ids, diagnostics)
@@ -723,7 +727,9 @@ def _evaluate_item(
             failures += 1
             continue
         claim_ids.add(str(claim["id"]))
-        supports = _resolve_support(claim, path, index, scope, scopes, declared_owners, diagnostics)
+        supports = _resolve_support(
+            claim, path, index, scope, scopes, declared_owners, diagnostics, narrowed
+        )
         if supports is None:
             failures += 1
             continue
@@ -899,6 +905,7 @@ def _resolve_support(
     scopes: dict[str, ItemScope],
     declared_owners: dict[str, str],
     diagnostics: _Diagnostics,
+    narrowed: dict[str, Support],
 ) -> tuple[Support, ...] | None:
     level = str(claim["support_level"])
     raw_support = claim.get("support", [])
@@ -944,7 +951,11 @@ def _resolve_support(
             )
             failed = True
             continue
-        resolved.append(_narrowed(support, scope, index))
+        cached = narrowed.get(value)
+        if cached is None:
+            cached = _narrowed(support, scope, index)
+            narrowed[value] = cached
+        resolved.append(cached)
     shared = _resolve_shared(
         claim, path, index, scope, scopes, declared_owners, resolved, diagnostics
     )

@@ -550,3 +550,115 @@ def test_value_change_still_finds_a_linked_pair_through_coarse_support() -> None
     assert result.grounding.outcomes[0].proof == (
         "replacement span sb0 -> sa0 changes 'old_0' to 'new_0'"
     )
+
+
+def test_coarse_narrowing_is_computed_once_per_item_and_support(monkeypatch: Any) -> None:
+    """Narrowing depends on the item, not the claim, so claims must not repeat it."""
+    spans, claims, items = 400, 16, 4
+    packet, line_ids = wide_packet(spans)
+    per_item = spans // items
+    manifest: dict[str, Any] = {
+        "schema": "shiftory.explanation/v1",
+        "summary": "Many values are added.",
+        "items": [
+            {
+                "id": f"slice-{index}",
+                "kind": "structural",
+                "title": f"Slice {index}",
+                "confidence": "extracted",
+                "citations": [],
+                "grounding": {
+                    "claims": [
+                        {
+                            "id": f"claim-{number}",
+                            "type": "text_presence",
+                            "support_level": "verified",
+                            "support": ["u"],
+                            "side": "after",
+                            "literal": f"value_{index * per_item + number} = 1",
+                        }
+                        for number in range(claims)
+                    ]
+                },
+            }
+            for index in range(items)
+        ],
+        "coverage_owners": [
+            {"evidence_id": line_id, "owner_id": f"slice-{position // per_item}"}
+            for position, line_id in enumerate(line_ids)
+        ],
+    }
+
+    narrowings = 0
+    original = grounding._narrowed
+
+    def counting_narrow(support: Any, scope: Any, index: Any) -> Any:
+        nonlocal narrowings
+        narrowings += 1
+        return original(support, scope, index)
+
+    monkeypatch.setattr(grounding, "_narrowed", counting_narrow)
+    result = validate_explanation(packet, manifest, require_grounding=True)
+
+    assert result.grounding is not None
+    assert result.grounding.claim_total == claims * items
+    # One narrowing per item and distinct support id, never one per claim.
+    assert narrowings == items
+
+
+def test_narrowing_cache_does_not_leak_between_items() -> None:
+    """Each item must narrow the same coarse support against its own lines."""
+    packet, line_ids = wide_packet(4)
+    manifest: dict[str, Any] = {
+        "schema": "shiftory.explanation/v1",
+        "summary": "Values are added.",
+        "items": [
+            {
+                "id": "head",
+                "kind": "structural",
+                "title": "Head",
+                "confidence": "extracted",
+                "citations": [],
+                "grounding": {
+                    "claims": [
+                        {
+                            "id": "head-value",
+                            "type": "text_presence",
+                            "support_level": "verified",
+                            "support": ["u"],
+                            "side": "after",
+                            "literal": "value_3 = 1",
+                        }
+                    ]
+                },
+            },
+            {
+                "id": "tail",
+                "kind": "structural",
+                "title": "Tail",
+                "confidence": "extracted",
+                "citations": [],
+                "grounding": {
+                    "claims": [
+                        {
+                            "id": "tail-value",
+                            "type": "text_presence",
+                            "support_level": "verified",
+                            "support": ["u"],
+                            "side": "after",
+                            "literal": "value_3 = 1",
+                        }
+                    ]
+                },
+            },
+        ],
+        "coverage_owners": [
+            {"evidence_id": line_id, "owner_id": "head" if position < 2 else "tail"}
+            for position, line_id in enumerate(line_ids)
+        ],
+    }
+    with pytest.raises(ValidationError) as error:
+        validate_explanation(packet, manifest, require_grounding=True)
+    assert [entry["code"] for entry in error.value.details["errors"]] == [
+        "grounding.operand_missing"
+    ]

@@ -944,7 +944,7 @@ def _resolve_support(
             )
             failed = True
             continue
-        resolved.append(_narrowed(support, scope))
+        resolved.append(_narrowed(support, scope, index))
     shared = _resolve_shared(
         claim, path, index, scope, scopes, declared_owners, resolved, diagnostics
     )
@@ -1126,13 +1126,17 @@ def _paths_for_lines(line_ids: tuple[str, ...], lines: dict[str, LineRecord]) ->
     return tuple(sorted(found))
 
 
-def _narrowed(support: Support, scope: ItemScope) -> Support:
+def _narrowed(support: Support, scope: ItemScope, index: EvidenceIndex) -> Support:
     """Drop the parts of a coarse reference the item does not own.
 
     A textual hunk or text unit only has to *intersect* the item's owned change
     to be usable, so it can also cover spans that belong to another item. Those
     spans must not become claim text, otherwise coarse support would silently
     reach evidence that `shared_support` exists to declare.
+
+    The advertised hunks shrink with the retained lines. A file's text unit spans
+    every hunk in that file, so forwarding the original set would turn
+    shared-support hunk locality into mere same-file locality.
     """
     if support.kind not in {"hunk", "unit"}:
         return support
@@ -1146,7 +1150,7 @@ def _narrowed(support: Support, scope: ItemScope) -> Support:
         support.kind,
         line_ids,
         regions,
-        support.hunk_ids,
+        _hunks_for(line_ids, index.lines),
         support.paths,
         support.unit_id,
         support.fact,
@@ -1354,17 +1358,10 @@ def _value_change(
         )
     if level != "verified":
         return generic
-    linked = [
-        (before_region, after_region)
-        for before_region in before_regions
-        for after_region in after_regions
-        if _linked(before_region, after_region, index)
-        and before_literal in before_region.joined()
-        and after_literal in after_region.joined()
-        and before_literal not in after_region.joined()
-        and after_literal not in before_region.joined()
-    ]
-    if not linked:
+    linked = _linked_replacement(
+        before_regions, after_regions, before_literal, after_literal, index
+    )
+    if linked is None:
         diagnostics.add(
             "grounding.replacement_link_missing",
             f"{path}.support",
@@ -1376,14 +1373,41 @@ def _value_change(
         )
         return generic
     return (
-        f"replacement span {linked[0][0].span_id} -> {linked[0][1].span_id} changes "
+        f"replacement span {linked[0].span_id} -> {linked[1].span_id} changes "
         f"{before_literal!r} to {after_literal!r}"
     )
 
 
-def _linked(before_region: Region, after_region: Region, index: EvidenceIndex) -> bool:
-    span = index.spans.get(before_region.span_id)
-    return span is not None and span.replacement_span_id == after_region.span_id
+def _linked_replacement(
+    before_regions: tuple[Region, ...],
+    after_regions: tuple[Region, ...],
+    before_literal: str,
+    after_literal: str,
+    index: EvidenceIndex,
+) -> tuple[Region, Region] | None:
+    """Find the first replacement-linked pair that proves the change.
+
+    `replacement_span_id` is a function, not a relation, so the candidate after
+    span is a lookup rather than a scan over every before/after combination.
+    """
+    after_by_span = {region.span_id: region for region in after_regions}
+    for before_region in before_regions:
+        span = index.spans.get(before_region.span_id)
+        if span is None or span.replacement_span_id is None:
+            continue
+        after_region = after_by_span.get(span.replacement_span_id)
+        if after_region is None:
+            continue
+        before_text = before_region.joined()
+        after_text = after_region.joined()
+        if (
+            before_literal in before_text
+            and after_literal in after_text
+            and before_literal not in after_text
+            and after_literal not in before_text
+        ):
+            return before_region, after_region
+    return None
 
 
 def _addition(

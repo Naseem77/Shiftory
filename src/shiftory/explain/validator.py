@@ -578,7 +578,7 @@ def _validate_claim_values(
     claim_type = claim.get("type")
     level = claim.get("support_level")
     forced: tuple[str, ...] = ()
-    if isinstance(claim_type, str) and level in OBLIGATION_LEVELS:
+    if isinstance(claim_type, str) and isinstance(level, str) and level in OBLIGATION_LEVELS:
         forced = _EVIDENCE_FORCED_FIELDS.get(claim_type, ())
     for name in (*LITERAL_FIELDS, "target", "path", "id"):
         if name in forced:

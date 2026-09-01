@@ -948,6 +948,81 @@ def test_shared_support_accepts_a_declared_neighbour_in_the_same_hunk() -> None:
     assert accept(manifest).claim_total == 5
 
 
+def test_shared_support_locality_survives_a_whole_file_unit_reference() -> None:
+    """A file's text unit spans every hunk, so it must not widen locality."""
+    manifest = explanation(
+        value_change_claim(),
+        {
+            "id": "observer",
+            "type": "text_presence",
+            "support_level": "verified",
+            "support": ["u1"],
+            "shared_support": [
+                {
+                    "evidence_id": "sa2",
+                    "owner_id": "second",
+                    "reason": "The logging line completes the same statement group.",
+                }
+            ],
+            "side": "after",
+            "literal": "log('done')",
+        },
+    )
+    packet = evidence()
+    packet["files"][0]["hunks"].append(
+        {
+            "id": "h1b",
+            "span_ids": ["sa2"],
+            "lines": [{"id": "la3", "side": "after", "content": "    log('done')"}],
+        }
+    )
+    packet["files"][0]["hunks"][0]["span_ids"] = ["sb", "sa"]
+    packet["files"][0]["hunks"][0]["lines"] = packet["files"][0]["hunks"][0]["lines"][:3]
+    packet["files"][0]["units"][0]["hunk_ids"] = ["h1", "h1b"]
+    with pytest.raises(ValidationError) as error:
+        validate_explanation(packet, manifest, require_grounding=True)
+    assert [entry["code"] for entry in error.value.details["errors"]] == [
+        "grounding.shared_support_nonlocal"
+    ]
+
+
+def test_shared_support_still_works_inside_one_hunk() -> None:
+    manifest = explanation(
+        value_change_claim(),
+        {
+            "id": "observer",
+            "type": "text_presence",
+            "support_level": "verified",
+            "support": ["u1"],
+            "shared_support": [
+                {
+                    "evidence_id": "sa2",
+                    "owner_id": "second",
+                    "reason": "The logging line completes the same statement group.",
+                }
+            ],
+            "side": "after",
+            "literal": "log('done')",
+        },
+    )
+    assert accept(manifest).claim_total == 5
+
+
+def test_a_malformed_support_level_fails_as_a_validation_error() -> None:
+    for level in ({}, ["verified"], 3):
+        manifest = explanation(
+            {
+                "id": "broken",
+                "type": "text_presence",
+                "support_level": level,
+                "support": ["sa"],
+                "side": "after",
+                "literal": "timeout = 60",
+            }
+        )
+        assert codes(manifest) == ["grounding.claim_shape"]
+
+
 def test_shared_support_must_share_a_hunk_with_its_own_support() -> None:
     manifest = explanation(
         value_change_claim(),

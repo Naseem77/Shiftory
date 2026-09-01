@@ -440,3 +440,113 @@ def test_coarse_support_narrows_to_the_owning_item() -> None:
     assert [entry["code"] for entry in error.value.details["errors"]] == [
         "grounding.operand_missing"
     ]
+
+
+def linked_pair_packet(pairs: int) -> tuple[dict[str, Any], dict[str, Any]]:
+    """One hunk holding `pairs` before spans and `pairs` after spans."""
+    lines: list[dict[str, Any]] = []
+    spans: list[dict[str, Any]] = []
+    span_ids: list[str] = []
+    for index in range(pairs):
+        lines.append({"id": f"b{index}", "side": "before", "content": f"old_{index}"})
+        spans.append(
+            {
+                "id": f"sb{index}",
+                "side": "before",
+                "start_line": index + 1,
+                "end_line": index + 1,
+                "line_ids": [f"b{index}"],
+                "replacement_span_id": None,
+            }
+        )
+        span_ids.append(f"sb{index}")
+    for index in range(pairs):
+        lines.append({"id": f"a{index}", "side": "after", "content": f"new_{index}"})
+        spans.append(
+            {
+                "id": f"sa{index}",
+                "side": "after",
+                "start_line": index + 1,
+                "end_line": index + 1,
+                "line_ids": [f"a{index}"],
+                "replacement_span_id": None,
+            }
+        )
+        span_ids.append(f"sa{index}")
+    packet = {
+        "schema": "shiftory.evidence/v1",
+        "comparison": {"identity": "identity"},
+        "files": [
+            {
+                "old_path": "pairs.py",
+                "new_path": "pairs.py",
+                "units": [{"id": "u", "kind": "text", "hunk_ids": ["h1"], "metadata": {}}],
+                "hunks": [{"id": "h1", "span_ids": span_ids, "lines": lines}],
+                "spans": spans,
+                "citations": [],
+            }
+        ],
+        "graph": {"status": "disabled", "facts": []},
+    }
+    value = {
+        "schema": "shiftory.explanation/v1",
+        "summary": "Values change.",
+        "items": [
+            {
+                "id": "values",
+                "kind": "behavioral",
+                "title": "Values",
+                "before": "The old values were used.",
+                "after": "The new values are used.",
+                "confidence": "extracted",
+                "citations": [],
+                "grounding": {
+                    "claims": [
+                        {
+                            "id": "vc",
+                            "type": "value_change",
+                            "support_level": "verified",
+                            "support": ["h1"],
+                            "before_literal": "old_0",
+                            "after_literal": "new_0",
+                        }
+                    ]
+                },
+            }
+        ],
+        "coverage_owners": [{"evidence_id": line["id"], "owner_id": "values"} for line in lines],
+    }
+    return packet, value
+
+
+def test_value_change_does_not_enumerate_every_region_pair(monkeypatch: Any) -> None:
+    """The replacement link is a function, so candidates are looked up, not scanned."""
+    pairs = 400
+    packet, manifest = linked_pair_packet(pairs)
+    joins = 0
+    original = grounding.Region.joined
+
+    def counting_join(self: Any) -> str:
+        nonlocal joins
+        joins += 1
+        return original(self)
+
+    monkeypatch.setattr(grounding.Region, "joined", counting_join)
+    with pytest.raises(ValidationError) as error:
+        validate_explanation(packet, manifest, require_grounding=True)
+    assert [entry["code"] for entry in error.value.details["errors"]] == [
+        "grounding.replacement_link_missing"
+    ]
+    # Two obligation scans over both sides, never a before-by-after product.
+    assert joins <= 4 * pairs
+
+
+def test_value_change_still_finds_a_linked_pair_through_coarse_support() -> None:
+    packet, manifest = linked_pair_packet(50)
+    packet["files"][0]["spans"][0]["replacement_span_id"] = "sa0"
+    packet["files"][0]["spans"][50]["replacement_span_id"] = "sb0"
+    result = validate_explanation(packet, manifest, require_grounding=True)
+    assert result.grounding is not None
+    assert result.grounding.outcomes[0].proof == (
+        "replacement span sb0 -> sa0 changes 'old_0' to 'new_0'"
+    )

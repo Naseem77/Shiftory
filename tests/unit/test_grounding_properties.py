@@ -1179,3 +1179,202 @@ def test_a_unit_orders_its_lines_by_evidence_position() -> None:
     index = grounding.index_evidence(packet)
     assert index.supports["u"].line_ids == ("l0", "l1")
     assert [region.span_id for region in index.supports["u"].regions] == ["s0", "s1"]
+
+
+def shared_prefix_packet(pairs: int) -> dict[str, Any]:
+    """Both sides share an eight-character prefix, as ordinary source does."""
+    lines: list[dict[str, Any]] = []
+    spans: list[dict[str, Any]] = []
+    span_ids: list[str] = []
+    for index in range(pairs):
+        lines.append(
+            {
+                "id": f"b{index}",
+                "side": "before",
+                "content": f"        self.logger.debug('legacy %s', ctx_{index})",
+            }
+        )
+        spans.append(
+            {
+                "id": f"sb{index}",
+                "side": "before",
+                "start_line": index + 1,
+                "end_line": index + 1,
+                "line_ids": [f"b{index}"],
+                "replacement_span_id": None,
+            }
+        )
+        span_ids.append(f"sb{index}")
+    for index in range(pairs):
+        lines.append(
+            {
+                "id": f"a{index}",
+                "side": "after",
+                "content": f"        self.logger.info('current %s', ctx_{index})",
+            }
+        )
+        spans.append(
+            {
+                "id": f"sa{index}",
+                "side": "after",
+                "start_line": index + 1,
+                "end_line": index + 1,
+                "line_ids": [f"a{index}"],
+                "replacement_span_id": None,
+            }
+        )
+        span_ids.append(f"sa{index}")
+    return {
+        "schema": "shiftory.evidence/v1",
+        "comparison": {"identity": "identity"},
+        "files": [
+            {
+                "old_path": "svc.py",
+                "new_path": "svc.py",
+                "units": [{"id": "u", "kind": "text", "hunk_ids": ["h1"], "metadata": {}}],
+                "hunks": [{"id": "h1", "span_ids": span_ids, "lines": lines}],
+                "spans": spans,
+                "citations": [],
+            }
+        ],
+        "graph": {"status": "disabled", "facts": []},
+    }
+
+
+def shared_prefix_manifest(pairs: int, items: int, claims: int) -> dict[str, Any]:
+    per_item = pairs // items
+    return {
+        "schema": "shiftory.explanation/v1",
+        "summary": "Logging changes.",
+        "items": [
+            {
+                "id": f"slice-{index}",
+                "kind": "structural",
+                "title": f"Slice {index}",
+                "confidence": "extracted",
+                "citations": [],
+                "grounding": {
+                    "claims": [
+                        {
+                            "id": f"claim-{number}",
+                            "type": "addition",
+                            "support_level": "verified",
+                            "support": [f"sa{index * per_item + (number % per_item)}"],
+                            "literal": (
+                                "self.logger.info('current %s', ctx_"
+                                f"{index * per_item + (number % per_item)})"
+                            ),
+                        }
+                        for number in range(claims)
+                    ]
+                },
+            }
+            for index in range(items)
+        ],
+        "coverage_owners": [
+            {"evidence_id": f"a{position}", "owner_id": f"slice-{position // per_item}"}
+            for position in range(pairs)
+        ]
+        + [
+            {"evidence_id": f"b{position}", "owner_id": f"slice-{position // per_item}"}
+            for position in range(pairs)
+        ],
+    }
+
+
+def test_residual_filter_rejects_literals_that_share_a_prefix(monkeypatch: Any) -> None:
+    """Checking every window, not just the first, is what makes the filter work."""
+    pairs, items, claims = 200, 10, 8
+    packet = shared_prefix_packet(pairs)
+    manifest = shared_prefix_manifest(pairs, items, claims)
+
+    rejected = 0
+    scanned = 0
+    original = grounding._literal_may_occur
+
+    def counting(index: Any, key: tuple[int, str], literal: str) -> bool:
+        nonlocal rejected, scanned
+        outcome = original(index, key, literal)
+        if outcome:
+            scanned += len(index.text_by_file_side.get(key, ""))
+        else:
+            rejected += 1
+        return outcome
+
+    monkeypatch.setattr(grounding, "_literal_may_occur", counting)
+    result = validate_explanation(packet, manifest, require_grounding=True)
+
+    assert result.grounding is not None
+    assert result.grounding.claim_total == items * claims
+    # Every literal shares its first window with the before side, so a first-window
+    # filter would reject none of them and scan the whole side for each claim.
+    assert rejected == items * claims
+    assert scanned == 0
+
+
+def test_residual_answers_are_remembered_within_one_validation(monkeypatch: Any) -> None:
+    pairs, items, claims = 40, 2, 8
+    packet = shared_prefix_packet(pairs)
+    manifest = shared_prefix_manifest(pairs, items, claims)
+    for item in manifest["items"]:
+        for claim in item["grounding"]["claims"]:
+            claim["literal"] = "self.logger.info('current %s', ctx_0)"
+    manifest["items"] = manifest["items"][:1]
+    manifest["coverage_owners"] = [
+        {"evidence_id": entry["evidence_id"], "owner_id": "slice-0"}
+        for entry in manifest["coverage_owners"]
+    ]
+    for claim in manifest["items"][0]["grounding"]["claims"]:
+        claim["support"] = ["sa0"]
+
+    probes = 0
+    original = grounding._literal_may_occur
+
+    def counting(index: Any, key: tuple[int, str], literal: str) -> bool:
+        nonlocal probes
+        probes += 1
+        return original(index, key, literal)
+
+    monkeypatch.setattr(grounding, "_literal_may_occur", counting)
+    result = validate_explanation(packet, manifest, require_grounding=True)
+
+    assert result.grounding is not None
+    assert result.grounding.claim_total == claims
+    # One distinct literal and one file side, so one probe however many claims.
+    assert probes == 1
+
+
+def test_grams_are_built_only_when_a_residual_check_needs_them() -> None:
+    packet = shared_prefix_packet(20)
+    manifest: dict[str, Any] = {
+        "schema": "shiftory.explanation/v1",
+        "summary": "Logging changes.",
+        "items": [
+            {
+                "id": "solo",
+                "kind": "structural",
+                "title": "Solo",
+                "confidence": "extracted",
+                "citations": [],
+                "grounding": {
+                    "claims": [
+                        {
+                            "id": "present",
+                            "type": "text_presence",
+                            "support_level": "verified",
+                            "support": ["sa0"],
+                            "side": "after",
+                            "literal": "self.logger.info",
+                        }
+                    ]
+                },
+            }
+        ],
+        "coverage_owners": [{"evidence_id": f"a{index}", "owner_id": "solo"} for index in range(20)]
+        + [{"evidence_id": f"b{index}", "owner_id": "solo"} for index in range(20)],
+    }
+    index = grounding.index_evidence(packet)
+    assert index.grams_by_file_side == {}
+    result = validate_explanation(packet, manifest, require_grounding=True)
+    assert result.grounding is not None
+    assert result.grounding.claim_total == 1

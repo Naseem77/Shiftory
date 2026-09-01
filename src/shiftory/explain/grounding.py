@@ -153,6 +153,7 @@ class EvidenceIndex:
     lines_by_file_side: dict[tuple[int, str], tuple[LineRecord, ...]] = field(default_factory=dict)
     text_by_file_side: dict[tuple[int, str], str] = field(default_factory=dict)
     grams_by_file_side: dict[tuple[int, str], frozenset[int]] = field(default_factory=dict)
+    residual_matches: dict[tuple[int, str, str], tuple[str, ...]] = field(default_factory=dict)
 
 
 @dataclass(frozen=True, slots=True)
@@ -316,7 +317,6 @@ def index_evidence(evidence: dict[str, Any]) -> EvidenceIndex:
         _index_supports(resolved_lines, spans, hunks, units, citations, facts),
         grouped_lines,
         joined,
-        {key: _content_grams(value) for key, value in joined.items()},
     )
 
 
@@ -324,15 +324,41 @@ GRAM_LENGTH = 8
 
 
 def _content_grams(text: str) -> frozenset[int]:
-    """Hashes of every `GRAM_LENGTH` window of a file side's changed text.
-
-    A literal can only occur in that text if its own first window occurs there,
-    so this answers the common "absent" case in constant time. The filter only
-    skips work that would have found nothing, so a hash collision costs one
-    ordinary search and can never change a result.
-    """
+    """Hashes of every `GRAM_LENGTH` window of a file side's changed text."""
     return frozenset(
         hash(text[offset : offset + GRAM_LENGTH]) for offset in range(len(text) - GRAM_LENGTH + 1)
+    )
+
+
+def _side_grams(index: EvidenceIndex, key: tuple[int, str]) -> frozenset[int]:
+    """The window hashes for one file side, built on first use.
+
+    Only addition and deletion claims consult this, so a comparison whose
+    manifest makes no such claim never pays for it.
+    """
+    cached = index.grams_by_file_side.get(key)
+    if cached is None:
+        cached = _content_grams(index.text_by_file_side.get(key, ""))
+        index.grams_by_file_side[key] = cached
+    return cached
+
+
+def _literal_may_occur(index: EvidenceIndex, key: tuple[int, str], literal: str) -> bool:
+    """Whether `literal` can occur in a file side, without searching its text.
+
+    Every window of a contained literal must itself occur in the containing
+    text, so one missing window is proof of absence. Checking all of them rather
+    than only the first is what rejects source text that merely shares a common
+    prefix with the other side. The test only skips searches that would have
+    found nothing, and a hash collision costs one ordinary search rather than
+    changing a result.
+    """
+    if len(literal) < GRAM_LENGTH:
+        return True
+    grams = _side_grams(index, key)
+    return all(
+        hash(literal[offset : offset + GRAM_LENGTH]) in grams
+        for offset in range(len(literal) - GRAM_LENGTH + 1)
     )
 
 
@@ -1639,20 +1665,25 @@ def _residual_lines(
         }
     ):
         key = (file_index, other)
-        # A constant-time window check rejects most literals outright. What
-        # survives is confirmed by one search over the side's joined text, and
-        # only a real hit reads individual records.
-        if len(literal) >= GRAM_LENGTH:
-            grams = index.grams_by_file_side.get(key)
-            if grams is None or hash(literal[:GRAM_LENGTH]) not in grams:
-                continue
-        if literal not in index.text_by_file_side.get(key, ""):
+        memo_key = (file_index, other, literal)
+        remembered = index.residual_matches.get(memo_key)
+        if remembered is not None:
+            found.extend(remembered)
             continue
-        found.extend(
-            record.id
-            for record in index.lines_by_file_side.get(key, ())
-            if literal in record.content
-        )
+        matches: tuple[str, ...] = ()
+        # A window check rejects most literals without reading the side at all.
+        # What survives is confirmed by one search over the joined text, and only
+        # a real hit reads individual records.
+        if _literal_may_occur(index, key, literal) and literal in index.text_by_file_side.get(
+            key, ""
+        ):
+            matches = tuple(
+                record.id
+                for record in index.lines_by_file_side.get(key, ())
+                if literal in record.content
+            )
+        index.residual_matches[memo_key] = matches
+        found.extend(matches)
     return sorted(found)
 
 

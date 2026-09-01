@@ -1,0 +1,170 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shiftory.dev/schemas/chunk-v1.json",
+  "title": "Shiftory agent evidence chunk v1",
+  "type": "object",
+  "required": [
+    "schema", "id", "comparison_identity", "ledger_sha256", "index", "count",
+    "grouping_strategy", "budget", "work_items", "graph_facts",
+    "omitted_graph_fact_ids", "allowed_citation_ids"
+  ],
+  "properties": {
+    "schema": {"const": "shiftory.chunk/v1"},
+    "id": {"type": "string", "minLength": 1},
+    "comparison_identity": {"type": "string", "minLength": 1},
+    "ledger_sha256": {"$ref": "#/$defs/sha256"},
+    "index": {"type": "integer", "minimum": 1},
+    "count": {"type": "integer", "minimum": 1},
+    "grouping_strategy": {"enum": ["graph-guided", "deterministic-fallback"]},
+    "budget": {"$ref": "#/$defs/budget"},
+    "work_items": {
+      "type": "array", "items": {"$ref": "#/$defs/workItem"}, "minItems": 1
+    },
+    "graph_facts": {"type": "array", "items": {"$ref": "#/$defs/graphFact"}},
+    "omitted_graph_fact_ids": {
+      "type": "array", "items": {"type": "string"}, "uniqueItems": true
+    },
+    "allowed_citation_ids": {
+      "type": "array", "items": {"type": "string"}, "minItems": 1, "uniqueItems": true
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "budget": {
+      "type": "object",
+      "required": [
+        "requested_bytes", "requested_estimated_tokens", "effective_max_bytes",
+        "token_estimate_formula", "actual_bytes", "estimated_tokens"
+      ],
+      "properties": {
+        "requested_bytes": {"type": "integer", "minimum": 0},
+        "requested_estimated_tokens": {"type": ["integer", "null"], "minimum": 0},
+        "effective_max_bytes": {"type": "integer", "minimum": 0},
+        "token_estimate_formula": {"const": "ceil(canonical_utf8_bytes/4)"},
+        "actual_bytes": {"type": "integer", "minimum": 1},
+        "estimated_tokens": {"type": "integer", "minimum": 1}
+      },
+      "additionalProperties": false
+    },
+    "file": {
+      "type": "object",
+      "required": [
+        "old_path", "new_path", "status", "classification",
+        "classification_confidence"
+      ],
+      "properties": {
+        "old_path": {"type": ["string", "null"]},
+        "new_path": {"type": ["string", "null"]},
+        "status": {"type": "string"},
+        "classification": {"type": "string"},
+        "classification_confidence": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "unit": {
+      "type": "object",
+      "required": ["id", "kind", "metadata"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "kind": {"type": "string", "minLength": 1},
+        "metadata": {"type": "object"}
+      },
+      "additionalProperties": false
+    },
+    "hunk": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "id", "old_start", "old_count", "new_start", "new_count", "heading"
+          ],
+          "properties": {
+            "id": {"type": "string", "minLength": 1},
+            "old_start": {"type": "integer", "minimum": 0},
+            "old_count": {"type": "integer", "minimum": 0},
+            "new_start": {"type": "integer", "minimum": 0},
+            "new_count": {"type": "integer", "minimum": 0},
+            "heading": {"type": "string"}
+          },
+          "additionalProperties": false
+        },
+        {"type": "null"}
+      ]
+    },
+    "target": {
+      "type": "object",
+      "required": [
+        "evidence_id", "kind", "side", "start_line", "end_line",
+        "changed_line_count"
+      ],
+      "properties": {
+        "evidence_id": {"type": "string", "minLength": 1},
+        "kind": {"enum": ["span", "non_text_unit"]},
+        "side": {"enum": ["before", "after", null]},
+        "start_line": {"type": ["integer", "null"], "minimum": 1},
+        "end_line": {"type": ["integer", "null"], "minimum": 1},
+        "changed_line_count": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "context": {
+      "type": "object",
+      "required": [
+        "citation_id", "path", "side", "start_line", "end_line",
+        "content_hash", "text", "retrieval_range_ids"
+      ],
+      "properties": {
+        "citation_id": {"type": "string", "minLength": 1},
+        "path": {"type": "string", "minLength": 1},
+        "side": {"enum": ["before", "after"]},
+        "start_line": {"type": "integer", "minimum": 1},
+        "end_line": {"type": "integer", "minimum": 1},
+        "content_hash": {"$ref": "#/$defs/sha256"},
+        "text": {"type": ["string", "null"]},
+        "retrieval_range_ids": {
+          "type": "array", "items": {"type": "string"}, "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "workItem": {
+      "type": "object",
+      "required": [
+        "id", "classification", "file", "unit", "hunk",
+        "ownership_targets", "contexts"
+      ],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "classification": {"type": "string", "minLength": 1},
+        "file": {"$ref": "#/$defs/file"},
+        "unit": {"$ref": "#/$defs/unit"},
+        "hunk": {"$ref": "#/$defs/hunk"},
+        "ownership_targets": {
+          "type": "array", "items": {"$ref": "#/$defs/target"}, "minItems": 1
+        },
+        "contexts": {"type": "array", "items": {"$ref": "#/$defs/context"}}
+      },
+      "additionalProperties": false
+    },
+    "graphFact": {
+      "type": "object",
+      "required": [
+        "id", "kind", "side", "path", "line", "symbol", "target",
+        "confidence", "provenance"
+      ],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "kind": {"type": "string"},
+        "side": {"enum": ["before", "after"]},
+        "path": {"type": "string"},
+        "line": {"type": ["integer", "null"], "minimum": 1},
+        "symbol": {"type": ["string", "null"]},
+        "target": {"type": ["string", "null"]},
+        "confidence": {"type": "string"},
+        "provenance": {"type": "string"}
+      },
+      "additionalProperties": false
+    }
+  }
+}

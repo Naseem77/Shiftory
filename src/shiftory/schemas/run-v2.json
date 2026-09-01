@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shiftory.dev/schemas/run-v2.json",
+  "title": "Shiftory private run v2",
+  "type": "object",
+  "required": [
+    "schema", "status", "comparison_identity", "repository_id", "repository_root",
+    "ledger", "ledger_sha256", "plan", "plan_sha256", "chunks",
+    "final_explanation", "report", "verification", "budget",
+    "schema_command", "retrieve_command", "resume_command"
+  ],
+  "properties": {
+    "schema": {"const": "shiftory.run/v2"},
+    "status": {"enum": ["awaiting_chunks", "complete"]},
+    "comparison_identity": {"type": "string", "minLength": 1},
+    "repository_id": {"type": "string", "minLength": 1},
+    "repository_root": {"type": "string", "minLength": 1},
+    "ledger": {"type": "string", "minLength": 1},
+    "ledger_sha256": {"$ref": "#/$defs/sha256"},
+    "plan": {"type": "string", "minLength": 1},
+    "plan_sha256": {"$ref": "#/$defs/sha256"},
+    "chunks": {"type": "array", "items": {"$ref": "#/$defs/chunk"}, "minItems": 1},
+    "final_explanation": {"type": "string", "minLength": 1},
+    "report": {"type": "string", "minLength": 1},
+    "verification": {"type": ["string", "null"]},
+    "budget": {"$ref": "#/$defs/budget"},
+    "schema_command": {
+      "type": "array", "items": {"type": "string"}, "minItems": 3
+    },
+    "retrieve_command": {
+      "type": "array", "items": {"type": "string"}, "minItems": 5
+    },
+    "resume_command": {
+      "type": "array", "items": {"type": "string"}, "minItems": 4
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "budget": {
+      "type": "object",
+      "required": [
+        "requested_bytes", "requested_estimated_tokens", "effective_max_bytes",
+        "token_estimate_formula", "ledger_bytes", "chunk_count",
+        "max_chunk_bytes", "max_chunk_estimated_tokens"
+      ],
+      "properties": {
+        "requested_bytes": {"type": "integer", "minimum": 0},
+        "requested_estimated_tokens": {"type": ["integer", "null"], "minimum": 0},
+        "effective_max_bytes": {"type": "integer", "minimum": 0},
+        "token_estimate_formula": {"const": "ceil(canonical_utf8_bytes/4)"},
+        "ledger_bytes": {"type": "integer", "minimum": 1},
+        "chunk_count": {"type": "integer", "minimum": 1},
+        "max_chunk_bytes": {"type": "integer", "minimum": 1},
+        "max_chunk_estimated_tokens": {"type": "integer", "minimum": 1}
+      },
+      "additionalProperties": false
+    },
+    "chunk": {
+      "type": "object",
+      "required": ["id", "payload", "payload_sha256", "explanation"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "payload": {"type": "string", "minLength": 1},
+        "payload_sha256": {"$ref": "#/$defs/sha256"},
+        "explanation": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    }
+  }
+}

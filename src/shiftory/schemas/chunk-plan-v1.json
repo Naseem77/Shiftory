@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shiftory.dev/schemas/chunk-plan-v1.json",
+  "title": "Shiftory chunk plan v1",
+  "type": "object",
+  "required": [
+    "schema", "id", "comparison_identity", "ledger_sha256",
+    "grouping_strategy", "budget", "chunks", "retrieval_ranges", "coverage"
+  ],
+  "properties": {
+    "schema": {"const": "shiftory.chunk-plan/v1"},
+    "id": {"type": "string", "minLength": 1},
+    "comparison_identity": {"type": "string", "minLength": 1},
+    "ledger_sha256": {"$ref": "#/$defs/sha256"},
+    "grouping_strategy": {"enum": ["graph-guided", "deterministic-fallback"]},
+    "budget": {"$ref": "#/$defs/budget"},
+    "chunks": {"type": "array", "items": {"$ref": "#/$defs/chunkEntry"}, "minItems": 1},
+    "retrieval_ranges": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/retrievalRange"}
+    },
+    "coverage": {
+      "type": "object",
+      "required": ["span_targets", "non_text_unit_targets"],
+      "properties": {
+        "span_targets": {"type": "integer", "minimum": 0},
+        "non_text_unit_targets": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "budget": {
+      "type": "object",
+      "required": [
+        "requested_bytes", "requested_estimated_tokens", "effective_max_bytes",
+        "token_estimate_formula"
+      ],
+      "properties": {
+        "requested_bytes": {"type": "integer", "minimum": 0},
+        "requested_estimated_tokens": {"type": ["integer", "null"], "minimum": 0},
+        "effective_max_bytes": {"type": "integer", "minimum": 0},
+        "token_estimate_formula": {"const": "ceil(canonical_utf8_bytes/4)"}
+      },
+      "additionalProperties": false
+    },
+    "chunkEntry": {
+      "type": "object",
+      "required": [
+        "id", "index", "payload_sha256", "ownership_target_ids",
+        "retrieval_range_ids"
+      ],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "index": {"type": "integer", "minimum": 1},
+        "payload_sha256": {"$ref": "#/$defs/sha256"},
+        "ownership_target_ids": {
+          "type": "array", "items": {"type": "string"}, "minItems": 1, "uniqueItems": true
+        },
+        "retrieval_range_ids": {
+          "type": "array", "items": {"type": "string"}, "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "retrievalRange": {
+      "type": "object",
+      "required": [
+        "id", "citation_id", "path", "side", "start_line", "end_line",
+        "content_hash", "response_bytes", "estimated_tokens"
+      ],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "citation_id": {"type": "string", "minLength": 1},
+        "path": {"type": "string", "minLength": 1},
+        "side": {"enum": ["before", "after"]},
+        "start_line": {"type": "integer", "minimum": 1},
+        "end_line": {"type": "integer", "minimum": 1},
+        "content_hash": {"$ref": "#/$defs/sha256"},
+        "response_bytes": {"type": "integer", "minimum": 1},
+        "estimated_tokens": {"type": "integer", "minimum": 1}
+      },
+      "additionalProperties": false
+    }
+  }
+}

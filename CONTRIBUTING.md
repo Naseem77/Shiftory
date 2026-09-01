@@ -32,7 +32,7 @@ python -m twine check dist/*
 
 Also smoke-test the built wheel in a clean environment when package data, CLI
 entry points, schemas, or the bundled skill changes. The installed wheel must
-contain all three JSON schemas, `py.typed`, and the bundled `SKILL.md`.
+contain every bundled JSON schema, `py.typed`, and the bundled `SKILL.md`.
 
 If the repository provides documentation-link, license/SBOM, or offline benchmark
 commands, run those commands exactly as CI does. Network-fetched release

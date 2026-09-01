@@ -48,10 +48,12 @@ shiftory explain
 
 With no scope flag, Shiftory compares `HEAD` with the complete working tree:
 staged, unstaged, and non-ignored untracked content. The command creates a private
-run, writes deterministic evidence and an explanation template, and prints a JSON
-descriptor, then stops. The thin agent skill reads that descriptor, fills the
-template, and invokes the recorded resume command; resume verifies before it
-renders and emits the report.
+run and prints a JSON descriptor, then stops. A fitting comparison uses the
+compatible `shiftory.run/v1` evidence/template pair. If the mandatory ledger cannot
+fit the agent budget, `shiftory.run/v2` keeps that complete ledger private and emits
+strictly bounded work chunks instead. The thin agent skill follows either descriptor,
+uses only recorded source retrieval when needed, and invokes the recorded finalizer;
+finalization verifies global coverage before it renders and emits the report.
 
 For a manual two-phase run:
 
@@ -59,12 +61,16 @@ For a manual two-phase run:
 # Save the printed descriptor; it contains the exact evidence and template paths.
 shiftory explain --graphora auto > run-descriptor.json
 
-# After an agent fills the descriptor's explanation template:
+# After an agent follows the descriptor and fills its recorded output template(s):
 shiftory explain \
   --resume /path/to/run/run.json \
   --explanation /path/to/run/explanation.json \
   --output shiftory-report.md
 ```
+
+The explicit `--explanation` form above is the compatible v1 resume. A v2
+descriptor's generated `resume_command` omits it and composes all recorded chunk
+outputs.
 
 The successful resume removes the private run directory by default. See
 [Artifacts and retention](#artifacts-and-retention) before using sensitive
@@ -164,7 +170,25 @@ shiftory render \
 ```
 
 Inspect the exact bundled contracts with `shiftory schema evidence`,
-`shiftory schema explanation`, or `shiftory schema report`.
+`shiftory schema explanation`, `shiftory schema report`, `shiftory schema run`,
+`shiftory schema chunk-plan`, `shiftory schema chunk`,
+`shiftory schema chunk-explanation`, or `shiftory schema retrieval`.
+
+### Agent payload budgets
+
+`--max-evidence-bytes` remains the strict serialized byte ceiling for each v2
+agent chunk and recorded retrieval response. An optional token-oriented ceiling is
+available for the low-friction workflow:
+
+```bash
+shiftory explain --max-evidence-bytes 1000000 --max-evidence-tokens 200000
+```
+
+The token estimate is `ceil(canonical UTF-8 bytes / 4)`. It is a deterministic
+planning estimate, not a model-specific tokenizer count. When both options are
+present, the effective byte ceiling is the smaller of the byte limit and four times
+the token limit. The token option is unset by default, preserving the existing
+1,000,000-byte default.
 
 ### Illustrative output
 
@@ -236,8 +260,10 @@ as tests. They are not executed tests or runtime coverage. See
 Git analysis and Graphora enrichment are local by default; `--pr` alone uses
 `gh` and may fetch missing objects. The CLI sends no telemetry, prompts, reports,
 or product memory and does not itself send source to an LLM. The agent workflow
-does intentionally give the invoked agent the bounded evidence file, so that
-agent and its host's data-handling policy still apply.
+does intentionally give the invoked agent bounded evidence chunks and requested
+recorded ranges, so that agent and its host's data-handling policy still apply. The
+complete v2 ledger and chunk plan remain private run artifacts and the skill tells
+the agent not to read them.
 
 Graphora needs source snapshots. Shiftory stores derived, repository-scoped
 snapshots and graph data beneath the platform cache directory. Common credential
@@ -257,8 +283,16 @@ structural enrichment is wanted.
 
 `shiftory explain` stores runs under the platform state directory, or
 `SHIFTORY_RUN_DIR` when set. Directories are owner-only and files are written
-owner-readable/writable. An awaiting-explanation run remains available so the
-agent can resume it. A successfully finalized run is deleted unless either:
+owner-readable/writable through atomic inode replacement. On supported POSIX
+systems, run and chunk directories remain pinned by no-follow directory descriptors
+for the command lifetime; artifact reads, writes, temporary cleanup, and run deletion
+are descriptor-relative. Existing run files with symbolic links, multiple hard
+links, foreign ownership, or non-private permissions are rejected. Platforms
+without the required directory-descriptor primitives fail closed. Run storage must
+be outside the analyzed repository so private artifacts cannot alter a working-tree
+fingerprint or enter a later diff.
+An awaiting-explanation run remains available so the agent can resume it. A
+successfully finalized run is deleted unless either:
 
 ```bash
 shiftory explain \

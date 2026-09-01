@@ -84,13 +84,35 @@ def analyze(
     provider: GraphoraProvider | None = None,
 ) -> Evidence:
     options = options or AnalyzeOptions()
+    evidence = analyze_complete(options, provider=provider)
+    return _apply_evidence_budget(evidence, options.max_evidence_bytes)
+
+
+def analyze_complete(
+    options: AnalyzeOptions | None = None,
+    *,
+    provider: GraphoraProvider | None = None,
+) -> Evidence:
+    """Build the complete private ledger before agent-payload budgeting."""
+    options = options or AnalyzeOptions()
     root = resolve_repository(options.repo)
     comparison = resolve_comparison(root, options.scope)
     patch = acquire_patch(comparison, context_lines=options.context_lines)
-    return build_evidence(comparison, patch, options=options, provider=provider)
+    return build_complete_evidence(comparison, patch, options=options, provider=provider)
 
 
 def build_evidence(
+    comparison: Any,
+    patch: bytes,
+    *,
+    options: AnalyzeOptions,
+    provider: GraphoraProvider | None = None,
+) -> Evidence:
+    evidence = build_complete_evidence(comparison, patch, options=options, provider=provider)
+    return _apply_evidence_budget(evidence, options.max_evidence_bytes)
+
+
+def build_complete_evidence(
     comparison: Any,
     patch: bytes,
     *,
@@ -199,9 +221,14 @@ def build_evidence(
         (),
         metrics,
     )
-    result = _apply_evidence_budget(evidence, options.max_evidence_bytes)
+    result = _set_evidence_bytes(evidence)
     assert_comparison_consistent(comparison, operation="evidence construction")
     return result
+
+
+def apply_evidence_budget(evidence: Evidence, requested_bytes: int) -> Evidence:
+    """Apply the public evidence/v1 citation-omission budget."""
+    return _apply_evidence_budget(evidence, requested_bytes)
 
 
 def _normalize_non_text_changes(file: FileChange) -> FileChange:

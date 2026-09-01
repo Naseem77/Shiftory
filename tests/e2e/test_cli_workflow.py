@@ -4,7 +4,15 @@ import json
 import os
 import subprocess
 import sys
+from hashlib import sha256
 from pathlib import Path
+
+import pytest
+
+from shiftory.chunking.planner import estimate_tokens, plan_identity
+from shiftory.models.json import canonical_json, pretty_json
+
+SOURCE_ROOT = Path(__file__).parents[2] / "src"
 
 
 def run_cli(repository, *args, check=True, extra_env=None):
@@ -14,6 +22,9 @@ def run_cli(repository, *args, check=True, extra_env=None):
         **os.environ,
         "SHIFTORY_RUN_DIR": str(run_root),
         "SHIFTORY_CACHE_DIR": str(cache_root),
+        "PYTHONPATH": os.pathsep.join(
+            filter(None, (str(SOURCE_ROOT), os.environ.get("PYTHONPATH", "")))
+        ),
         **(extra_env or {}),
     }
     return subprocess.run(
@@ -57,6 +68,46 @@ def write_explanation(descriptor: dict, summary: str = "The return value changes
     path.write_text(json.dumps(explanation), encoding="utf-8")
     path.chmod(0o600)
     return path
+
+
+def write_chunk_explanations(descriptor: dict) -> None:
+    for entry in descriptor["chunks"]:
+        chunk = json.loads(Path(entry["payload"]).read_text(encoding="utf-8"))
+        owner_id = f"chunk-{chunk['index']}-change"
+        targets = [
+            target["evidence_id"]
+            for work_item in chunk["work_items"]
+            for target in work_item["ownership_targets"]
+        ]
+        citations = [
+            context["citation_id"]
+            for work_item in chunk["work_items"]
+            for context in work_item["contexts"]
+        ]
+        explanation = {
+            "schema": "shiftory.chunk-explanation/v1",
+            "chunk_id": chunk["id"],
+            "comparison_identity": chunk["comparison_identity"],
+            "ledger_sha256": chunk["ledger_sha256"],
+            "summary": f"Chunk {chunk['index']} changes source assignments.",
+            "items": [
+                {
+                    "id": owner_id,
+                    "kind": "behavioral",
+                    "title": f"Change assignments in chunk {chunk['index']}",
+                    "before": "The assignments used their previous values.",
+                    "after": "The assignments use their new values.",
+                    "confidence": "extracted",
+                    "citations": citations,
+                }
+            ],
+            "coverage_owners": [
+                {"evidence_id": target, "owner_id": owner_id} for target in targets
+            ],
+        }
+        path = Path(entry["explanation"])
+        path.write_text(json.dumps(explanation), encoding="utf-8")
+        path.chmod(0o600)
 
 
 def test_analyze_verify_render_and_repeated_citation(repo_factory) -> None:
@@ -138,6 +189,30 @@ def test_default_explain_creates_private_recoverable_descriptor(repo_factory) ->
     assert descriptor["evidence_budget"]["actual_bytes"] <= 1_000_000
 
 
+def test_empty_explain_preserves_v1_and_verified_no_changes_report(repo_factory) -> None:
+    repository = repo_factory()
+    descriptor = json.loads(run_cli(repository, "explain", "--graphora", "off").stdout)
+    assert descriptor["schema"] == "shiftory.run/v1"
+    explanation_path = Path(descriptor["explanation"])
+    explanation_path.write_text(
+        json.dumps(
+            {
+                "schema": "shiftory.explanation/v1",
+                "summary": "No changes are present.",
+                "items": [],
+                "coverage_owners": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+    explanation_path.chmod(0o600)
+
+    report = run_cli(repository, *descriptor["resume_command"][1:]).stdout
+
+    assert "Changed lines: 0/0 (100%)" in report
+    assert "Change units: 0/0 (100%)" in report
+
+
 def test_explain_resume_verifies_renders_and_cleans_up(repo_factory) -> None:
     repository = repo_factory()
     (repository / "app.py").write_text("def value():\n    return 2\n", encoding="utf-8")
@@ -151,6 +226,355 @@ def test_explain_resume_verifies_renders_and_cleans_up(repo_factory) -> None:
     assert "# Shiftory explanation" in final.stdout
     assert "Changed lines: 2/2 (100%)" in final.stdout
     assert not run.exists()
+
+
+def test_chunked_explain_retrieves_composes_and_repeats_deterministically(
+    repo_factory,
+) -> None:
+    repository = repo_factory()
+    (repository / "large.py").write_text(
+        "\n".join(f"old_{index:03d} = {index}" for index in range(1, 121)) + "\n",
+        encoding="utf-8",
+    )
+    subprocess.run(["git", "add", "."], cwd=repository, check=True)
+    subprocess.run(["git", "commit", "-qm", "add large source"], cwd=repository, check=True)
+    (repository / "large.py").write_text(
+        "\n".join(f"new_{index:03d} = {index}" for index in range(1, 121)) + "\n",
+        encoding="utf-8",
+    )
+
+    first = json.loads(
+        run_cli(
+            repository,
+            "explain",
+            "--graphora",
+            "off",
+            "--max-evidence-bytes",
+            "3000",
+            "--max-evidence-tokens",
+            "750",
+        ).stdout
+    )
+    assert first["schema"] == "shiftory.run/v2"
+    assert first["status"] == "awaiting_chunks"
+    assert first["budget"]["ledger_bytes"] > 3_000
+    assert first["budget"]["effective_max_bytes"] == 3_000
+    assert first["chunks"]
+    first_payloads = [
+        Path(entry["payload"]).read_text(encoding="utf-8") for entry in first["chunks"]
+    ]
+    chunks = [json.loads(payload) for payload in first_payloads]
+    assert all(chunk["budget"]["actual_bytes"] <= 3_000 for chunk in chunks)
+    assert all(
+        chunk["budget"]["estimated_tokens"] == (chunk["budget"]["actual_bytes"] + 3) // 4
+        for chunk in chunks
+    )
+    range_id = next(
+        range_id
+        for chunk in chunks
+        for work_item in chunk["work_items"]
+        for context in work_item["contexts"]
+        for range_id in context["retrieval_range_ids"]
+    )
+    retrieved = json.loads(
+        run_cli(
+            repository,
+            *first["retrieve_command"][1:],
+            range_id,
+        ).stdout
+    )
+    assert retrieved["range_id"] == range_id
+    assert retrieved["actual_bytes"] <= 3_000
+    assert retrieved["text"].startswith(("old_001", "new_001"))
+
+    write_chunk_explanations(first)
+    first_report = run_cli(
+        repository,
+        *first["resume_command"][1:],
+        "--keep-artifacts",
+    ).stdout
+    assert "Changed lines: 240/240 (100%)" in first_report
+    assert "Change spans: 2/2 (100%)" in first_report
+    assert "Textual hunks: 1/1 (100%)" in first_report
+    assert "Change units: 1/1 (100%)" in first_report
+
+    second = json.loads(
+        run_cli(
+            repository,
+            "explain",
+            "--graphora",
+            "off",
+            "--max-evidence-bytes",
+            "3000",
+            "--max-evidence-tokens",
+            "750",
+        ).stdout
+    )
+    assert Path(first["plan"]).read_bytes() == Path(second["plan"]).read_bytes()
+    assert first_payloads == [
+        Path(entry["payload"]).read_text(encoding="utf-8") for entry in second["chunks"]
+    ]
+    write_chunk_explanations(second)
+    second_report = run_cli(repository, *second["resume_command"][1:]).stdout
+    assert second_report == first_report
+
+
+def test_chunked_resume_rejects_missing_output_and_tampered_payload(repo_factory) -> None:
+    repository = repo_factory()
+    (repository / "large.py").write_text(
+        "\n".join(f"old_{index:03d} = {index}" for index in range(1, 121)) + "\n",
+        encoding="utf-8",
+    )
+    subprocess.run(["git", "add", "."], cwd=repository, check=True)
+    subprocess.run(["git", "commit", "-qm", "add large source"], cwd=repository, check=True)
+    (repository / "large.py").write_text(
+        "\n".join(f"new_{index:03d} = {index}" for index in range(1, 121)) + "\n",
+        encoding="utf-8",
+    )
+    descriptor = json.loads(
+        run_cli(
+            repository,
+            "explain",
+            "--graphora",
+            "off",
+            "--max-evidence-bytes",
+            "3000",
+        ).stdout
+    )
+    Path(descriptor["chunks"][0]["explanation"]).unlink()
+
+    missing = run_cli(
+        repository,
+        *descriptor["resume_command"][1:],
+        check=False,
+    )
+
+    assert missing.returncode == 2
+    assert json.loads(missing.stderr)["error"] == "composition_error"
+
+    second = json.loads(
+        run_cli(
+            repository,
+            "explain",
+            "--graphora",
+            "off",
+            "--max-evidence-bytes",
+            "3000",
+        ).stdout
+    )
+    payload_path = Path(second["chunks"][0]["payload"])
+    payload = json.loads(payload_path.read_text(encoding="utf-8"))
+    payload["grouping_strategy"] = "graph-guided"
+    payload_path.write_text(json.dumps(payload), encoding="utf-8")
+    payload_path.chmod(0o600)
+
+    tampered = run_cli(
+        repository,
+        *second["resume_command"][1:],
+        check=False,
+    )
+
+    assert tampered.returncode == 2
+    assert "exact canonical JSON" in json.loads(tampered.stderr)["message"]
+
+
+def _chunked_descriptor(repository) -> dict:
+    return json.loads(
+        run_cli(
+            repository,
+            "explain",
+            "--graphora",
+            "off",
+            "--max-evidence-bytes",
+            "3000",
+        ).stdout
+    )
+
+
+def _large_changed_repository(repo_factory):
+    repository = repo_factory()
+    (repository / "large.py").write_text(
+        "\n".join(f"old_{index:03d} = {index}" for index in range(1, 121)) + "\n",
+        encoding="utf-8",
+    )
+    subprocess.run(["git", "add", "."], cwd=repository, check=True)
+    subprocess.run(["git", "commit", "-qm", "add large source"], cwd=repository, check=True)
+    (repository / "large.py").write_text(
+        "\n".join(f"new_{index:03d} = {index}" for index in range(1, 121)) + "\n",
+        encoding="utf-8",
+    )
+    return repository
+
+
+@pytest.mark.skipif(os.name != "posix" or not hasattr(os, "link"), reason="POSIX hard links")
+def test_chunked_run_rejects_hard_linked_artifacts_without_mutating_sources(
+    repo_factory,
+) -> None:
+    repository = _large_changed_repository(repo_factory)
+    descriptor = _chunked_descriptor(repository)
+    write_chunk_explanations(descriptor)
+    run = Path(descriptor["descriptor"]).parent
+    targets = [
+        Path(descriptor["descriptor"]),
+        Path(descriptor["ledger"]),
+        Path(descriptor["plan"]),
+        Path(descriptor["chunks"][0]["payload"]),
+        Path(descriptor["chunks"][0]["explanation"]),
+        Path(descriptor["final_explanation"]),
+        Path(descriptor["verification"] or run / "verification.json"),
+        Path(descriptor["report"]),
+    ]
+
+    for index, target in enumerate(targets):
+        original = target.read_bytes() if target.exists() else None
+        source = repository / f"linked-source-{index}"
+        source.write_bytes(original if original is not None else b"repository content\n")
+        source.chmod(0o600)
+        target.unlink(missing_ok=True)
+        os.link(source, target)
+        before = source.read_bytes()
+
+        result = run_cli(repository, *descriptor["resume_command"][1:], check=False)
+
+        assert result.returncode == 2
+        assert "hard links" in json.loads(result.stderr)["message"]
+        assert source.read_bytes() == before
+        target.unlink(missing_ok=True)
+        if original is not None:
+            target.write_bytes(original)
+            target.chmod(0o600)
+
+
+@pytest.mark.parametrize(
+    "mutation,expected",
+    [
+        ("whitespace", "canonical JSON"),
+        ("pretty", "canonical JSON"),
+        ("key-order", "canonical JSON"),
+        ("duplicate", "duplicate JSON key"),
+        ("invalid-utf8", "valid UTF-8"),
+        ("over-cap", "on-disk byte cap"),
+    ],
+)
+def test_chunk_payload_requires_exact_canonical_capped_bytes(
+    repo_factory, mutation, expected
+) -> None:
+    repository = _large_changed_repository(repo_factory)
+    descriptor = _chunked_descriptor(repository)
+    path = Path(descriptor["chunks"][0]["payload"])
+    raw = path.read_bytes()
+    value = json.loads(raw)
+    if mutation == "whitespace":
+        changed = raw + b" "
+    elif mutation == "pretty":
+        changed = pretty_json(value).encode()
+    elif mutation == "key-order":
+        changed = (
+            json.dumps(
+                dict(reversed(list(value.items()))), ensure_ascii=True, separators=(",", ":")
+            )
+            + "\n"
+        ).encode()
+    elif mutation == "duplicate":
+        changed = b'{"schema":"shiftory.chunk/v1",' + raw[1:]
+    elif mutation == "invalid-utf8":
+        changed = raw + b"\xff"
+    else:
+        changed = raw + b" " * 3_001
+    path.write_bytes(changed)
+    path.chmod(0o600)
+
+    result = run_cli(
+        repository,
+        *descriptor["retrieve_command"][1:],
+        "unused-range",
+        check=False,
+    )
+
+    assert result.returncode == 2
+    assert expected in json.loads(result.stderr)["message"]
+
+
+def test_chunk_payload_rejects_recorded_size_mismatch_even_when_hashes_are_rebound(
+    repo_factory,
+) -> None:
+    repository = _large_changed_repository(repo_factory)
+    descriptor = _chunked_descriptor(repository)
+    descriptor_path = Path(descriptor["descriptor"])
+    chunk_path = Path(descriptor["chunks"][0]["payload"])
+    plan_path = Path(descriptor["plan"])
+    chunk = json.loads(chunk_path.read_bytes())
+    chunk["budget"]["actual_bytes"] = 1
+    chunk["budget"]["estimated_tokens"] = estimate_tokens(1)
+    chunk_payload = canonical_json(chunk).encode()
+    chunk_digest = sha256(chunk_payload).hexdigest()
+    chunk_path.write_bytes(chunk_payload)
+    chunk_path.chmod(0o600)
+    plan = json.loads(plan_path.read_bytes())
+    plan["chunks"][0]["payload_sha256"] = chunk_digest
+    plan["id"] = plan_identity(plan)
+    plan_payload = canonical_json(plan).encode()
+    plan_path.write_bytes(plan_payload)
+    plan_path.chmod(0o600)
+    stored_descriptor = {key: value for key, value in descriptor.items() if key != "descriptor"}
+    stored_descriptor["chunks"][0]["payload_sha256"] = chunk_digest
+    stored_descriptor["plan_sha256"] = sha256(plan_payload).hexdigest()
+    descriptor_path.write_text(pretty_json(stored_descriptor), encoding="utf-8")
+    descriptor_path.chmod(0o600)
+
+    result = run_cli(
+        repository,
+        *descriptor["retrieve_command"][1:],
+        "unused-range",
+        check=False,
+    )
+
+    assert result.returncode == 2
+    assert "recorded byte size is invalid" in json.loads(result.stderr)["message"]
+
+
+@pytest.mark.parametrize("field", ["ledger", "plan"])
+def test_bound_generated_json_requires_exact_canonical_bytes(repo_factory, field) -> None:
+    repository = _large_changed_repository(repo_factory)
+    descriptor = _chunked_descriptor(repository)
+    path = Path(descriptor[field])
+    path.write_bytes(path.read_bytes() + b" ")
+    path.chmod(0o600)
+
+    result = run_cli(
+        repository,
+        *descriptor["retrieve_command"][1:],
+        "unused-range",
+        check=False,
+    )
+
+    assert result.returncode == 2
+    assert "canonical JSON" in json.loads(result.stderr)["message"]
+
+
+def test_explain_rejects_worktree_visible_run_storage(repo_factory) -> None:
+    repository = repo_factory()
+    (repository / "app.py").write_text("def value():\n    return 2\n", encoding="utf-8")
+    unsafe_root = repository / ".shiftory-runs"
+    safe_home = repository.parent / "safe-home"
+
+    result = run_cli(
+        repository,
+        "explain",
+        "--graphora",
+        "off",
+        check=False,
+        extra_env={
+            "SHIFTORY_RUN_DIR": str(unsafe_root),
+            "HOME": str(safe_home),
+        },
+    )
+
+    error = json.loads(result.stderr)
+    assert result.returncode == 2
+    assert "must be outside the analyzed repository" in error["message"]
+    assert not unsafe_root.exists()
+    assert not Path(error["details"]["diagnostic"]).is_relative_to(repository)
 
 
 def test_explain_retention_flag_and_environment_keep_complete_artifacts(repo_factory) -> None:
@@ -354,8 +778,18 @@ def test_pr_scope_uses_explicit_gh_path_only(repo_factory) -> None:
 
 def test_schema_cache_and_skill_install_commands(repo_factory) -> None:
     repository = repo_factory()
-    schema = json.loads(run_cli(repository, "schema", "explanation").stdout)
-    assert schema["$id"].endswith("/explanation-v1.json")
+    for name, filename in [
+        ("evidence", "evidence-v1.json"),
+        ("explanation", "explanation-v1.json"),
+        ("report", "report-v1.json"),
+        ("run", "run-v2.json"),
+        ("chunk-plan", "chunk-plan-v1.json"),
+        ("chunk", "chunk-v1.json"),
+        ("chunk-explanation", "chunk-explanation-v1.json"),
+        ("retrieval", "retrieval-v1.json"),
+    ]:
+        schema = json.loads(run_cli(repository, "schema", name).stdout)
+        assert schema["$id"].endswith(f"/{filename}")
 
     status = json.loads(run_cli(repository, "cache", "status").stdout)
     cleared = json.loads(run_cli(repository, "cache", "clear").stdout)

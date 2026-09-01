@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shiftory.dev/schemas/retrieval-v1.json",
+  "title": "Shiftory retrieval response v1",
+  "type": "object",
+  "required": [
+    "schema", "comparison_identity", "ledger_sha256", "range_id",
+    "citation_id", "path", "side", "start_line", "end_line", "content_hash",
+    "text", "actual_bytes", "estimated_tokens", "token_estimate_formula"
+  ],
+  "properties": {
+    "schema": {"const": "shiftory.retrieval/v1"},
+    "comparison_identity": {"type": "string", "minLength": 1},
+    "ledger_sha256": {"$ref": "#/$defs/sha256"},
+    "range_id": {"type": "string", "minLength": 1},
+    "citation_id": {"type": "string", "minLength": 1},
+    "path": {"type": "string", "minLength": 1},
+    "side": {"enum": ["before", "after"]},
+    "start_line": {"type": "integer", "minimum": 1},
+    "end_line": {"type": "integer", "minimum": 1},
+    "content_hash": {"$ref": "#/$defs/sha256"},
+    "text": {"type": "string"},
+    "actual_bytes": {"type": "integer", "minimum": 1},
+    "estimated_tokens": {"type": "integer", "minimum": 1},
+    "token_estimate_formula": {"const": "ceil(canonical_utf8_bytes/4)"}
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

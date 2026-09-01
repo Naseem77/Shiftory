@@ -14,10 +14,23 @@ _SECTION_TITLES = {
     "ambiguity": "Ambiguity and unresolved notes",
     "unresolved": "Ambiguity and unresolved notes",
 }
+_ACCOUNTING_GUARANTEE = (
+    "Shiftory verified accounting and citation references; it does not verify semantic correctness."
+)
+_GROUNDED_GUARANTEE = (
+    "Shiftory verified accounting, citation references, and every declared grounding claim "
+    "against the exact evidence bound to it; verified claims are source-level facts and do not "
+    "establish runtime behavior or semantic correctness."
+)
 
 
-def build_report(evidence: dict[str, Any], explanation: dict[str, Any]) -> dict[str, Any]:
-    result = validate_explanation(evidence, explanation)
+def build_report(
+    evidence: dict[str, Any],
+    explanation: dict[str, Any],
+    *,
+    require_grounding: bool = False,
+) -> dict[str, Any]:
+    result = validate_explanation(evidence, explanation, require_grounding=require_grounding)
     sections: dict[str, list[dict[str, Any]]] = {
         "behavioral": [],
         "structural": [],
@@ -31,7 +44,9 @@ def build_report(evidence: dict[str, Any], explanation: dict[str, Any]) -> dict[
         explanation["coverage_owners"],
         key=lambda value: (value["evidence_id"], value["owner_id"]),
     )
-    return {
+    grounding = result.grounding
+    grounded = grounding is not None and grounding.claim_total > 0
+    report: dict[str, Any] = {
         "schema": "shiftory.report/v1",
         "evidence_schema": evidence["schema"],
         "explanation_schema": explanation["schema"],
@@ -40,11 +55,11 @@ def build_report(evidence: dict[str, Any], explanation: dict[str, Any]) -> dict[
         "sections": sections,
         "coverage": result.to_dict(),
         "coverage_owners": owners,
-        "guarantee": (
-            "Shiftory verified accounting and citation references; "
-            "it does not verify semantic correctness."
-        ),
+        "guarantee": _GROUNDED_GUARANTEE if grounded else _ACCOUNTING_GUARANTEE,
     }
+    if grounding is not None and grounded:
+        report["grounding"] = grounding.to_dict()
+    return report
 
 
 def render_report(evidence: dict[str, Any], explanation: dict[str, Any]) -> str:
@@ -82,6 +97,7 @@ def render_report_markdown(report: dict[str, Any]) -> str:
                     ]
                 )
             lines.extend([f"Confidence: **{item['confidence']}**", ""])
+    lines.extend(_render_grounding(report.get("grounding")))
     lines.extend(
         [
             "## Complete source-cited coverage appendix",
@@ -114,3 +130,40 @@ def render_report_markdown(report: dict[str, Any]) -> str:
         lines.append(f"| `{owner['evidence_id']}` | `{owner['owner_id']}` |")
     lines.extend(["", f"> {report['guarantee']}", ""])
     return "\n".join(lines)
+
+
+def _render_grounding(grounding: dict[str, Any] | None) -> list[str]:
+    if not grounding:
+        return []
+    unresolved = grounding["unresolved"] + grounding["unavailable"]
+    lines = [
+        "## Grounded claims",
+        "",
+        f"Grounding mode: **{grounding['mode']}**.",
+        "",
+        (
+            f"- Claims: {grounding['claim_total']} across "
+            f"{grounding['grounded_items']} explanation item(s)"
+        ),
+        f"- Verified against bound evidence: {grounding['verified']}",
+        f"- Declared inferred: {grounding['inferred']}",
+        f"- Declared ambiguous: {grounding['ambiguous']}",
+        f"- Declared unresolved or unavailable: {unresolved}",
+        "",
+        (
+            "Verified claims are proven against the exact evidence bound to them. Source order "
+            "is lexical order inside the cited region, never execution order."
+        ),
+        "",
+    ]
+    for item in grounding["items"]:
+        lines.extend([f"### Grounding for `{item['item_id']}`", ""])
+        for claim in item["claims"]:
+            lines.append(
+                f"- `{claim['claim_id']}` (`{claim['type']}`, **{claim['support_level']}**): "
+                f"{claim['proof']}"
+            )
+            if claim["limits"]:
+                lines.append(f"  - Limits: {claim['limits']}")
+        lines.append("")
+    return lines

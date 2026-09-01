@@ -16,10 +16,19 @@ private phases:
    changed line and every non-text unit exactly one `coverage_owners` entry.
    Span ownership is inherited from its unanimously owned lines. Citations are
    separate and may be reused.
-4. Run the descriptor's `resume_command`. This finalizer always verifies and
+4. Ground every item when the descriptor's `grounding.mode` is `required`. Give
+   each item a `grounding.claims` entry drawn from the descriptor's
+   `claim_types` and `support_levels`. Bind every claim only to evidence that
+   the same item owns, on the side the claim is about. Use `verified` only when
+   the cited bytes prove the claim; otherwise use `inferred`, `ambiguous`,
+   `unresolved`, or `unavailable` and state `limits`. Source order is not
+   execution order, and an order claim must evidence both operations.
+5. Run the descriptor's `resume_command`. This finalizer always verifies and
    renders before emitting the report. Present only that emitted report.
-5. On failure, report the exact `details.diagnostic` path from CLI JSON. Never
-   present an unverified template or partial report.
+6. If verification fails, read each `details.errors[]` `code` and `path`,
+   correct the explanation file, and run `resume_command` again. After three
+   unsuccessful attempts, report the exact `details.diagnostic` path from CLI
+   JSON. Never present an unverified template or partial report.
 
 Use only these scope forms when requested: `--staged`, `--unstaged`,
 `--commit REV [--parent N]`, `--range BASE..HEAD`, `--branch REF`, or

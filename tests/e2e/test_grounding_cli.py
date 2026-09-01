@@ -242,3 +242,68 @@ def test_resume_rejects_a_descriptor_without_a_grounding_block(repo_factory) -> 
 
     assert failed.returncode == 2
     assert "missing its grounding block" in json.loads(failed.stderr)["message"]
+
+
+def test_required_workflow_rejects_review_prose_in_an_absence_literal(repo_factory) -> None:
+    """Nothing forces an absence literal to be source text, so it is scanned."""
+    repository = modified(repo_factory)
+    descriptor = json.loads(run_cli(repository, "explain", "--graphora", "off").stdout)
+    evidence = evidence_of(descriptor)
+    manifest = grounded_manifest(evidence)
+    citation = next(
+        citation["id"]
+        for file in evidence["files"]
+        for citation in file["citations"]
+        if citation["side"] == "after"
+    )
+    manifest["items"][0]["grounding"]["claims"].append(
+        {
+            "id": "smuggled",
+            "type": "text_absence",
+            "support_level": "verified",
+            "support": [citation],
+            "side": "after",
+            "literal": "I recommend reverting this change.",
+        }
+    )
+    write_manifest(descriptor, manifest)
+
+    failed = run_cli(repository, *descriptor["resume_command"][1:], check=False)
+
+    assert failed.returncode == 2
+    error = json.loads(failed.stderr)
+    assert error["details"]["errors"] == [
+        {
+            "path": "$.items[0].grounding.claims[1].literal",
+            "message": "Disallowed recommendation; describe before-to-after behavior instead",
+        }
+    ]
+
+
+def test_required_workflow_keeps_a_source_derived_absence_literal(repo_factory) -> None:
+    repository = modified(repo_factory)
+    descriptor = json.loads(run_cli(repository, "explain", "--graphora", "off").stdout)
+    evidence = evidence_of(descriptor)
+    manifest = grounded_manifest(evidence)
+    citation = next(
+        citation["id"]
+        for file in evidence["files"]
+        for citation in file["citations"]
+        if citation["side"] == "after"
+    )
+    manifest["items"][0]["grounding"]["claims"].append(
+        {
+            "id": "no-old-value",
+            "type": "text_absence",
+            "support_level": "verified",
+            "support": [citation],
+            "side": "after",
+            "literal": "return 1",
+        }
+    )
+    write_manifest(descriptor, manifest)
+
+    final = run_cli(repository, *descriptor["resume_command"][1:])
+
+    assert "- Verified against bound evidence: 2" in final.stdout
+    assert "'return 1' is absent from the cited after source" in final.stdout

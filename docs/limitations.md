@@ -179,6 +179,14 @@ contain words such as “risk” or “bug.” Consequently, it is neither a gen
 natural-language classifier nor a guarantee that every possible judgmental
 paraphrase is rejected.
 
+A grounding claim value is exempt from the check only while an obligation forces
+it to match the evidence byte-for-byte, or when it occurs verbatim in the
+packet's source text. Because `text_absence` proves a literal is *not* in the
+cited source, its literal is agent prose at every support level and is always
+scanned. A source-derived literal that reads like a review — a deleted
+`# this should be fixed` comment, for example — still passes, because it occurs
+in the evidence.
+
 ## Evidence size
 
 The current `--max-evidence-bytes` behavior records a diagnostic after the

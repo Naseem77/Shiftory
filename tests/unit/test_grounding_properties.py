@@ -11,6 +11,7 @@ from typing import Any
 import pytest
 
 from shiftory.errors import ValidationError
+from shiftory.explain import grounding
 from shiftory.explain.validator import validate_explanation
 from shiftory.models.json import canonical_json
 from shiftory.render.report import build_report
@@ -276,3 +277,166 @@ def _source_root() -> str:
     import shiftory
 
     return str(__import__("pathlib").Path(shiftory.__file__).resolve().parents[1])
+
+
+def wide_packet(spans: int) -> tuple[dict[str, Any], list[str]]:
+    """One hunk holding `spans` single-line spans, the pathological coarse shape."""
+    lines, span_records, citations, span_ids = [], [], [], []
+    for index in range(spans):
+        line_id, span_id = f"l{index}", f"s{index}"
+        span_ids.append(span_id)
+        lines.append({"id": line_id, "side": "after", "content": f"    value_{index} = 1"})
+        span_records.append(
+            {
+                "id": span_id,
+                "side": "after",
+                "start_line": index + 1,
+                "end_line": index + 1,
+                "line_ids": [line_id],
+                "replacement_span_id": None,
+            }
+        )
+        citations.append(
+            {
+                "id": f"c{index}",
+                "path": "wide.py",
+                "side": "after",
+                "start_line": index + 1,
+                "end_line": index + 1,
+                "text": f"    value_{index} = 1",
+                "omitted": False,
+            }
+        )
+    packet = {
+        "schema": "shiftory.evidence/v1",
+        "comparison": {"identity": "identity"},
+        "files": [
+            {
+                "old_path": "wide.py",
+                "new_path": "wide.py",
+                "units": [{"id": "u", "kind": "text", "hunk_ids": ["h"], "metadata": {}}],
+                "hunks": [{"id": "h", "span_ids": span_ids, "lines": lines}],
+                "spans": span_records,
+                "citations": citations,
+            }
+        ],
+        "graph": {"status": "disabled", "facts": []},
+    }
+    return packet, [line["id"] for line in lines]
+
+
+def wide_manifest(line_ids: list[str], claims: int, support: str) -> dict[str, Any]:
+    return {
+        "schema": "shiftory.explanation/v1",
+        "summary": "Many values are added.",
+        "items": [
+            {
+                "id": "bulk",
+                "kind": "behavioral",
+                "title": "Bulk addition",
+                "before": None,
+                "after": "Many values are added.",
+                "absence": "before",
+                "confidence": "extracted",
+                "citations": [],
+                "grounding": {
+                    "claims": [
+                        {
+                            "id": f"claim-{index}",
+                            "type": "addition",
+                            "support_level": "verified",
+                            "support": [support],
+                            "literal": f"value_{index} = 1",
+                        }
+                        for index in range(claims)
+                    ]
+                },
+            }
+        ],
+        "coverage_owners": [{"evidence_id": line_id, "owner_id": "bulk"} for line_id in line_ids],
+    }
+
+
+def test_coarse_support_resolution_stays_near_linear(monkeypatch: Any) -> None:
+    """Resolution work must not grow with claims times spans."""
+    spans, claims = 2_000, 32
+    packet, line_ids = wide_packet(spans)
+    manifest = wide_manifest(line_ids, claims, "h")
+
+    regions_built = 0
+    original_region = grounding.Region
+
+    class CountingRegion(original_region):  # type: ignore[misc, valid-type]
+        def __new__(cls, *args: Any, **kwargs: Any) -> Any:
+            nonlocal regions_built
+            regions_built += 1
+            return original_region(*args, **kwargs)
+
+    resolved = 0
+    original_resolve = grounding._resolve_one
+
+    def counting_resolve(value: str, index: Any) -> Any:
+        nonlocal resolved
+        resolved += 1
+        return original_resolve(value, index)
+
+    monkeypatch.setattr(grounding, "Region", CountingRegion)
+    monkeypatch.setattr(grounding, "_resolve_one", counting_resolve)
+
+    result = validate_explanation(packet, manifest, require_grounding=True)
+
+    assert result.grounding is not None
+    assert result.grounding.level_counts["verified"] == claims
+    # One region per span plus one per citation, built once with the index.
+    assert regions_built == 2 * spans
+    # One resolution per support reference, never per span.
+    assert resolved == claims
+
+
+def test_coarse_and_narrow_support_agree_on_the_same_claims() -> None:
+    spans, claims = 200, 8
+    packet, line_ids = wide_packet(spans)
+    coarse = validate_explanation(
+        packet, wide_manifest(line_ids, claims, "h"), require_grounding=True
+    )
+    narrow = validate_explanation(
+        packet, wide_manifest(line_ids, claims, "u"), require_grounding=True
+    )
+    assert coarse.grounding is not None
+    assert narrow.grounding is not None
+    assert coarse.grounding.to_dict() == narrow.grounding.to_dict()
+
+
+def test_coarse_support_narrows_to_the_owning_item() -> None:
+    packet, line_ids = wide_packet(6)
+    manifest = wide_manifest(line_ids, 1, "h")
+    manifest["items"].append(
+        {
+            "id": "tail",
+            "kind": "structural",
+            "title": "Trailing value",
+            "confidence": "extracted",
+            "citations": [],
+            "grounding": {
+                "claims": [
+                    {
+                        "id": "tail-value",
+                        "type": "addition",
+                        "support_level": "verified",
+                        "support": ["s5"],
+                        "literal": "value_5 = 1",
+                    }
+                ]
+            },
+        }
+    )
+    manifest["coverage_owners"] = [
+        {"evidence_id": line_id, "owner_id": "tail" if line_id == "l5" else "bulk"}
+        for line_id in line_ids
+    ]
+    manifest["items"][0]["grounding"]["claims"][0]["literal"] = "value_5 = 1"
+    with pytest.raises(ValidationError) as error:
+        validate_explanation(packet, manifest, require_grounding=True)
+    assert [entry["code"] for entry in error.value.details["errors"]] == [
+        "grounding.operand_missing"
+    ]

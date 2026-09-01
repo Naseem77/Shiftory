@@ -124,7 +124,7 @@ def validate_explanation(
         else:
             item_ids.add(item_id)
         _validate_item(item, index, errors)
-    _validate_policy(explanation, items, errors)
+    _validate_policy(explanation, items, errors, _source_corpus(evidence))
 
     ledger = _evidence_ledger(evidence, errors)
     owners_value = explanation.get("coverage_owners")
@@ -426,10 +426,37 @@ def _contains_uncertainty(value: str) -> bool:
     return bool(re.search(r"\bmay\b", value) or _MODAL_PREDICATE.search(value))
 
 
+def _source_corpus(evidence: dict[str, Any]) -> str:
+    """Every piece of source text the evidence packet carries.
+
+    A claim value that occurs verbatim here is source-derived, exactly like the
+    quoted source the explanation-not-review check already permits elsewhere.
+    """
+    parts: list[str] = []
+    files = evidence.get("files")
+    for file in files if isinstance(files, list) else []:
+        if not isinstance(file, dict):
+            continue
+        hunks = file.get("hunks")
+        for hunk in hunks if isinstance(hunks, list) else []:
+            if not isinstance(hunk, dict):
+                continue
+            lines = hunk.get("lines")
+            for line in lines if isinstance(lines, list) else []:
+                if isinstance(line, dict) and isinstance(line.get("content"), str):
+                    parts.append(line["content"])
+        citations = file.get("citations")
+        for citation in citations if isinstance(citations, list) else []:
+            if isinstance(citation, dict) and isinstance(citation.get("text"), str):
+                parts.append(citation["text"])
+    return "\n".join(parts)
+
+
 def _validate_policy(
     explanation: dict[str, Any],
     items: list[Any],
     errors: list[dict[str, Any]],
+    source_corpus: str = "",
 ) -> None:
     for field in sorted(explanation):
         normalized = field.lower().replace("-", "_")
@@ -469,7 +496,7 @@ def _validate_policy(
                 continue
             unquoted = _QUOTED_OR_CODE.sub("", value)
             _validate_policy_text(unquoted, f"$.items[{index}].{field}", errors)
-        _validate_grounding_policy(raw_item, index, errors)
+        _validate_grounding_policy(raw_item, index, errors, source_corpus)
     summary = explanation.get("summary")
     if isinstance(summary, str):
         unquoted = _QUOTED_OR_CODE.sub("", summary)
@@ -480,6 +507,7 @@ def _validate_grounding_policy(
     item: dict[str, Any],
     index: int,
     errors: list[dict[str, Any]],
+    source_corpus: str = "",
 ) -> None:
     grounding = item.get("grounding")
     if not isinstance(grounding, dict):
@@ -505,7 +533,7 @@ def _validate_grounding_policy(
         limits = claim.get("limits")
         if isinstance(limits, str):
             _validate_policy_text(_QUOTED_OR_CODE.sub("", limits), f"{claim_path}.limits", errors)
-        _validate_unproven_operands(claim, claim_path, errors)
+        _validate_claim_values(claim, claim_path, errors, source_corpus)
         shared = claim.get("shared_support")
         if not isinstance(shared, list):
             continue
@@ -519,25 +547,67 @@ def _validate_grounding_policy(
                 )
 
 
-def _validate_unproven_operands(
+_EVIDENCE_FORCED_FIELDS: dict[str, tuple[str, ...]] = {
+    "addition": ("literal",),
+    "deletion": ("literal",),
+    "graph_relation": ("symbol", "target", "path"),
+    "non_text_change": (),
+    "source_order": ("first", "second"),
+    "text_absence": (),
+    "text_presence": ("literal",),
+    "value_change": ("before_literal", "after_literal"),
+}
+
+
+def _validate_claim_values(
     claim: dict[str, Any],
     claim_path: str,
     errors: list[dict[str, Any]],
+    source_corpus: str,
 ) -> None:
-    """Scan operands that no obligation forces to match the evidence.
+    """Scan every claim value that is not forced to come from the evidence.
 
-    At an asserting support level an operand has to appear byte-for-byte in the
-    cited source, so real diff text containing words such as "vulnerability" must
-    be allowed through. At `unresolved` and `unavailable` nothing constrains the
-    operand, and it is still echoed into the report, so it is scanned like any
-    other agent prose.
+    An operand that an obligation makes match the evidence byte-for-byte is real
+    source or graph text, so diff content mentioning words such as "vulnerability"
+    must pass. `text_absence` inverts that: a verified absence proves the literal
+    is *not* in the cited source, and inferred or ambiguous absence constrains it
+    not at all, so its literal is agent prose at every level. Non-text metadata is
+    only compared with the unit at `verified`. Anything that occurs verbatim in
+    the packet's source text is treated as quoted source and left alone.
     """
-    if claim.get("support_level") in OBLIGATION_LEVELS:
-        return
-    for name in LITERAL_FIELDS:
+    claim_type = claim.get("type")
+    level = claim.get("support_level")
+    forced: tuple[str, ...] = ()
+    if isinstance(claim_type, str) and level in OBLIGATION_LEVELS:
+        forced = _EVIDENCE_FORCED_FIELDS.get(claim_type, ())
+    for name in (*LITERAL_FIELDS, "target", "path", "id"):
+        if name in forced:
+            continue
         value = claim.get(name)
         if isinstance(value, str):
-            _validate_policy_text(_QUOTED_OR_CODE.sub("", value), f"{claim_path}.{name}", errors)
+            _scan_claim_value(value, f"{claim_path}.{name}", errors, source_corpus)
+    if level == "verified":
+        return
+    metadata = claim.get("metadata")
+    if not isinstance(metadata, dict):
+        return
+    for key in sorted(metadata):
+        value = metadata[key]
+        if isinstance(key, str):
+            _scan_claim_value(key, f"{claim_path}.metadata", errors, source_corpus)
+        if isinstance(value, str):
+            _scan_claim_value(value, f"{claim_path}.metadata.{key}", errors, source_corpus)
+
+
+def _scan_claim_value(
+    value: str,
+    path: str,
+    errors: list[dict[str, Any]],
+    source_corpus: str,
+) -> None:
+    if value in source_corpus:
+        return
+    _validate_policy_text(_QUOTED_OR_CODE.sub("", value), path, errors)
 
 
 def _validate_policy_text(

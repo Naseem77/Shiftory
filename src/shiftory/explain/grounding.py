@@ -148,9 +148,7 @@ class EvidenceIndex:
     facts: dict[str, dict[str, Any]] = field(default_factory=dict)
     graph_status: str = "disabled"
     changed_paths: frozenset[str] = frozenset()
-    span_regions: dict[str, Region] = field(default_factory=dict)
-    citation_regions: dict[str, Region] = field(default_factory=dict)
-    span_hunks: dict[str, tuple[str, ...]] = field(default_factory=dict)
+    supports: dict[str, Support] = field(default_factory=dict)
 
 
 @dataclass(frozen=True, slots=True)
@@ -295,7 +293,6 @@ def index_evidence(evidence: dict[str, Any]) -> EvidenceIndex:
         )
         for line_id, record in lines.items()
     }
-    span_regions, span_hunks = _index_span_regions(spans, resolved_lines)
     return EvidenceIndex(
         resolved_lines,
         spans,
@@ -305,63 +302,8 @@ def index_evidence(evidence: dict[str, Any]) -> EvidenceIndex:
         facts,
         status if isinstance(status, str) else "disabled",
         frozenset(changed_paths),
-        span_regions,
-        _index_citation_regions(citations, spans, span_regions),
-        span_hunks,
+        _index_supports(resolved_lines, spans, hunks, units, citations, facts),
     )
-
-
-def _index_span_regions(
-    spans: dict[str, SpanRecord],
-    lines: dict[str, LineRecord],
-) -> tuple[dict[str, Region], dict[str, tuple[str, ...]]]:
-    """Precompute each span's region text and hunk set exactly once.
-
-    Support resolution is a pure function of an evidence id, so building these
-    with the index keeps claim evaluation independent of how many claims cite the
-    same span.
-    """
-    regions: dict[str, Region] = {}
-    hunk_sets: dict[str, tuple[str, ...]] = {}
-    for span_id, span in spans.items():
-        present = [line_id for line_id in span.line_ids if line_id in lines]
-        regions[span_id] = Region(
-            span_id,
-            span.side,
-            span.line_ids,
-            tuple(lines[line_id].content for line_id in present),
-            "changed lines",
-        )
-        hunk_sets[span_id] = tuple(sorted({lines[line_id].hunk_id for line_id in present}))
-    return regions, hunk_sets
-
-
-def _index_citation_regions(
-    citations: dict[str, CitationRecord],
-    spans: dict[str, SpanRecord],
-    span_regions: dict[str, Region],
-) -> dict[str, Region]:
-    """Map each citation to the region it covers.
-
-    A citation omitted by the evidence budget carries no text, so its span's
-    changed-line content stands in for it.
-    """
-    regions: dict[str, Region] = {}
-    for citation_id, citation in citations.items():
-        span = spans.get(citation.span_id) if citation.span_id else None
-        if span is None:
-            continue
-        if citation.omitted or citation.text is None:
-            regions[citation_id] = span_regions[span.id]
-            continue
-        regions[citation_id] = Region(
-            span.id,
-            span.side,
-            span.line_ids,
-            tuple(citation.text.split("\n")),
-            "source citation",
-        )
-    return regions
 
 
 def _index_hunks(
@@ -485,6 +427,154 @@ def _index_citations(
             file_spans.get((side, start_line, end_line)),
             file_index,
         )
+
+
+def _index_supports(
+    lines: dict[str, LineRecord],
+    spans: dict[str, SpanRecord],
+    hunks: dict[str, HunkRecord],
+    units: dict[str, UnitRecord],
+    citations: dict[str, CitationRecord],
+    facts: dict[str, dict[str, Any]],
+) -> dict[str, Support]:
+    """Resolve every evidence id to an immutable support exactly once.
+
+    Support resolution is a pure function of an evidence id, so building the
+    whole map with the index keeps claim evaluation independent of how many
+    claims cite the same span, hunk, or unit. Insertion follows a fixed
+    precedence so an id shared by two record kinds resolves deterministically.
+    """
+    supports: dict[str, Support] = {}
+    span_regions: dict[str, Region] = {}
+    span_hunks: dict[str, tuple[str, ...]] = {}
+    for span_id, span in spans.items():
+        present = [line_id for line_id in span.line_ids if line_id in lines]
+        span_regions[span_id] = Region(
+            span_id,
+            span.side,
+            span.line_ids,
+            tuple(lines[line_id].content for line_id in present),
+            "changed lines",
+        )
+        span_hunks[span_id] = tuple(sorted({lines[line_id].hunk_id for line_id in present}))
+    for line_id, line in lines.items():
+        line_span = spans.get(line.span_id) if line.span_id else None
+        if line_span is None:
+            region = Region(line_id, line.side, (line_id,), (line.content,), "changed line")
+            supports.setdefault(
+                line_id,
+                Support(line_id, "line", (line_id,), (region,), (line.hunk_id,), _paths(line.path)),
+            )
+            continue
+        # A changed line is only meaningful inside its contiguous span. Resolving
+        # to the whole span keeps every span-scoped predicate, and the proof text
+        # that names the span, honest when a claim cites a single line.
+        supports.setdefault(
+            line_id,
+            Support(
+                line_id,
+                "line",
+                line_span.line_ids,
+                (span_regions[line_span.id],),
+                span_hunks[line_span.id],
+                _paths(line.path),
+            ),
+        )
+    for span_id, span in spans.items():
+        supports.setdefault(
+            span_id,
+            Support(
+                span_id,
+                "span",
+                span.line_ids,
+                (span_regions[span_id],),
+                span_hunks[span_id],
+                _paths(span.path),
+            ),
+        )
+    for citation_id, citation in citations.items():
+        cited = spans.get(citation.span_id) if citation.span_id else None
+        if cited is None:
+            supports.setdefault(
+                citation_id, Support(citation_id, "citation", (), (), (), (citation.path,))
+            )
+            continue
+        region = (
+            span_regions[cited.id]
+            if citation.omitted or citation.text is None
+            else Region(
+                cited.id,
+                cited.side,
+                cited.line_ids,
+                tuple(citation.text.split("\n")),
+                "source citation",
+            )
+        )
+        supports.setdefault(
+            citation_id,
+            Support(
+                citation_id,
+                "citation",
+                cited.line_ids,
+                (region,),
+                span_hunks[cited.id],
+                (citation.path,),
+            ),
+        )
+    for hunk_id, hunk in hunks.items():
+        supports.setdefault(
+            hunk_id,
+            Support(
+                hunk_id,
+                "hunk",
+                hunk.line_ids,
+                _span_regions_for(hunk.line_ids, lines, span_regions),
+                (hunk_id,),
+                _paths_for_lines(hunk.line_ids, lines),
+            ),
+        )
+    for unit_id, unit in units.items():
+        supports.setdefault(
+            unit_id,
+            Support(
+                unit_id,
+                "unit" if unit.kind == "text" else "non_text_unit",
+                unit.line_ids,
+                _span_regions_for(unit.line_ids, lines, span_regions),
+                _hunks_for(unit.line_ids, lines),
+                unit.paths,
+                unit_id,
+            ),
+        )
+    for fact_id, fact in facts.items():
+        supports.setdefault(
+            fact_id,
+            Support(fact_id, "fact", (), (), (), _paths(_text(fact.get("path"))), None, fact),
+        )
+    return supports
+
+
+def _span_regions_for(
+    line_ids: tuple[str, ...],
+    lines: dict[str, LineRecord],
+    span_regions: dict[str, Region],
+) -> tuple[Region, ...]:
+    """Collect a coarse reference's span regions in first-appearance order.
+
+    Membership uses a set so a hunk or unit covering many spans stays linear in
+    its own changed lines.
+    """
+    seen: set[str] = set()
+    ordered: list[Region] = []
+    for line_id in line_ids:
+        record = lines.get(line_id)
+        if record is None or record.span_id is None or record.span_id in seen:
+            continue
+        seen.add(record.span_id)
+        region = span_regions.get(record.span_id)
+        if region is not None:
+            ordered.append(region)
+    return tuple(ordered)
 
 
 def item_scopes(
@@ -1016,98 +1106,21 @@ def _effective_owners(support: Support, declared_owners: dict[str, str]) -> set[
 
 
 def _resolve_one(value: str, index: EvidenceIndex) -> Support | None:
-    line = index.lines.get(value)
-    if line is not None:
-        span = index.spans.get(line.span_id) if line.span_id else None
-        if span is None:
-            region = Region(value, line.side, (value,), (line.content,), "changed line")
-            return Support(value, "line", (value,), (region,), (line.hunk_id,), _paths(line.path))
-        # A changed line is only meaningful inside its contiguous span. Resolving
-        # to the whole span keeps every span-scoped predicate, and the proof text
-        # that names the span, honest when a claim cites a single line.
-        return Support(
-            value,
-            "line",
-            span.line_ids,
-            (index.span_regions[span.id],),
-            index.span_hunks[span.id],
-            _paths(line.path),
-        )
-    span = index.spans.get(value)
-    if span is not None:
-        return Support(
-            value,
-            "span",
-            span.line_ids,
-            (index.span_regions[value],),
-            index.span_hunks[value],
-            _paths(span.path),
-        )
-    citation = index.citations.get(value)
-    if citation is not None:
-        target = index.spans.get(citation.span_id) if citation.span_id else None
-        if target is None:
-            return Support(value, "citation", (), (), (), (citation.path,))
-        return Support(
-            value,
-            "citation",
-            target.line_ids,
-            (index.citation_regions[value],),
-            index.span_hunks[target.id],
-            (citation.path,),
-        )
-    hunk = index.hunks.get(value)
-    if hunk is not None:
-        return Support(
-            value,
-            "hunk",
-            hunk.line_ids,
-            _regions_for_lines(hunk.line_ids, index),
-            (value,),
-            _paths_for_lines(hunk.line_ids, index),
-        )
-    unit = index.units.get(value)
-    if unit is not None:
-        return Support(
-            value,
-            "unit" if unit.kind == "text" else "non_text_unit",
-            unit.line_ids,
-            _regions_for_lines(unit.line_ids, index),
-            _hunks_for(unit.line_ids, index),
-            unit.paths,
-            value,
-        )
-    fact = index.facts.get(value)
-    if fact is not None:
-        return Support(value, "fact", (), (), (), _paths(_text(fact.get("path"))), None, fact)
-    return None
+    return index.supports.get(value)
 
 
-def _regions_for_lines(line_ids: tuple[str, ...], index: EvidenceIndex) -> tuple[Region, ...]:
-    ordered: list[str] = []
-    for line_id in line_ids:
-        record = index.lines.get(line_id)
-        if record is None or record.span_id is None or record.span_id in ordered:
-            continue
-        if record.span_id in index.span_regions:
-            ordered.append(record.span_id)
-    return tuple(index.span_regions[span_id] for span_id in ordered)
-
-
-def _hunks_for(line_ids: tuple[str, ...], index: EvidenceIndex) -> tuple[str, ...]:
-    return tuple(
-        sorted({index.lines[line_id].hunk_id for line_id in line_ids if line_id in index.lines})
-    )
+def _hunks_for(line_ids: tuple[str, ...], lines: dict[str, LineRecord]) -> tuple[str, ...]:
+    return tuple(sorted({lines[line_id].hunk_id for line_id in line_ids if line_id in lines}))
 
 
 def _paths(value: str | None) -> tuple[str, ...]:
     return (value,) if value else ()
 
 
-def _paths_for_lines(line_ids: tuple[str, ...], index: EvidenceIndex) -> tuple[str, ...]:
+def _paths_for_lines(line_ids: tuple[str, ...], lines: dict[str, LineRecord]) -> tuple[str, ...]:
     found: set[str] = set()
     for line_id in line_ids:
-        record = index.lines.get(line_id)
+        record = lines.get(line_id)
         if record is not None and record.path is not None:
             found.add(record.path)
     return tuple(sorted(found))
@@ -1123,10 +1136,11 @@ def _narrowed(support: Support, scope: ItemScope) -> Support:
     """
     if support.kind not in {"hunk", "unit"}:
         return support
+    owned = scope.owned_lines
     regions = tuple(
-        region for region in support.regions if set(region.line_ids) <= scope.owned_lines
+        region for region in support.regions if all(line_id in owned for line_id in region.line_ids)
     )
-    line_ids = tuple(line_id for line_id in support.line_ids if line_id in scope.owned_lines)
+    line_ids = tuple(line_id for line_id in support.line_ids if line_id in owned)
     return Support(
         support.id,
         support.kind,
@@ -1652,21 +1666,23 @@ def _non_text_change(
         if declared
         else ""
     )
-    proof = f"the change unit is a {unit_kind} change{detail}"
     if level not in OBLIGATION_LEVELS:
         return f"the {unit_kind} unit change is not interpreted"
-    units = [
-        index.units[support.id]
-        for support in supports
-        if support.kind == "non_text_unit" and support.id in index.units
-    ]
+    units = sorted(
+        (
+            index.units[support.id]
+            for support in supports
+            if support.kind == "non_text_unit" and support.id in index.units
+        ),
+        key=lambda unit: unit.id,
+    )
     if not units:
         diagnostics.add(
             "grounding.non_text_mismatch",
             f"{path}.support",
             "A non-text claim requires a supported non-text change unit owned by this item",
         )
-        return proof
+        return f"the change unit is a {unit_kind} change{detail}"
     matching = [unit for unit in units if unit.kind == unit_kind]
     if not matching:
         diagnostics.add(
@@ -1677,22 +1693,42 @@ def _non_text_change(
                 f"{', '.join(sorted({unit.kind for unit in units}))}"
             ),
         )
-        return proof
+        return f"the change unit is a {unit_kind} change{detail}"
     if level != "verified":
         return (
-            f"a {unit_kind} change unit is bound to this claim; any declared metadata is "
+            f"change unit {matching[0].id} is a {unit_kind} change; any declared metadata is "
             "asserted, not proven"
         )
-    mismatched = sorted(
-        key for key in declared if all(unit.metadata.get(key) != declared[key] for unit in matching)
-    )
-    if mismatched:
+    # One unit must satisfy the whole claim. Letting different units satisfy
+    # different keys would state a combined fact that no unit actually has.
+    exact = [unit for unit in matching if _metadata_matches(unit, declared)]
+    if not exact:
         diagnostics.add(
             "grounding.non_text_mismatch",
             f"{path}.metadata",
-            f"Unit metadata does not match declared values for: {', '.join(mismatched)}",
+            (
+                "No single supported unit has kind "
+                f"{unit_kind!r} together with every declared metadata entry: "
+                f"{_declared_detail(declared)}"
+            ),
         )
-    return proof
+        return f"the change unit is a {unit_kind} change{detail}"
+    return f"change unit {exact[0].id} is a {unit_kind} change{detail}"
+
+
+def _metadata_matches(unit: UnitRecord, declared: dict[str, Any]) -> bool:
+    """Require every declared entry on one unit, with key presence significant.
+
+    A declared `null` must match a key that is present and null, never a key the
+    unit does not carry at all.
+    """
+    return all(
+        key in unit.metadata and unit.metadata[key] == value for key, value in declared.items()
+    )
+
+
+def _declared_detail(declared: dict[str, Any]) -> str:
+    return ", ".join(f"{key}={declared[key]!r}" for key in sorted(declared)) or "none"
 
 
 def _require_regions(

@@ -1267,7 +1267,7 @@ def test_unverified_proofs_never_assert_the_unchecked_predicate() -> None:
         "or retained is asserted, not proven"
     )
     assert proofs["rename"] == (
-        "a rename change unit is bound to this claim; any declared metadata is asserted, not proven"
+        "change unit u3 is a rename change; any declared metadata is asserted, not proven"
     )
 
 
@@ -1294,6 +1294,217 @@ def test_unresolved_proofs_state_that_nothing_is_established() -> None:
     assert proofs["callers"] == (
         "a caller relation for 'connect' on the after side is not established"
     )
+
+
+REVIEW_PROSE = "Critical severity: this change exposes credentials and I recommend fixing it."
+
+
+@pytest.mark.parametrize(
+    "level", ["verified", "inferred", "ambiguous", "unresolved", "unavailable"]
+)
+def test_absence_literals_are_scanned_at_every_support_level(level: str) -> None:
+    """Nothing forces an absence literal to be source text, at any level."""
+    claim: dict[str, Any] = {
+        "id": "leak",
+        "type": "text_absence",
+        "support_level": level,
+        "support": ["ca"],
+        "side": "after",
+        "literal": REVIEW_PROSE,
+    }
+    if level != "verified":
+        claim["limits"] = "Scoped to the cited region."
+    manifest = explanation(value_change_claim(), claim)
+    if level in {"unresolved", "unavailable", "ambiguous"}:
+        manifest["items"][0]["kind"] = "ambiguity" if level == "ambiguous" else "unresolved"
+        manifest["items"][0]["confidence"] = level
+        del manifest["items"][0]["before"]
+        del manifest["items"][0]["after"]
+    elif level == "inferred":
+        manifest["items"][0]["confidence"] = "inferred"
+    reported = codes(manifest)
+    assert reported and all(code == "-" for code in reported)
+
+
+def test_absence_literals_that_are_real_source_text_still_pass() -> None:
+    manifest = explanation(
+        value_change_claim(),
+        {
+            "id": "no-legacy",
+            "type": "text_absence",
+            "support_level": "verified",
+            "support": ["ca"],
+            "side": "after",
+            "literal": "timeout = 30",
+        },
+    )
+    assert accept(manifest).claim_total == 5
+
+
+def test_source_derived_absence_literal_survives_review_wording() -> None:
+    """A deleted comment is quoted source even though it reads like a review."""
+    packet = evidence()
+    packet["files"][0]["hunks"][0]["lines"][0]["content"] = "    # this should be fixed"
+    packet["files"][0]["citations"][0]["text"] = "    # this should be fixed"
+    manifest = explanation(
+        {
+            "id": "gone",
+            "type": "text_absence",
+            "support_level": "verified",
+            "support": ["ca"],
+            "side": "after",
+            "literal": "# this should be fixed",
+        },
+        {
+            "id": "before-side",
+            "type": "text_presence",
+            "support_level": "verified",
+            "support": ["cb"],
+            "side": "before",
+            "literal": "# this should be fixed",
+        },
+    )
+    result = validate_explanation(packet, manifest, require_grounding=True)
+    assert result.grounding is not None
+    assert result.grounding.level_counts["verified"] == 5
+
+
+def test_graph_operands_are_scanned_when_nothing_matches_them() -> None:
+    manifest = explanation(
+        value_change_claim(),
+        {
+            "id": "callers",
+            "type": "graph_relation",
+            "support_level": "unresolved",
+            "limits": "Callers are not established.",
+            "support": [],
+            "fact_kind": "caller",
+            "side": "after",
+            "symbol": REVIEW_PROSE,
+        },
+    )
+    manifest["items"][0]["kind"] = "unresolved"
+    manifest["items"][0]["confidence"] = "unresolved"
+    del manifest["items"][0]["before"]
+    del manifest["items"][0]["after"]
+    reported = codes(manifest)
+    assert reported and all(code == "-" for code in reported)
+
+
+def test_unverified_non_text_metadata_is_scanned() -> None:
+    manifest = explanation()
+    claim = manifest["items"][3]["grounding"]["claims"][0]
+    claim["support_level"] = "inferred"
+    claim["limits"] = "Rename metadata is read from Git only."
+    claim["metadata"] = {"old_path": REVIEW_PROSE}
+    manifest["items"][3]["confidence"] = "inferred"
+    reported = codes(manifest)
+    assert reported and all(code == "-" for code in reported)
+
+
+def test_claim_ids_are_scanned_like_other_authored_text() -> None:
+    manifest = explanation(value_change_claim(id="this change introduces a bug"))
+    reported = codes(manifest)
+    assert reported and all(code == "-" for code in reported)
+
+
+def test_non_text_metadata_must_match_one_unit() -> None:
+    packet = _two_rename_packet()
+    manifest = _two_rename_manifest()
+    manifest["items"][3]["grounding"]["claims"][0]["metadata"] = {
+        "old_path": "old.py",
+        "new_path": "new_b.py",
+    }
+    with pytest.raises(ValidationError) as error:
+        validate_explanation(packet, manifest, require_grounding=True)
+    assert [entry["code"] for entry in error.value.details["errors"]] == [
+        "grounding.non_text_mismatch"
+    ]
+
+
+def test_non_text_metadata_accepts_a_single_consistent_unit() -> None:
+    packet = _two_rename_packet()
+    manifest = _two_rename_manifest()
+    manifest["items"][3]["grounding"]["claims"][0]["metadata"] = {
+        "old_path": "old_b.py",
+        "new_path": "new_b.py",
+    }
+    result = validate_explanation(packet, manifest, require_grounding=True)
+    assert result.grounding is not None
+    proof = next(
+        outcome.proof for outcome in result.grounding.outcomes if outcome.claim_id == "rename"
+    )
+    assert proof.startswith("change unit u4 is a rename change")
+
+
+def test_an_absent_metadata_key_does_not_match_a_declared_null() -> None:
+    manifest = explanation()
+    manifest["items"][3]["grounding"]["claims"][0]["metadata"] = {"missing_key": None}
+    assert codes(manifest) == ["grounding.non_text_mismatch"]
+
+
+def test_a_present_null_metadata_key_matches_a_declared_null() -> None:
+    packet = evidence()
+    packet["files"][2]["units"][0]["metadata"] = {"old_path": None, "new_path": "new.py"}
+    manifest = explanation()
+    manifest["items"][3]["grounding"]["claims"][0]["metadata"] = {"old_path": None}
+    result = validate_explanation(packet, manifest, require_grounding=True)
+    assert result.grounding is not None
+    assert result.grounding.level_counts["verified"] == 4
+
+
+def test_multiple_identical_units_bind_the_lexicographically_first(caplog: Any) -> None:
+    del caplog
+    packet = _two_rename_packet()
+    packet["files"][3]["units"][0]["metadata"] = {"old_path": "old.py", "new_path": "new.py"}
+    manifest = _two_rename_manifest()
+    result = validate_explanation(packet, manifest, require_grounding=True)
+    assert result.grounding is not None
+    proof = next(
+        outcome.proof for outcome in result.grounding.outcomes if outcome.claim_id == "rename"
+    )
+    assert proof.startswith("change unit u3 is a rename change")
+
+
+def test_non_text_claim_still_rejects_the_wrong_kind() -> None:
+    packet = _two_rename_packet()
+    manifest = _two_rename_manifest()
+    manifest["items"][3]["grounding"]["claims"][0]["unit_kind"] = "binary"
+    with pytest.raises(ValidationError) as error:
+        validate_explanation(packet, manifest, require_grounding=True)
+    assert [entry["code"] for entry in error.value.details["errors"]] == [
+        "grounding.non_text_mismatch"
+    ]
+
+
+def _two_rename_packet() -> dict[str, Any]:
+    packet = evidence()
+    packet["files"].append(
+        {
+            "old_path": "old_b.py",
+            "new_path": "new_b.py",
+            "status": "renamed",
+            "units": [
+                {
+                    "id": "u4",
+                    "kind": "rename",
+                    "hunk_ids": [],
+                    "metadata": {"old_path": "old_b.py", "new_path": "new_b.py"},
+                }
+            ],
+            "hunks": [],
+            "spans": [],
+            "citations": [],
+        }
+    )
+    return packet
+
+
+def _two_rename_manifest() -> dict[str, Any]:
+    manifest = explanation()
+    manifest["items"][3]["grounding"]["claims"][0]["support"] = ["u3", "u4"]
+    manifest["coverage_owners"].append({"evidence_id": "u4", "owner_id": "renamed"})
+    return manifest
 
 
 def test_claim_counts_are_stable_under_repeated_validation() -> None:

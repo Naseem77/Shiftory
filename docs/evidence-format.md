@@ -205,11 +205,16 @@ ordering itself may be downgraded.
 | `deletion` | `literal` appears in bound before evidence | `literal` appears in no changed after line of the same changed file |
 | `source_order` | `first` and `second` both appear in bound `side` evidence | exactly one cited region, in which every `first` occurrence precedes every `second` occurrence |
 | `graph_relation` | a supported graph fact matches `fact_kind`, `side`, `symbol`, and any `target`/`path` | the graph is `available` and a matched fact is `extracted` |
-| `non_text_change` | a supported non-text unit the item owns | the unit `kind` and every declared `metadata` entry match |
+| `non_text_change` | a supported non-text unit the item owns | **one** supported unit has the declared `unit_kind` **and** every declared `metadata` entry, with key presence significant |
 
 Matching is byte-exact substring matching on evidence text. There is no case
 folding, whitespace normalization, tokenization, or regular-expression
 interpretation. Literals are one to 512 characters.
+
+A `non_text_change` claim is satisfied by a single unit, never by combining keys
+from different units, and a declared `null` matches only a key that is present
+and null. When several supported units satisfy the claim identically, the
+lexicographically first unit id is bound and named in the proof.
 
 Region text comes from the source citation covering a span. When the evidence
 budget omitted that citation's text, the span's changed-line content is used
@@ -340,6 +345,15 @@ recommendations, severity/risk judgments, bug declarations, and suggested fixes.
 The check is contextual rather than a raw token ban. Identifiers, paths, quoted
 source, and faithful behavior descriptions may legitimately contain strings such
 as `risk_score`, `severity_level`, `fix_bug`, or “review configuration.”
+
+Grounding claims are scanned by the same rules. A claim value is exempt only
+while an obligation forces it to match the evidence byte-for-byte, or when it
+occurs verbatim in the packet's source text. `text_absence` inverts that
+obligation — a verified absence proves the literal is *not* in the cited source,
+and an inferred or ambiguous absence constrains it not at all — so an absence
+literal is scanned at every support level. Claim ids, `limits`,
+`shared_support` reasons, graph operands with no matching fact, and non-text
+metadata below `verified` are scanned for the same reason.
 
 ## Verification and rendering
 

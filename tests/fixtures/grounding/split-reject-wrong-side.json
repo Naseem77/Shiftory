@@ -1,0 +1,72 @@
+{
+  "fixture_schema": "shiftory.grounding-adversarial/v1",
+  "scenario": "split",
+  "expect": "reject",
+  "expected_codes": ["grounding.side_mismatch"],
+  "intent": "A before-side statement supported only by after-side evidence.",
+  "manifest": {
+    "schema": "shiftory.explanation/v1",
+    "summary": "Both modules raise their configured numbers.",
+    "items": [
+      {
+        "id": "app-timeout",
+        "kind": "behavioral",
+        "title": "Timeout value",
+        "before": "The application waited 30 units.",
+        "after": "The application waits 60 units.",
+        "confidence": "extracted",
+        "citations": ["{citation:app.py:after:1}"],
+        "grounding": {
+          "claims": [
+            {
+              "id": "old-timeout",
+              "type": "text_presence",
+              "support_level": "verified",
+              "support": ["{span:app.py:after:1}"],
+              "side": "before",
+              "literal": "TIMEOUT = 30"
+            },
+            {
+              "id": "new-timeout",
+              "type": "text_presence",
+              "support_level": "verified",
+              "support": ["{span:app.py:after:1}"],
+              "side": "after",
+              "literal": "TIMEOUT = 60"
+            }
+          ]
+        }
+      },
+      {
+        "id": "util-retries",
+        "kind": "behavioral",
+        "title": "Retry count",
+        "before": "The utility retried once.",
+        "after": "The utility retries three times.",
+        "confidence": "extracted",
+        "citations": ["{citation:util.py:before:1}", "{citation:util.py:after:1}"],
+        "grounding": {
+          "claims": [
+            {
+              "id": "retries",
+              "type": "value_change",
+              "support_level": "verified",
+              "support": [
+                "{span:util.py:before:1}",
+                "{span:util.py:after:1}"
+              ],
+              "before_literal": "RETRIES = 1",
+              "after_literal": "RETRIES = 3"
+            }
+          ]
+        }
+      }
+    ],
+    "coverage_owners": [
+      {"evidence_id": "{line:app.py:before:1}", "owner_id": "app-timeout"},
+      {"evidence_id": "{line:app.py:after:1}", "owner_id": "app-timeout"},
+      {"evidence_id": "{line:util.py:before:1}", "owner_id": "util-retries"},
+      {"evidence_id": "{line:util.py:after:1}", "owner_id": "util-retries"}
+    ]
+  }
+}

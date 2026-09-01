@@ -1,0 +1,53 @@
+{
+  "fixture_schema": "shiftory.grounding-adversarial/v1",
+  "scenario": "reorder",
+  "expect": "reject",
+  "expected_codes": ["grounding.confidence_overstated"],
+  "intent": "Extracted confidence on an item whose ordering claim is only inferred.",
+  "manifest": {
+    "schema": "shiftory.explanation/v1",
+    "summary": "The save path returns a different value and reorders its statements.",
+    "items": [
+      {
+        "id": "save-result",
+        "kind": "behavioral",
+        "title": "Save result and execution order",
+        "before": "The function returned \"ok\".",
+        "after": "The function returns \"done\" and commits after invalidating at run time.",
+        "confidence": "extracted",
+        "citations": ["{citation:service.py:after:3}"],
+        "grounding": {
+          "claims": [
+            {
+              "id": "result",
+              "type": "value_change",
+              "support_level": "verified",
+              "support": [
+                "{span:service.py:before:4}",
+                "{span:service.py:after:3}"
+              ],
+              "before_literal": "return \"ok\"",
+              "after_literal": "return \"done\""
+            },
+            {
+              "id": "runtime-order",
+              "type": "source_order",
+              "support_level": "inferred",
+              "limits": "Source order does not establish execution order.",
+              "support": ["{citation:service.py:after:3}"],
+              "side": "after",
+              "first": "database.commit()",
+              "second": "return \"done\""
+            }
+          ]
+        }
+      }
+    ],
+    "coverage_owners": [
+      {"evidence_id": "{line:service.py:before:2}", "owner_id": "save-result"},
+      {"evidence_id": "{line:service.py:before:4}", "owner_id": "save-result"},
+      {"evidence_id": "{line:service.py:after:3}", "owner_id": "save-result"},
+      {"evidence_id": "{line:service.py:after:4}", "owner_id": "save-result"}
+    ]
+  }
+}

@@ -47,6 +47,7 @@ def write_explanation(descriptor: dict, summary: str = "The return value changes
                 "after": "The function returns the new value.",
                 "confidence": "extracted",
                 "citations": citations,
+                "grounding": {"claims": [_value_change_claim(evidence)]},
             }
         ],
         "coverage_owners": [
@@ -57,6 +58,25 @@ def write_explanation(descriptor: dict, summary: str = "The return value changes
     path.write_text(json.dumps(explanation), encoding="utf-8")
     path.chmod(0o600)
     return path
+
+
+def _value_change_claim(evidence: dict) -> dict:
+    """Bind the fixture's `return 1` to `return 2` replacement to the item."""
+    for file in evidence["files"]:
+        spans = {span["id"]: span for span in file["spans"]}
+        for span in file["spans"]:
+            replacement = spans.get(span.get("replacement_span_id") or "")
+            if span["side"] != "before" or replacement is None:
+                continue
+            return {
+                "id": "return-value",
+                "type": "value_change",
+                "support_level": "verified",
+                "support": [span["id"], replacement["id"]],
+                "before_literal": "return 1",
+                "after_literal": "return 2",
+            }
+    raise AssertionError("The fixture comparison has no replacement-linked span pair")
 
 
 def test_analyze_verify_render_and_repeated_citation(repo_factory) -> None:

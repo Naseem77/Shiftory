@@ -103,6 +103,125 @@ def test_report_json_schema_and_markdown_layering_are_deterministic() -> None:
     assert markdown.index("**After:**") < markdown.index("The declaration is represented")
     assert "Change spans: 2/2 (100%)" in markdown
     assert "Valid citation references: 2" in markdown
+    assert "## Grounded claims" not in markdown
+    assert markdown.endswith(
+        "> Shiftory verified accounting and citation references; "
+        "it does not verify semantic correctness.\n"
+    )
+
+
+def test_grounded_report_renders_claims_between_items_and_coverage() -> None:
+    evidence = {
+        "schema": "shiftory.evidence/v1",
+        "comparison": {"identity": "comparison"},
+        "files": [
+            {
+                "old_path": "config.py",
+                "new_path": "config.py",
+                "units": [{"id": "u1", "kind": "text", "hunk_ids": ["h1"], "metadata": {}}],
+                "hunks": [
+                    {
+                        "id": "h1",
+                        "span_ids": ["s1", "s2"],
+                        "lines": [
+                            {"id": "l1", "side": "before", "content": "RETRIES = 1"},
+                            {"id": "l2", "side": "after", "content": "RETRIES = 4"},
+                        ],
+                    }
+                ],
+                "spans": [
+                    {
+                        "id": "s1",
+                        "side": "before",
+                        "start_line": 3,
+                        "end_line": 3,
+                        "line_ids": ["l1"],
+                        "replacement_span_id": "s2",
+                    },
+                    {
+                        "id": "s2",
+                        "side": "after",
+                        "start_line": 3,
+                        "end_line": 3,
+                        "line_ids": ["l2"],
+                        "replacement_span_id": "s1",
+                    },
+                ],
+                "citations": [
+                    {
+                        "id": "c1",
+                        "path": "config.py",
+                        "side": "after",
+                        "start_line": 3,
+                        "end_line": 3,
+                        "text": "RETRIES = 4",
+                        "omitted": False,
+                    }
+                ],
+            }
+        ],
+        "graph": {"status": "disabled", "facts": []},
+    }
+    explanation = {
+        "schema": "shiftory.explanation/v1",
+        "summary": "The retry budget grows.",
+        "items": [
+            {
+                "id": "retries",
+                "kind": "behavioral",
+                "title": "Retry budget",
+                "before": "One retry was configured.",
+                "after": "Four retries are configured.",
+                "confidence": "inferred",
+                "citations": ["c1"],
+                "grounding": {
+                    "claims": [
+                        {
+                            "id": "budget",
+                            "type": "value_change",
+                            "support_level": "verified",
+                            "support": ["s1", "s2"],
+                            "before_literal": "RETRIES = 1",
+                            "after_literal": "RETRIES = 4",
+                        },
+                        {
+                            "id": "effect",
+                            "type": "text_presence",
+                            "support_level": "inferred",
+                            "limits": "The runtime retry count is not established by source text.",
+                            "support": ["s2"],
+                            "side": "after",
+                            "literal": "RETRIES",
+                        },
+                    ]
+                },
+            }
+        ],
+        "coverage_owners": [
+            {"evidence_id": "l1", "owner_id": "retries"},
+            {"evidence_id": "l2", "owner_id": "retries"},
+        ],
+    }
+    report = build_report(evidence, explanation, require_grounding=True)
+    assert not list(Draft202012Validator(load_schema("report")).iter_errors(report))
+    assert report["grounding"]["mode"] == "required"
+    assert report["grounding"]["verified"] == 1
+    assert report["grounding"]["inferred"] == 1
+
+    markdown = render_report_markdown(report)
+    assert markdown.index("### Retry budget") < markdown.index("## Grounded claims")
+    assert markdown.index("## Grounded claims") < markdown.index(
+        "## Complete source-cited coverage appendix"
+    )
+    assert "### Grounding for `retries`" in markdown
+    assert (
+        "- `budget` (`value_change`, **verified**): replacement span s1 -> s2 changes "
+        "'RETRIES = 1' to 'RETRIES = 4'" in markdown
+    )
+    assert "  - Limits: The runtime retry count is not established by source text." in markdown
+    assert markdown == render_report_markdown(
+        build_report(evidence, explanation, require_grounding=True)
+    )
 
 
 def test_evidence_markdown_uses_the_canonical_ledger() -> None:

@@ -1,0 +1,87 @@
+{
+  "fixture_schema": "shiftory.grounding-adversarial/v1",
+  "scenario": "split",
+  "expect": "accept",
+  "intent": "An unresolved item honestly records that graph enrichment is unavailable instead of asserting callers.",
+  "manifest": {
+    "schema": "shiftory.explanation/v1",
+    "summary": "Both modules raise their configured numbers.",
+    "items": [
+      {
+        "id": "app-timeout",
+        "kind": "behavioral",
+        "title": "Timeout value",
+        "before": "The application waited 30 units.",
+        "after": "The application waits 60 units.",
+        "confidence": "extracted",
+        "citations": ["{citation:app.py:before:1}", "{citation:app.py:after:1}"],
+        "grounding": {
+          "claims": [
+            {
+              "id": "timeout",
+              "type": "value_change",
+              "support_level": "verified",
+              "support": [
+                "{span:app.py:before:1}",
+                "{span:app.py:after:1}"
+              ],
+              "before_literal": "TIMEOUT = 30",
+              "after_literal": "TIMEOUT = 60"
+            }
+          ]
+        }
+      },
+      {
+        "id": "util-retries",
+        "kind": "behavioral",
+        "title": "Retry count",
+        "before": "The utility retried once.",
+        "after": "The utility retries three times.",
+        "confidence": "extracted",
+        "citations": ["{citation:util.py:before:1}", "{citation:util.py:after:1}"],
+        "grounding": {
+          "claims": [
+            {
+              "id": "retries",
+              "type": "value_change",
+              "support_level": "verified",
+              "support": [
+                "{span:util.py:before:1}",
+                "{span:util.py:after:1}"
+              ],
+              "before_literal": "RETRIES = 1",
+              "after_literal": "RETRIES = 3"
+            }
+          ]
+        }
+      },
+      {
+        "id": "callers",
+        "kind": "unresolved",
+        "title": "Callers of the changed settings",
+        "confidence": "unavailable",
+        "citations": [],
+        "grounding": {
+          "claims": [
+            {
+              "id": "who-calls",
+              "type": "graph_relation",
+              "support_level": "unavailable",
+              "limits": "Graph enrichment is disabled for this comparison, so no caller relation is established.",
+              "support": [],
+              "fact_kind": "caller",
+              "side": "after",
+              "symbol": "TIMEOUT"
+            }
+          ]
+        }
+      }
+    ],
+    "coverage_owners": [
+      {"evidence_id": "{line:app.py:before:1}", "owner_id": "app-timeout"},
+      {"evidence_id": "{line:app.py:after:1}", "owner_id": "app-timeout"},
+      {"evidence_id": "{line:util.py:before:1}", "owner_id": "util-retries"},
+      {"evidence_id": "{line:util.py:after:1}", "owner_id": "util-retries"}
+    ]
+  }
+}

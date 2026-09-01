@@ -7,6 +7,12 @@ from dataclasses import dataclass
 from typing import Any
 
 from shiftory.errors import ValidationError
+from shiftory.explain.grounding import (
+    LITERAL_FIELDS,
+    OBLIGATION_LEVELS,
+    GroundingSummary,
+    evaluate_grounding,
+)
 
 _CONFIDENCE = {"extracted", "inferred", "ambiguous", "unresolved", "unavailable"}
 _DISALLOWED_FIELDS = {
@@ -66,6 +72,7 @@ class ValidationResult:
     unit_total: int
     unit_covered: int
     citation_count: int
+    grounding: GroundingSummary | None = None
 
     def to_dict(self) -> dict[str, int | float]:
         return {
@@ -89,7 +96,12 @@ def _ratio(covered: int, total: int) -> float:
     return 1.0 if total == 0 else covered / total
 
 
-def validate_explanation(evidence: dict[str, Any], explanation: dict[str, Any]) -> ValidationResult:
+def validate_explanation(
+    evidence: dict[str, Any],
+    explanation: dict[str, Any],
+    *,
+    require_grounding: bool = False,
+) -> ValidationResult:
     errors: list[dict[str, Any]] = []
     if evidence.get("schema") != "shiftory.evidence/v1":
         errors.append({"path": "$.evidence.schema", "message": "Expected shiftory.evidence/v1"})
@@ -257,6 +269,18 @@ def validate_explanation(evidence: dict[str, Any], explanation: dict[str, Any]) 
         )
         for unit_id in ledger["units"]
     )
+    grounding = (
+        evaluate_grounding(
+            evidence=evidence,
+            items=items,
+            item_ids=item_ids,
+            owners=owners,
+            require_grounding=require_grounding,
+            errors=errors,
+        )
+        if not errors
+        else None
+    )
     if errors:
         raise ValidationError(
             f"Explanation validation failed with {len(errors)} error(s)",
@@ -272,6 +296,7 @@ def validate_explanation(evidence: dict[str, Any], explanation: dict[str, Any]) 
         len(ledger["units"]),
         unit_covered,
         citation_count,
+        grounding,
     )
 
 
@@ -444,10 +469,75 @@ def _validate_policy(
                 continue
             unquoted = _QUOTED_OR_CODE.sub("", value)
             _validate_policy_text(unquoted, f"$.items[{index}].{field}", errors)
+        _validate_grounding_policy(raw_item, index, errors)
     summary = explanation.get("summary")
     if isinstance(summary, str):
         unquoted = _QUOTED_OR_CODE.sub("", summary)
         _validate_policy_text(unquoted, "$.summary", errors)
+
+
+def _validate_grounding_policy(
+    item: dict[str, Any],
+    index: int,
+    errors: list[dict[str, Any]],
+) -> None:
+    grounding = item.get("grounding")
+    if not isinstance(grounding, dict):
+        return
+    claims = grounding.get("claims")
+    if not isinstance(claims, list):
+        return
+    for position, claim in enumerate(claims):
+        if not isinstance(claim, dict):
+            continue
+        claim_path = f"$.items[{index}].grounding.claims[{position}]"
+        for field in sorted(claim):
+            normalized = field.lower().replace("-", "_")
+            if normalized in _DISALLOWED_FIELDS:
+                errors.append(
+                    {
+                        "path": f"{claim_path}.{field}",
+                        "message": (
+                            f"{field!r} is a review/judgment structure, not an explanation field"
+                        ),
+                    }
+                )
+        limits = claim.get("limits")
+        if isinstance(limits, str):
+            _validate_policy_text(_QUOTED_OR_CODE.sub("", limits), f"{claim_path}.limits", errors)
+        _validate_unproven_operands(claim, claim_path, errors)
+        shared = claim.get("shared_support")
+        if not isinstance(shared, list):
+            continue
+        for shared_position, entry in enumerate(shared):
+            reason = entry.get("reason") if isinstance(entry, dict) else None
+            if isinstance(reason, str):
+                _validate_policy_text(
+                    _QUOTED_OR_CODE.sub("", reason),
+                    f"{claim_path}.shared_support[{shared_position}].reason",
+                    errors,
+                )
+
+
+def _validate_unproven_operands(
+    claim: dict[str, Any],
+    claim_path: str,
+    errors: list[dict[str, Any]],
+) -> None:
+    """Scan operands that no obligation forces to match the evidence.
+
+    At an asserting support level an operand has to appear byte-for-byte in the
+    cited source, so real diff text containing words such as "vulnerability" must
+    be allowed through. At `unresolved` and `unavailable` nothing constrains the
+    operand, and it is still echoed into the report, so it is scanned like any
+    other agent prose.
+    """
+    if claim.get("support_level") in OBLIGATION_LEVELS:
+        return
+    for name in LITERAL_FIELDS:
+        value = claim.get(name)
+        if isinstance(value, str):
+            _validate_policy_text(_QUOTED_OR_CODE.sub("", value), f"{claim_path}.{name}", errors)
 
 
 def _validate_policy_text(

@@ -102,6 +102,13 @@ normalization, hashing, or parent relationships invalidates evidence references.
 Document the migration and add before/after fixtures rather than treating such a
 change as an internal refactor.
 
+Grounding is an additive part of `shiftory.explanation/v1`. A manifest without
+`grounding` stays valid, so new claim types, support levels, or binding rules
+must keep ungrounded manifests working and must not reinterpret an existing
+field. Adding a claim type means updating the closed vocabulary in the schema,
+the engine, the run descriptor, both skill copies, and the documented guarantee
+table together.
+
 ## Tests and goldens
 
 Tests are organized by purpose:
@@ -111,6 +118,12 @@ Tests are organized by purpose:
 - `tests/e2e`: installed-style CLI/skill flows;
 - `tests/golden`: deterministic rendering; and
 - `tests/regression`: previously discovered failures.
+
+`tests/fixtures/grounding` holds hand-authored adversarial explanation manifests.
+They are written against the published contract, never generated from validator
+output, and reference evidence through `{kind:path:...}` placeholders that the
+integration test resolves straight from the evidence packet. Add a fixture for
+every new grounding bypass, and state the exact diagnostic codes it must produce.
 
 Add a regression test for every corrected parser or accounting defect. Golden
 changes must be reviewed as behavior, not blindly regenerated. In the pull

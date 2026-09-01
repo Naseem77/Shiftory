@@ -12,8 +12,10 @@ For evidence that Shiftory successfully parsed, verification proves:
 - every non-text unit has exactly one owner;
 - every text hunk and text unit has complete descendant-line ownership;
 - all citation IDs exist;
-- evidence and explanation match their v1 schemas; and
-- the manifest does not use supported review/judgment structures.
+- evidence and explanation match their v1 schemas;
+- the manifest does not use supported review/judgment structures; and
+- every declared grounding claim is bound to evidence its own item owns and
+  satisfies the obligations, and every `verified` claim satisfies its predicate.
 
 It does **not** prove:
 
@@ -25,6 +27,59 @@ It does **not** prove:
 
 Shiftory intentionally does not produce bug findings, severity, risk rankings, or
 recommended fixes. Use separate review and testing systems for those jobs.
+
+## What grounding proves, and what it does not
+
+Grounding closes one specific hole: on its own, a citation only had to exist, so
+any valid identifier could be attached to any sentence. A claim now has to name
+a predicate, bind its support to the change the item actually owns, and place
+each operand on the correct side.
+
+Grounding proves statements about **source bytes in the evidence packet**:
+
+- a literal is present in, or absent from, a cited region on a stated side;
+- a replacement-linked span pair changes one literal into another;
+- added or deleted text does not merely move within the same changed file;
+- one literal precedes another in the **source order** of one cited region;
+- the static graph records a relation with an exact kind, side, and symbol; and
+- a non-text unit has a declared kind and metadata.
+
+Grounding does **not** prove:
+
+- that the item's full prose follows from its claims. A claim is checked; the
+  paragraph around it is not. An agent can still attach one true but narrow
+  claim to a broad sentence, so the report prints exactly what was proven for
+  each item;
+- execution order. `source_order` is lexical order inside one cited region.
+  Runtime ordering must be declared `inferred` with explicit limits, and the
+  renderer always labels the proven fact as source order;
+- absence anywhere outside the cited regions. `text_absence` is scoped to the
+  regions the claim cites, never to a file, package, or repository;
+- that a graph relation happens at run time. Graph claims stay static,
+  non-authoritative, and require an `available` graph and an `extracted` fact
+  before they can be `verified`; or
+- that the evidence packet itself is genuine. Grounding trusts the packet it is
+  given. Source hashes are not recomputed from decoded text because that is not
+  safe for non-UTF-8 content. The `explain` workflow instead binds evidence to a
+  recorded comparison identity.
+
+Grounding can only reference text that the evidence packet carries: changed-line
+content and the source citations covering changed spans. Unchanged context lines
+inside a hunk are not part of that text, so a claim about a moved statement whose
+own line did not change cannot be `verified` and must be stated as `inferred`.
+
+The claim vocabulary is closed. A statement that no claim type expresses is not
+silently accepted as proven; it can only be carried as an `inferred`,
+`ambiguous`, `unresolved`, or `unavailable` claim with stated limits.
+
+`shiftory explain` requires grounding by default and records that mode when
+evidence is produced, so a resume invocation cannot weaken the gate with a flag
+and a descriptor without a valid grounding block is rejected. `shiftory verify`
+and `shiftory render` stay optional by default for manifests produced by
+existing tooling, and always validate grounding that is declared. The recorded
+mode is workflow state, not an integrity guarantee: the run directory is
+owner-only private state that the caller already writes, exactly like the
+evidence and explanation files it holds.
 
 ## Git and content boundaries
 
@@ -111,8 +166,10 @@ An inferred statement can be correct but is not upgraded merely because it sound
 confident.
 
 Agent-authored prose is bounded by the evidence the agent reads. The validator
-can reject obvious uncertainty mislabeled as extracted, but it cannot generally
-detect hallucinated or misleading prose.
+can reject obvious uncertainty mislabeled as extracted, reject a claim whose
+operands are absent from the evidence bound to it, and reject confidence that is
+stronger than the weakest declared claim. It still cannot generally detect
+hallucinated or misleading prose around a technically satisfied claim.
 
 ## Policy validation is bounded
 

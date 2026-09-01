@@ -130,11 +130,23 @@ The evidence packet is deterministic. An agent reads it and writes a separate
 - requires exactly one owner for every changed line, span, and non-text unit;
 - derives complete textual hunk/unit coverage from line ownership;
 - checks every citation reference;
-- rejects review/judgment communication structures; and
-- handles empty comparisons explicitly.
+- rejects review/judgment communication structures;
+- handles empty comparisons explicitly; and
+- evaluates declared grounding claims once accounting is clean.
 
-The renderer groups valid items into fixed sections and emits a coverage appendix.
-It never upgrades accounting success into a claim of semantic correctness.
+Grounding is a separate, read-only pass in `shiftory.explain.grounding`. It
+indexes changed-line content, span geometry and replacement links, source
+citation ranges, unit metadata, and graph facts, derives each item's owned change
+from `coverage_owners`, and then evaluates each claim's obligations and, for
+`verified` claims, its predicate. Every predicate is a byte-exact operation on
+evidence the packet already carries: no natural-language processing, no network
+call, and no model judgment. Grounding runs only after the accounting checks pass
+so that a broken ownership map cannot produce cascading claim errors.
+
+The renderer groups valid items into fixed sections, adds a grounded-claims
+section when claims exist, and emits a coverage appendix. It never upgrades
+accounting or source-level grounding success into a claim of semantic
+correctness or runtime behavior.
 
 ## State and ownership
 
@@ -165,8 +177,10 @@ The invariants that define Shiftory's correctness boundary are:
 3. every file change has at least one unit;
 4. changed source ranges fit the corresponding before/after source;
 5. every ownable evidence ID has exactly one explanation owner;
-6. all lines in a span have the same effective owner as that span; and
-7. citations are valid references but never affect ownership counts.
+6. all lines in a span have the same effective owner as that span;
+7. citations are valid references but never affect ownership counts; and
+8. a grounding claim's support resolves into the change its own item owns, on
+   the side the claim is about.
 
 Violating one of these invariants is an error, not a partial-success report.
 

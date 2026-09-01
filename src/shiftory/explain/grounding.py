@@ -151,6 +151,8 @@ class EvidenceIndex:
     changed_paths: frozenset[str] = frozenset()
     supports: dict[str, Support] = field(default_factory=dict)
     lines_by_file_side: dict[tuple[int, str], tuple[LineRecord, ...]] = field(default_factory=dict)
+    text_by_file_side: dict[tuple[int, str], str] = field(default_factory=dict)
+    grams_by_file_side: dict[tuple[int, str], frozenset[int]] = field(default_factory=dict)
 
 
 @dataclass(frozen=True, slots=True)
@@ -297,6 +299,11 @@ def index_evidence(evidence: dict[str, Any]) -> EvidenceIndex:
         )
         for position, (line_id, record) in enumerate(lines.items())
     }
+    grouped_lines = _index_lines_by_file_side(resolved_lines)
+    joined = {
+        key: "\n".join(record.content for record in records)
+        for key, records in grouped_lines.items()
+    }
     return EvidenceIndex(
         resolved_lines,
         spans,
@@ -307,7 +314,25 @@ def index_evidence(evidence: dict[str, Any]) -> EvidenceIndex:
         status if isinstance(status, str) else "disabled",
         frozenset(changed_paths),
         _index_supports(resolved_lines, spans, hunks, units, citations, facts),
-        _index_lines_by_file_side(resolved_lines),
+        grouped_lines,
+        joined,
+        {key: _content_grams(value) for key, value in joined.items()},
+    )
+
+
+GRAM_LENGTH = 8
+
+
+def _content_grams(text: str) -> frozenset[int]:
+    """Hashes of every `GRAM_LENGTH` window of a file side's changed text.
+
+    A literal can only occur in that text if its own first window occurs there,
+    so this answers the common "absent" case in constant time. The filter only
+    skips work that would have found nothing, so a hash collision costs one
+    ordinary search and can never change a result.
+    """
+    return frozenset(
+        hash(text[offset : offset + GRAM_LENGTH]) for offset in range(len(text) - GRAM_LENGTH + 1)
     )
 
 
@@ -542,35 +567,37 @@ def _index_supports(
             ),
         )
     for hunk_id, hunk in hunks.items():
+        ordered = _position_order(hunk.line_ids, lines)
         supports.setdefault(
             hunk_id,
             Support(
                 hunk_id,
                 "hunk",
-                hunk.line_ids,
-                _span_regions_for(hunk.line_ids, lines, span_regions),
+                ordered,
+                _span_regions_for(ordered, lines, span_regions),
                 (hunk_id,),
-                _paths_for_lines(hunk.line_ids, lines),
+                _paths_for_lines(ordered, lines),
                 None,
                 None,
                 False,
-                frozenset(hunk.line_ids),
+                frozenset(ordered),
             ),
         )
     for unit_id, unit in units.items():
+        ordered = _position_order(unit.line_ids, lines)
         supports.setdefault(
             unit_id,
             Support(
                 unit_id,
                 "unit" if unit.kind == "text" else "non_text_unit",
-                unit.line_ids,
-                _span_regions_for(unit.line_ids, lines, span_regions),
-                _hunks_for(unit.line_ids, lines),
+                ordered,
+                _span_regions_for(ordered, lines, span_regions),
+                _hunks_for(ordered, lines),
                 unit.paths,
                 unit_id,
                 None,
                 False,
-                frozenset(unit.line_ids),
+                frozenset(ordered),
             ),
         )
     for fact_id, fact in facts.items():
@@ -579,6 +606,20 @@ def _index_supports(
             Support(fact_id, "fact", (), (), (), _paths(_text(fact.get("path"))), None, fact),
         )
     return supports
+
+
+def _position_order(
+    line_ids: tuple[str, ...],
+    lines: dict[str, LineRecord],
+) -> tuple[str, ...]:
+    """Order a coarse reference's lines by their position in the evidence.
+
+    A unit concatenates its hunks in declared order, which the ledger does not
+    require to follow file order. Canonicalising here means a coarse support and
+    a narrowed one always agree, whichever side narrowing iterates.
+    """
+    present = [line_id for line_id in line_ids if line_id in lines]
+    return tuple(sorted(present, key=lambda line_id: lines[line_id].position))
 
 
 def _span_regions_for(
@@ -968,11 +1009,7 @@ def _resolve_support(
             )
             failed = True
             continue
-        if value in narrowed:
-            cached = narrowed[value]
-        else:
-            cached = _narrowed(support, scope, index) if _is_bound(support, scope, index) else None
-            narrowed[value] = cached
+        cached = _bound_for_item(value, support, scope, index, narrowed)
         if cached is None:
             diagnostics.add(
                 "grounding.support_unbound",
@@ -986,7 +1023,7 @@ def _resolve_support(
             continue
         resolved.append(cached)
     shared = _resolve_shared(
-        claim, path, index, scope, scopes, declared_owners, resolved, diagnostics
+        claim, path, index, scope, scopes, declared_owners, resolved, diagnostics, narrowed
     )
     if shared is None or failed:
         return None
@@ -1000,6 +1037,26 @@ def _resolve_support(
     return (*resolved, *shared)
 
 
+def _bound_for_item(
+    value: str,
+    support: Support,
+    scope: ItemScope,
+    index: EvidenceIndex,
+    narrowed: dict[str, Support | None],
+) -> Support | None:
+    """The item-narrowed support, or None when the item does not own it.
+
+    Binding and narrowing both depend only on the support and the item's owned
+    lines, so the answer is computed once per support id and reused by every
+    claim of the item, including shared-support checks.
+    """
+    if value in narrowed:
+        return narrowed[value]
+    decided = _narrowed(support, scope, index) if _is_bound(support, scope, index) else None
+    narrowed[value] = decided
+    return decided
+
+
 def _resolve_shared(
     claim: dict[str, Any],
     path: str,
@@ -1009,6 +1066,7 @@ def _resolve_shared(
     declared_owners: dict[str, str],
     bound: list[Support],
     diagnostics: _Diagnostics,
+    narrowed: dict[str, Support | None],
 ) -> tuple[Support, ...] | None:
     if "shared_support" not in claim:
         return ()
@@ -1040,6 +1098,7 @@ def _resolve_shared(
             declared_owners,
             local_hunks,
             diagnostics,
+            narrowed,
         )
         if support is None:
             failed = True
@@ -1057,6 +1116,7 @@ def _shared_entry(
     declared_owners: dict[str, str],
     local_hunks: set[str],
     diagnostics: _Diagnostics,
+    narrowed: dict[str, Support | None],
 ) -> Support | None:
     if not isinstance(entry, dict) or set(entry) != {"evidence_id", "owner_id", "reason"}:
         diagnostics.add(
@@ -1086,7 +1146,7 @@ def _shared_entry(
             f"owner_id must identify a different explanation item, not {owner_id!r}",
         )
         return None
-    if _is_bound(support, scope, index):
+    if _bound_for_item(str(evidence_id), support, scope, index, narrowed) is not None:
         diagnostics.add(
             "grounding.shared_support_invalid",
             entry_path,
@@ -1124,6 +1184,7 @@ def _shared_entry(
         support.unit_id,
         support.fact,
         True,
+        support.line_set,
     )
 
 
@@ -1181,12 +1242,16 @@ def _narrowed(support: Support, scope: ItemScope, index: EvidenceIndex) -> Suppo
     if support.kind not in {"hunk", "unit"}:
         return support
     owned = scope.owned_lines
-    line_ids = tuple(
-        sorted(
-            (line_id for line_id in owned if line_id in support.line_set),
-            key=lambda line_id: index.lines[line_id].position,
+    if len(owned) <= len(support.line_set):
+        line_ids = tuple(
+            sorted(
+                (line_id for line_id in owned if line_id in support.line_set),
+                key=lambda line_id: index.lines[line_id].position,
+            )
         )
-    )
+    else:
+        # `support.line_ids` is already in position order, so filtering keeps it.
+        line_ids = tuple(line_id for line_id in support.line_ids if line_id in owned)
     return Support(
         support.id,
         support.kind,
@@ -1227,10 +1292,12 @@ def _is_bound(support: Support, scope: ItemScope, index: EvidenceIndex) -> bool:
     if support.kind in {"line", "span", "citation"}:
         return bool(support.line_ids) and set(support.line_ids) <= scope.owned_lines
     if support.kind in {"hunk", "unit"}:
-        # Iterate the item's own lines: their total across all items is the
-        # comparison size, while every item would otherwise rescan the whole
-        # coarse reference.
-        return any(line_id in support.line_set for line_id in scope.owned_lines)
+        # Walk whichever side is smaller. An item owning few lines must not
+        # rescan a whole-file unit, and an item owning most of the comparison
+        # must not rescan its own lines for a small hunk.
+        if len(scope.owned_lines) <= len(support.line_set):
+            return any(line_id in support.line_set for line_id in scope.owned_lines)
+        return any(line_id in scope.owned_lines for line_id in support.line_ids)
     if support.kind == "non_text_unit":
         return support.id in scope.owned_units
     if support.kind == "fact":
@@ -1563,7 +1630,7 @@ def _residual_lines(
     lines this item owns, so narrow ownership cannot manufacture a verified
     addition or deletion for text that merely moved.
     """
-    candidates: list[LineRecord] = []
+    found: list[str] = []
     for file_index in sorted(
         {
             index.spans[region.span_id].file_index
@@ -1571,10 +1638,22 @@ def _residual_lines(
             if region.span_id in index.spans
         }
     ):
-        candidates.extend(index.lines_by_file_side.get((file_index, other), ()))
-    if not candidates:
-        return []
-    return sorted(record.id for record in candidates if literal in record.content)
+        key = (file_index, other)
+        # A constant-time window check rejects most literals outright. What
+        # survives is confirmed by one search over the side's joined text, and
+        # only a real hit reads individual records.
+        if len(literal) >= GRAM_LENGTH:
+            grams = index.grams_by_file_side.get(key)
+            if grams is None or hash(literal[:GRAM_LENGTH]) not in grams:
+                continue
+        if literal not in index.text_by_file_side.get(key, ""):
+            continue
+        found.extend(
+            record.id
+            for record in index.lines_by_file_side.get(key, ())
+            if literal in record.content
+        )
+    return sorted(found)
 
 
 def _source_order(

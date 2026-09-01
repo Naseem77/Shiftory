@@ -866,3 +866,316 @@ def test_distinct_flagged_values_each_resolve_against_the_corpus() -> None:
         policy.scan(f"I recommend reverting change {index}.", "$.x", errors)
     assert len(errors) == 4
     assert policy.corpus_lookups == 5
+
+
+def paired_packet(pairs: int) -> tuple[dict[str, Any], list[str]]:
+    """`pairs` before lines and `pairs` after lines in one hunk."""
+    lines: list[dict[str, Any]] = []
+    spans: list[dict[str, Any]] = []
+    span_ids: list[str] = []
+    for index in range(pairs):
+        lines.append({"id": f"b{index}", "side": "before", "content": f"    old_{index} = 0"})
+        spans.append(
+            {
+                "id": f"sb{index}",
+                "side": "before",
+                "start_line": index + 1,
+                "end_line": index + 1,
+                "line_ids": [f"b{index}"],
+                "replacement_span_id": None,
+            }
+        )
+        span_ids.append(f"sb{index}")
+    for index in range(pairs):
+        lines.append({"id": f"a{index}", "side": "after", "content": f"    new_{index} = 1"})
+        spans.append(
+            {
+                "id": f"sa{index}",
+                "side": "after",
+                "start_line": index + 1,
+                "end_line": index + 1,
+                "line_ids": [f"a{index}"],
+                "replacement_span_id": None,
+            }
+        )
+        span_ids.append(f"sa{index}")
+    packet = {
+        "schema": "shiftory.evidence/v1",
+        "comparison": {"identity": "identity"},
+        "files": [
+            {
+                "old_path": "paired.py",
+                "new_path": "paired.py",
+                "units": [{"id": "u", "kind": "text", "hunk_ids": ["h1"], "metadata": {}}],
+                "hunks": [{"id": "h1", "span_ids": span_ids, "lines": lines}],
+                "spans": spans,
+                "citations": [],
+            }
+        ],
+        "graph": {"status": "disabled", "facts": []},
+    }
+    return packet, [line["id"] for line in lines]
+
+
+def test_residual_checks_reject_absent_literals_without_reading_records(
+    monkeypatch: Any,
+) -> None:
+    """Both sides exist, so the old scan read every opposite-side record."""
+    pairs, items, claims = 400, 20, 8
+    packet, _ = paired_packet(pairs)
+    per_item = pairs // items
+    manifest: dict[str, Any] = {
+        "schema": "shiftory.explanation/v1",
+        "summary": "Values change.",
+        "items": [
+            {
+                "id": f"slice-{index}",
+                "kind": "structural",
+                "title": f"Slice {index}",
+                "confidence": "extracted",
+                "citations": [],
+                "grounding": {
+                    "claims": [
+                        {
+                            "id": f"claim-{number}",
+                            "type": "addition",
+                            "support_level": "verified",
+                            "support": [f"sa{index * per_item + (number % per_item)}"],
+                            "literal": f"new_{index * per_item + (number % per_item)} = 1",
+                        }
+                        for number in range(claims)
+                    ]
+                },
+            }
+            for index in range(items)
+        ],
+        "coverage_owners": [
+            {"evidence_id": f"a{position}", "owner_id": f"slice-{position // per_item}"}
+            for position in range(pairs)
+        ]
+        + [
+            {"evidence_id": f"b{position}", "owner_id": f"slice-{position // per_item}"}
+            for position in range(pairs)
+        ],
+    }
+
+    inspected = 0
+    original = grounding._residual_lines
+
+    def counting(regions: Any, index: Any, other: str, literal: str) -> Any:
+        nonlocal inspected
+        files = {
+            index.spans[region.span_id].file_index
+            for region in regions
+            if region.span_id in index.spans
+        }
+        for file_index in files:
+            key = (file_index, other)
+            if literal in index.text_by_file_side.get(key, ""):
+                inspected += len(index.lines_by_file_side.get(key, ()))
+        return original(regions, index, other, literal)
+
+    monkeypatch.setattr(grounding, "_residual_lines", counting)
+    result = validate_explanation(packet, manifest, require_grounding=True)
+
+    assert result.grounding is not None
+    assert result.grounding.claim_total == items * claims
+    # Every added literal is absent from the before side, so no record is read.
+    assert inspected == 0
+
+
+def test_residual_checks_still_find_a_real_move() -> None:
+    packet, _ = paired_packet(50)
+    packet["files"][0]["hunks"][0]["lines"][0]["content"] = "    new_0 = 1"
+    manifest: dict[str, Any] = {
+        "schema": "shiftory.explanation/v1",
+        "summary": "Values change.",
+        "items": [
+            {
+                "id": "solo",
+                "kind": "structural",
+                "title": "Solo",
+                "confidence": "extracted",
+                "citations": [],
+                "grounding": {
+                    "claims": [
+                        {
+                            "id": "moved",
+                            "type": "addition",
+                            "support_level": "verified",
+                            "support": ["sa0"],
+                            "literal": "new_0 = 1",
+                        }
+                    ]
+                },
+            }
+        ],
+        "coverage_owners": [{"evidence_id": f"a{index}", "owner_id": "solo"} for index in range(50)]
+        + [{"evidence_id": f"b{index}", "owner_id": "solo"} for index in range(50)],
+    }
+    with pytest.raises(ValidationError) as error:
+        validate_explanation(packet, manifest, require_grounding=True)
+    assert [entry["code"] for entry in error.value.details["errors"]] == [
+        "grounding.absence_violated"
+    ]
+
+
+def test_many_distinct_coarse_supports_read_the_smaller_side(monkeypatch: Any) -> None:
+    """An item owning most of a comparison must not rescan itself per support."""
+    spans, supports = 640, 32
+    packet, line_ids = wide_packet(spans)
+    per_hunk = spans // supports
+    file = packet["files"][0]
+    file["hunks"] = [
+        {
+            "id": f"h{index}",
+            "span_ids": [
+                f"s{position}" for position in range(index * per_hunk, (index + 1) * per_hunk)
+            ],
+            "lines": [
+                {"id": f"l{position}", "side": "after", "content": f"    value_{position} = 1"}
+                for position in range(index * per_hunk, (index + 1) * per_hunk)
+            ],
+        }
+        for index in range(supports)
+    ]
+    file["units"][0]["hunk_ids"] = [f"h{index}" for index in range(supports)]
+
+    manifest: dict[str, Any] = {
+        "schema": "shiftory.explanation/v1",
+        "summary": "Values are added.",
+        "items": [
+            {
+                "id": "solo",
+                "kind": "structural",
+                "title": "Solo",
+                "confidence": "extracted",
+                "citations": [],
+                "grounding": {
+                    "claims": [
+                        {
+                            "id": f"claim-{index}",
+                            "type": "text_presence",
+                            "support_level": "verified",
+                            "support": [f"h{index}"],
+                            "side": "after",
+                            "literal": f"value_{index * per_hunk} = 1",
+                        }
+                        for index in range(supports)
+                    ]
+                },
+            }
+        ],
+        "coverage_owners": [{"evidence_id": line_id, "owner_id": "solo"} for line_id in line_ids],
+    }
+
+    reads = 0
+    original = grounding._is_bound
+
+    def counting(support: Any, scope: Any, index: Any) -> Any:
+        nonlocal reads
+        reads += (
+            min(len(scope.owned_lines), len(support.line_set))
+            if support.kind in {"hunk", "unit"}
+            else max(len(support.line_ids), 1)
+        )
+        return original(support, scope, index)
+
+    monkeypatch.setattr(grounding, "_is_bound", counting)
+    result = validate_explanation(packet, manifest, require_grounding=True)
+
+    assert result.grounding is not None
+    assert result.grounding.claim_total == supports
+    # Each hunk is read at most once, never the item's whole owned set.
+    assert reads <= spans
+
+
+def test_shared_support_binding_reuses_the_item_cache(monkeypatch: Any) -> None:
+    """A shared entry must not re-decide binding for every citing claim."""
+    packet, line_ids = wide_packet(20)
+    claims = 8
+    manifest: dict[str, Any] = {
+        "schema": "shiftory.explanation/v1",
+        "summary": "Values are added.",
+        "items": [
+            {
+                "id": "head",
+                "kind": "structural",
+                "title": "Head",
+                "confidence": "extracted",
+                "citations": [],
+                "grounding": {
+                    "claims": [
+                        {
+                            "id": f"claim-{number}",
+                            "type": "text_presence",
+                            "support_level": "verified",
+                            "support": ["s0"],
+                            "shared_support": [
+                                {
+                                    "evidence_id": "s19",
+                                    "owner_id": "tail",
+                                    "reason": "The tail value completes the same group.",
+                                }
+                            ],
+                            "side": "after",
+                            "literal": "value_19 = 1",
+                        }
+                        for number in range(claims)
+                    ]
+                },
+            },
+            {
+                "id": "tail",
+                "kind": "structural",
+                "title": "Tail",
+                "confidence": "extracted",
+                "citations": [],
+                "grounding": {
+                    "claims": [
+                        {
+                            "id": "own",
+                            "type": "addition",
+                            "support_level": "verified",
+                            "support": ["s19"],
+                            "literal": "value_19 = 1",
+                        }
+                    ]
+                },
+            },
+        ],
+        "coverage_owners": [
+            {"evidence_id": line_id, "owner_id": "tail" if line_id == "l19" else "head"}
+            for line_id in line_ids
+        ],
+    }
+
+    calls = 0
+    original = grounding._is_bound
+
+    def counting(support: Any, scope: Any, index: Any) -> Any:
+        nonlocal calls
+        calls += 1
+        return original(support, scope, index)
+
+    monkeypatch.setattr(grounding, "_is_bound", counting)
+    result = validate_explanation(packet, manifest, require_grounding=True)
+
+    assert result.grounding is not None
+    assert result.grounding.claim_total == claims + 1
+    # Two supports for `head` plus one for `tail`, decided once each.
+    assert calls == 3
+
+
+def test_a_unit_orders_its_lines_by_evidence_position() -> None:
+    """Declared hunk order must not decide a coarse support's reading order."""
+    packet, _ = wide_packet(2)
+    file = packet["files"][0]
+    file["hunks"] = [
+        {"id": "h0", "span_ids": ["s0"], "lines": [file["hunks"][0]["lines"][0]]},
+        {"id": "h1", "span_ids": ["s1"], "lines": [file["hunks"][0]["lines"][1]]},
+    ]
+    file["units"][0]["hunk_ids"] = ["h1", "h0"]
+    index = grounding.index_evidence(packet)
+    assert index.supports["u"].line_ids == ("l0", "l1")
+    assert [region.span_id for region in index.supports["u"].regions] == ["s0", "s1"]

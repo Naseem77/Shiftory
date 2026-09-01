@@ -306,7 +306,7 @@ def test_private_write_pins_swapped_run_directory(tmp_path, monkeypatch) -> None
 
     monkeypatch.setattr(cli._PrivateDirectory, "verify", swap_after_verify)
     try:
-        with pytest.raises(cli.ValidationError, match="path was replaced|symbolic link"):
+        with pytest.raises(cli.ValidationError, match=r"path was replaced|symbolic link"):
             cli._write_private(run / "report.md", "generated", directory=directory)
         assert sentinel.read_text(encoding="utf-8") == "outside sentinel"
         assert not (hidden / "report.md").exists()
@@ -343,7 +343,7 @@ def test_private_read_pins_swapped_run_directory(tmp_path, monkeypatch) -> None:
 
     monkeypatch.setattr(cli._PrivateDirectory, "verify", swap_after_verify)
     try:
-        with pytest.raises(cli.ValidationError, match="path was replaced|symbolic link"):
+        with pytest.raises(cli.ValidationError, match=r"path was replaced|symbolic link"):
             cli._read_private_bytes(
                 run / "ledger.json",
                 "Ledger",
@@ -390,7 +390,7 @@ def test_private_write_and_cleanup_pin_swapped_chunks_and_run_directories(
 
     monkeypatch.setattr(cli._PrivateDirectory, "verify", swap_chunks_after_verify)
     try:
-        with pytest.raises(cli.ValidationError, match="path was replaced|symbolic link"):
+        with pytest.raises(cli.ValidationError, match=r"path was replaced|symbolic link"):
             cli._write_private(
                 chunks_path / "chunk-0001.json",
                 "generated",
@@ -415,7 +415,7 @@ def test_private_write_and_cleanup_pin_swapped_chunks_and_run_directories(
 
     monkeypatch.setattr(cli._PrivateDirectory, "verify", swap_run_after_verify)
     try:
-        with pytest.raises(cli.ValidationError, match="path was replaced|symbolic link"):
+        with pytest.raises(cli.ValidationError, match=r"path was replaced|symbolic link"):
             cli._remove_private_run(run)
         assert sentinel.read_text(encoding="utf-8") == "outside sentinel"
         assert hidden_run.is_dir()

@@ -382,17 +382,25 @@ def _open_private_directory(
 ) -> _PrivateDirectory:
     _require_private_directory_fd_support()
     flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
-    if parent is None:
-        descriptor = os.open(path, flags)
-    else:
+    if parent is not None:
         if path.parent != parent.path:
             raise ValidationError(f"{label} is not an immediate child of {parent.path}")
         parent.verify()
-        descriptor = os.open(path.name, flags, dir_fd=parent.descriptor)
+    try:
+        descriptor = (
+            os.open(path, flags)
+            if parent is None
+            else os.open(path.name, flags, dir_fd=parent.descriptor)
+        )
+    except OSError as error:
+        raise ValidationError(f"{label} could not be opened safely: {path}") from error
     try:
         opened = os.fstat(descriptor)
         _validate_private_directory_metadata(opened, path, label)
-        current = path.lstat()
+        try:
+            current = path.lstat()
+        except OSError as error:
+            raise ValidationError(f"{label} could not be inspected safely: {path}") from error
         _validate_private_directory_metadata(current, path, label)
         if (opened.st_dev, opened.st_ino) != (current.st_dev, current.st_ino):
             raise ValidationError(f"{label} changed while it was being opened: {path}")
@@ -551,7 +559,11 @@ def _new_run(
         os.mkdir(name, mode=0o700, dir_fd=root.descriptor)
         run = root.path / name
         directory = _open_private_directory(run, "Run directory", parent=root)
-        root.verify()
+        try:
+            root.verify()
+        except Exception:
+            directory.close()
+            raise
         return directory
 
 
@@ -764,7 +776,11 @@ def _private_subdirectory(
     parent.verify()
     os.mkdir(name, mode=0o700, dir_fd=parent.descriptor)
     directory = _open_private_directory(path, label, parent=parent)
-    parent.verify()
+    try:
+        parent.verify()
+    except Exception:
+        directory.close()
+        raise
     return directory
 
 

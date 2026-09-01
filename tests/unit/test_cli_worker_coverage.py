@@ -432,6 +432,81 @@ def test_private_run_io_fails_closed_without_posix_directory_fds(monkeypatch) ->
         cli._require_private_directory_fd_support()
 
 
+@pytest.mark.skipif(os.name != "posix", reason="requires POSIX directory descriptor semantics")
+def test_unsafe_private_directory_paths_fail_as_validation_errors(tmp_path) -> None:
+    outside = tmp_path / "outside"
+    outside.mkdir(mode=0o700)
+    linked = tmp_path / "linked"
+    linked.symlink_to(outside, target_is_directory=True)
+    regular = tmp_path / "regular"
+    regular.write_text("not a directory", encoding="utf-8")
+    regular.chmod(0o600)
+
+    # A no-follow open of a symlinked or non-directory run path must fail closed as a
+    # validation error rather than leaking a raw OSError out as an internal error.
+    for candidate in (linked, regular, tmp_path / "missing"):
+        with pytest.raises(cli.ValidationError, match="could not be opened safely"):
+            cli._open_private_directory(candidate, "Run directory")
+
+    parent = cli._open_private_directory(tmp_path, "Run root")
+    try:
+        with pytest.raises(cli.ValidationError, match="could not be opened safely"):
+            cli._open_private_directory(linked, "Run directory", parent=parent)
+    finally:
+        parent.close()
+
+
+@pytest.mark.skipif(os.name != "posix", reason="requires POSIX directory descriptor semantics")
+def test_private_directory_creation_closes_descriptors_when_the_parent_is_swapped(
+    tmp_path, monkeypatch
+) -> None:
+    root = tmp_path / "root"
+    root.mkdir(mode=0o700)
+    monkeypatch.setenv("SHIFTORY_RUN_DIR", str(root))
+    real_verify = cli._PrivateDirectory.verify
+    real_open = cli._open_private_directory
+    opened: list[cli._PrivateDirectory] = []
+    child_labels = {"Run directory", "Chunk directory"}
+    created = {"child": False}
+
+    def recording_open(path, label, *, parent=None):
+        directory = real_open(path, label, parent=parent)
+        opened.append(directory)
+        if label in child_labels:
+            created["child"] = True
+        return directory
+
+    def swapped_verify(self):
+        real_verify(self)
+        # Fail only the parent re-verification that happens *after* the child opened.
+        if created["child"] and self.label in {"Run root", "Run directory"}:
+            raise cli.ValidationError(f"{self.label} path was replaced: {self.path}")
+
+    monkeypatch.setattr(cli, "_open_private_directory", recording_open)
+    monkeypatch.setattr(cli._PrivateDirectory, "verify", swapped_verify)
+
+    for _ in range(5):
+        created["child"] = False
+        with pytest.raises(cli.ValidationError, match=r"path was replaced"):
+            cli._new_run(None)
+
+    monkeypatch.setattr(cli._PrivateDirectory, "verify", real_verify)
+    run = cli._new_run(None)
+    try:
+        monkeypatch.setattr(cli._PrivateDirectory, "verify", swapped_verify)
+        for index in range(5):
+            created["child"] = False
+            with pytest.raises(cli.ValidationError, match=r"path was replaced"):
+                cli._private_subdirectory(run, f"chunks{index}", "Chunk directory")
+    finally:
+        monkeypatch.setattr(cli._PrivateDirectory, "verify", real_verify)
+        run.close()
+
+    # Every descriptor opened during the failed creations must already be closed.
+    leaked = [directory for directory in opened if directory.descriptor >= 0]
+    assert not leaked, f"{len(leaked)} directory descriptor(s) leaked on the failure path"
+
+
 def _worker_request(root: Path, operation: str = "probe") -> dict[str, Any]:
     return {
         "schema": worker.GRAPH_WORKER_REQUEST_SCHEMA,

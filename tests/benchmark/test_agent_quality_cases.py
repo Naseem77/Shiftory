@@ -267,3 +267,79 @@ def test_synthetic_candidates_are_valid_and_discriminate(case_id: str) -> None:
         assert (adversarial["required_behavior_coverage"]["ratio"] or 0.0) < 1.0
         assert baseline["semantic_omissions"]["missed_count"] == 0
         assert adversarial["semantic_omissions"]["missed_count"] > 0
+
+
+INVALIDATED_DIR = CASES_DIR.parent / "invalidated"
+INVALIDATED_CASE_IDS = (
+    sorted(path.name for path in INVALIDATED_DIR.iterdir() if path.is_dir())
+    if INVALIDATED_DIR.is_dir()
+    else []
+)
+
+
+@pytest.mark.parametrize("case_id", INVALIDATED_CASE_IDS)
+def test_withdrawn_captures_are_hash_verified_and_never_officially_enumerated(
+    case_id: str,
+) -> None:
+    """A withdrawn (answer-key-leak) capture must carry a schema-valid
+    invalidated-capture-v1 record whose every referenced digest matches the
+    actual archived bytes (proving the archive is an honest, unmodified copy
+    of what was withdrawn -- see validation.py's validate_invalidated_capture),
+    and the archive directory this lives under must never be reachable by
+    runner.py's official case/candidate enumeration, so it can never be
+    accidentally scored or published as a real result."""
+    case_root = INVALIDATED_DIR / case_id
+    configs = sorted(
+        path.name
+        for path in case_root.iterdir()
+        if path.is_dir() and (path / "invalidation.json").is_file()
+    )
+    assert configs == ["config-a", "config-b"], (
+        f"invalidated/{case_id} must contain exactly config-a and config-b, found {configs}"
+    )
+    for config in configs:
+        record = v.validate_invalidated_capture(case_root, config)
+        assert record["status"] == "invalidated-answer-leak-v1"
+        replacement = record["replacement_capture"]
+        # The replacement must be a currently-official case/config, never
+        # pointing back at another withdrawn archive.
+        assert replacement["case_id"] in CASE_IDS, (
+            f"invalidated/{case_id}/{config}'s replacement_capture.case_id "
+            f"{replacement['case_id']!r} is not an official case"
+        )
+        replacement_path = CASES_DIR.parent.parent.parent / replacement["path"]
+        assert replacement_path.is_dir(), (
+            f"invalidated/{case_id}/{config}'s replacement_capture.path does not exist on disk"
+        )
+        # The withdrawn raw response must not be byte-identical to the
+        # official replacement's explanation -- if it were, withdrawal would
+        # have accomplished nothing (this also incidentally proves the
+        # replacement was actually regenerated, not just copied back).
+        official_path = (
+            CASES_DIR
+            / replacement["case_id"]
+            / "captured"
+            / replacement["config_id"]
+            / "explanation.json"
+        )
+        if official_path.is_file():
+            assert v.sha256_file(official_path) != record["archived_raw_response_sha256"], (
+                f"invalidated/{case_id}/{config}: official replacement is byte-identical "
+                "to the withdrawn capture"
+            )
+
+        # The original, leaked case id must never also be a live, officially
+        # scored case -- proving withdrawal actually removed it from
+        # circulation rather than merely renaming a still-reachable duplicate.
+        original_case_id = record["original_case_id"]
+        assert original_case_id not in CASE_IDS, (
+            f"the withdrawn, leaked case id {original_case_id!r} must never also be a live, "
+            "officially-scored case"
+        )
+
+    # The archive must never live where runner.py's official enumeration
+    # would find it: case_ids() only scans CASES_DIR (benchmarks/agent_quality/cases),
+    # and captured_candidates() only scans <case_dir>/captured/ beneath it.
+    assert INVALIDATED_DIR.parent == CASES_DIR.parent
+    assert INVALIDATED_DIR != CASES_DIR
+    assert not str(INVALIDATED_DIR).startswith(str(CASES_DIR) + "/")

@@ -153,156 +153,50 @@
       }
     },
     {
-      "accounting": {
-        "citation_count": 3,
-        "hunk_coverage_ratio": 1.0,
-        "hunk_covered": 0,
-        "hunk_total": 0,
-        "line_coverage_ratio": 1.0,
-        "line_owned": 0,
-        "line_total": 0,
-        "span_coverage_ratio": 1.0,
-        "span_owned": 0,
-        "span_total": 0,
-        "unit_coverage_ratio": 1.0,
-        "unit_covered": 1,
-        "unit_total": 1
-      },
-      "audit_status": {
-        "actor_type": "agent",
-        "adjudicator": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
-        "disagreement_count": 1,
-        "disagreement_rate": 0.3333333333333333,
-        "mode": "dual_audit"
-      },
+      "accounting": null,
+      "audit_status": null,
       "candidate_id": "captured_config_a",
       "candidate_kind": "captured_real_run",
       "case_id": "binary-asset-replacement",
-      "claim_factuality": {
-        "assessable_count": 3,
-        "assessable_weight": 15,
-        "ratio": 1.0,
-        "supported_count": 3,
-        "supported_weight": 15
-      },
-      "contradicted_claims": {
-        "claim_ids": [],
-        "count": 0,
-        "weight": 0
-      },
-      "explanation_sha256": "0b36dfefc2a5a920c5b420aa5cc0546e7fbecd04821f8940591da0ac7f66a7e5",
+      "claim_factuality": null,
+      "contradicted_claims": null,
+      "explanation_sha256": null,
       "gate": null,
-      "required_behavior_coverage": {
-        "ratio": 0.6666666666666666,
-        "satisfied_count": 2,
-        "satisfied_ids": [
-          "binary-content-replaced",
-          "content-meaning-not-available"
-        ],
-        "total_count": 3
-      },
+      "required_behavior_coverage": null,
       "rubric_match_heuristic": null,
       "schema": "shiftory.benchmark-agent-quality-score/v1",
-      "semantic_omissions": {
-        "missed_count": 1,
-        "missed_ids": [
-          "mode-unchanged"
-        ],
-        "missed_weight": 2
+      "semantic_omissions": null,
+      "structural_failure": {
+        "protocol_violation": "raw response cites evidence ids that do not exist in the real evidence for this diff",
+        "raw_response_sha256": "a8226e6d6b4a2edab0350208cb16a9d4d1e8d2381ff76697ebc848c6904433b1",
+        "reason": "The raw response is valid shiftory.explanation/v1-shaped JSON (passes the shallow schema check agent_harness.capture_result performs), but fails the real shiftory.explain.validator.validate_explanation structural check: it cites `fact_32314a96f2b283ccc2da5503` and `fact_711411314f61102f006d3668`, which do not exist anywhere in this case's real, deterministically-generated evidence (graphora is disabled/unavailable in this environment, so evidence.graph.facts is always empty) -- the model fabricated citation ids that look plausible but were never actually produced by shiftory analyze for this diff. This is a genuine accounting-level structural failure discovered by running the real validator, not a repair-worthy formatting issue; per protocol, the raw response and agent-run provenance are preserved exactly as first received, and no semantic score is synthesized for this candidate. Notably, this case's config-a and config-b captures (different model families, gpt-5.3-codex and gemini-3.7-flash) independently cite the exact same two fabricated ids -- confirmed by direct inspection of both raw responses, not a processing artifact; no shared prompt content or documentation in this repository contains these literal strings, so this is most likely both models pattern-matching a plausible-looking `fact_`-prefixed hex id from the real, correctly-cited `unit_` id and blob hashes they did see, rather than copying from a common leaked source. This is disclosed as an observed, unexplained coincidence, not claimed as understood."
       },
-      "structural_failure": null,
-      "uncertainty_honesty": {
-        "checked": 3,
-        "violation_ids": [],
-        "violations": 0
-      },
-      "unsupported_claims": {
-        "claim_ids": [],
-        "count": 0,
-        "weight": 0
-      },
-      "usefulness_relevance": {
-        "ambiguous_unresolvable_claims": 0,
-        "item_count": 3,
-        "non_semantic_claims": 0,
-        "useful_count": 3
-      }
+      "uncertainty_honesty": null,
+      "unsupported_claims": null,
+      "usefulness_relevance": null
     },
     {
-      "accounting": {
-        "citation_count": 0,
-        "hunk_coverage_ratio": 1.0,
-        "hunk_covered": 0,
-        "hunk_total": 0,
-        "line_coverage_ratio": 1.0,
-        "line_owned": 0,
-        "line_total": 0,
-        "span_coverage_ratio": 1.0,
-        "span_owned": 0,
-        "span_total": 0,
-        "unit_coverage_ratio": 1.0,
-        "unit_covered": 1,
-        "unit_total": 1
-      },
-      "audit_status": {
-        "actor_type": "agent",
-        "adjudicator": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
-        "disagreement_count": 0,
-        "disagreement_rate": 0.0,
-        "mode": "dual_audit"
-      },
+      "accounting": null,
+      "audit_status": null,
       "candidate_id": "captured_config_b",
       "candidate_kind": "captured_real_run",
       "case_id": "binary-asset-replacement",
-      "claim_factuality": {
-        "assessable_count": 4,
-        "assessable_weight": 17,
-        "ratio": 1.0,
-        "supported_count": 4,
-        "supported_weight": 17
-      },
-      "contradicted_claims": {
-        "claim_ids": [],
-        "count": 0,
-        "weight": 0
-      },
-      "explanation_sha256": "fc66c224c0b353d991c10912d05e3a13d4f889f84ccf562bbfaaf975883383d0",
+      "claim_factuality": null,
+      "contradicted_claims": null,
+      "explanation_sha256": null,
       "gate": null,
-      "required_behavior_coverage": {
-        "ratio": 0.3333333333333333,
-        "satisfied_count": 1,
-        "satisfied_ids": [
-          "binary-content-replaced"
-        ],
-        "total_count": 3
-      },
+      "required_behavior_coverage": null,
       "rubric_match_heuristic": null,
       "schema": "shiftory.benchmark-agent-quality-score/v1",
-      "semantic_omissions": {
-        "missed_count": 2,
-        "missed_ids": [
-          "content-meaning-not-available",
-          "mode-unchanged"
-        ],
-        "missed_weight": 7
+      "semantic_omissions": null,
+      "structural_failure": {
+        "protocol_violation": "raw response cites evidence ids that do not exist in the real evidence for this diff",
+        "raw_response_sha256": "a64207c66a938f433c41ae0cfce5bbfdca53240ef95c462e4fb21c43eff9efe0",
+        "reason": "The raw response is valid shiftory.explanation/v1-shaped JSON (passes the shallow schema check agent_harness.capture_result performs), but fails the real shiftory.explain.validator.validate_explanation structural check: it cites `fact_32314a96f2b283ccc2da5503` and `fact_711411314f61102f006d3668`, which do not exist anywhere in this case's real, deterministically-generated evidence (graphora is disabled/unavailable in this environment, so evidence.graph.facts is always empty) -- the model fabricated citation ids that look plausible but were never actually produced by shiftory analyze for this diff. This is a genuine accounting-level structural failure discovered by running the real validator, not a repair-worthy formatting issue; per protocol, the raw response and agent-run provenance are preserved exactly as first received, and no semantic score is synthesized for this candidate. Notably, this case's config-a and config-b captures (different model families, gpt-5.3-codex and gemini-3.7-flash) independently cite the exact same two fabricated ids -- confirmed by direct inspection of both raw responses, not a processing artifact; no shared prompt content or documentation in this repository contains these literal strings, so this is most likely both models pattern-matching a plausible-looking `fact_`-prefixed hex id from the real, correctly-cited `unit_` id and blob hashes they did see, rather than copying from a common leaked source. This is disclosed as an observed, unexplained coincidence, not claimed as understood."
       },
-      "structural_failure": null,
-      "uncertainty_honesty": {
-        "checked": 4,
-        "violation_ids": [],
-        "violations": 0
-      },
-      "unsupported_claims": {
-        "claim_ids": [],
-        "count": 0,
-        "weight": 0
-      },
-      "usefulness_relevance": {
-        "ambiguous_unresolvable_claims": 0,
-        "item_count": 1,
-        "non_semantic_claims": 0,
-        "useful_count": 4
-      }
+      "uncertainty_honesty": null,
+      "unsupported_claims": null,
+      "usefulness_relevance": null
     }
   ],
   "case_id": "binary-asset-replacement",

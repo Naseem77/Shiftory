@@ -1,0 +1,287 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-candidate-evaluation/v1",
+  "case_id": "error-swallow-to-raise",
+  "candidate_id": "captured_config_a",
+  "candidate_kind": "captured_real_run",
+  "rubric_version": 1,
+  "explanation_sha256": "bf1555a74bdd3c7063fbf8b64cf4dff0c363018f1868b449c17e2eaa882467c7",
+  "claims": [
+    {
+      "claim_id": "ca-1",
+      "field": "/summary",
+      "start": 0,
+      "end": 47,
+      "source_item_id": "item_propagate_config_errors",
+      "excerpt_sha256": "e0f2e79fb05b9b187fefea3e174d52fe901b3022aaf33838bed24d84b59bf202",
+      "verdict": "supported_correct",
+      "rationale": "Matches the rubric's core fact that the except block no longer catches/suppresses the parsing error. Both independent passes agreed.",
+      "confidence_expressed": "inferred",
+      "confidence_appropriate": true,
+      "maps_to_required_fact_id": "malformed-config-now-raises",
+      "materiality": 5,
+      "evidence_anchor_cited": [],
+      "overlaps_with": [],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T10:30:00Z"
+      }
+    },
+    {
+      "claim_id": "ca-2",
+      "field": "/summary",
+      "start": 49,
+      "end": 120,
+      "source_item_id": "item_propagate_config_errors",
+      "excerpt_sha256": "cd4bac94a4b2c1cb44b75abf8562d40b99e9e43e1fa4ab358eebd16dd5e44e82",
+      "verdict": "supported_correct",
+      "rationale": "Directly restates the rubric fact that a ValueError now propagates instead of being replaced with an empty dict. Both passes agreed.",
+      "confidence_expressed": "inferred",
+      "confidence_appropriate": true,
+      "maps_to_required_fact_id": "malformed-config-now-raises",
+      "materiality": 5,
+      "evidence_anchor_cited": [],
+      "overlaps_with": [],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T10:30:00Z"
+      }
+    },
+    {
+      "claim_id": "ca-3",
+      "field": "/items/0/before",
+      "start": 0,
+      "end": 81,
+      "source_item_id": "item_propagate_config_errors",
+      "excerpt_sha256": "d1078f503f996a34a1c86ed01b7fdf9f6c8358163e673229c2eac8c950d32ad1",
+      "verdict": "supported_correct",
+      "rationale": "Accurately describes the prior behavior the rubric contrasts against. Both passes agreed.",
+      "confidence_expressed": "inferred",
+      "confidence_appropriate": true,
+      "maps_to_required_fact_id": "malformed-config-now-raises",
+      "materiality": 3,
+      "evidence_anchor_cited": [],
+      "overlaps_with": [],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T10:30:00Z"
+      }
+    },
+    {
+      "claim_id": "ca-4",
+      "field": "/items/0/before",
+      "start": 83,
+      "end": 105,
+      "source_item_id": "item_propagate_config_errors",
+      "excerpt_sha256": "22becf2c9d98a60e152bf8eae69e7992d2b65b65aa94063208fe00e2c998c927",
+      "verdict": "supported_correct",
+      "rationale": "A direct restatement of the old return value being an empty dict; consistent with the rubric's description of prior behavior. Both passes agreed.",
+      "confidence_expressed": "inferred",
+      "confidence_appropriate": true,
+      "maps_to_required_fact_id": "malformed-config-now-raises",
+      "materiality": 2,
+      "evidence_anchor_cited": [],
+      "overlaps_with": [],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T10:30:00Z"
+      }
+    },
+    {
+      "claim_id": "ca-5",
+      "field": "/items/0/before",
+      "start": 106,
+      "end": 129,
+      "source_item_id": "item_propagate_config_errors",
+      "excerpt_sha256": "0d6c2b442bd5c39b9a7f778a273b6cae9542ec3debb805f62d3bf7f35a00b476",
+      "verdict": "unsupported",
+      "rationale": "Both independent passes flagged this identically: the claim asserts a definite downstream consequence (normal continued execution) for unspecified caller code that is not shown anywhere in the diff. The rubric explicitly treats caller-side impact as unresolved/unknowable from this change (callers-impact-unclear), so stating it as settled fact overreaches the evidence -- this is the one place this explanation states more than the diff actually establishes.",
+      "confidence_expressed": "inferred",
+      "confidence_appropriate": false,
+      "maps_to_required_fact_id": null,
+      "materiality": 3,
+      "evidence_anchor_cited": [],
+      "overlaps_with": [],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T10:30:00Z"
+      }
+    },
+    {
+      "claim_id": "ca-6",
+      "field": "/items/0/after",
+      "start": 0,
+      "end": 91,
+      "source_item_id": "item_propagate_config_errors",
+      "excerpt_sha256": "5e0607575df433a582fc4279e57efeadf5991f74b86205ec572937c66b75a537",
+      "verdict": "supported_correct",
+      "rationale": "Matches the rubric's core required fact that the ValueError now propagates to the caller instead of being swallowed. Both passes agreed.",
+      "confidence_expressed": "inferred",
+      "confidence_appropriate": true,
+      "maps_to_required_fact_id": "malformed-config-now-raises",
+      "materiality": 5,
+      "evidence_anchor_cited": [],
+      "overlaps_with": [],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T10:30:00Z"
+      }
+    },
+    {
+      "claim_id": "ca-7",
+      "field": "/items/0/after",
+      "start": 93,
+      "end": 149,
+      "source_item_id": "item_propagate_config_errors",
+      "excerpt_sha256": "b6f39d8aef22a4b0d1309651ddafd9346b4b8a62e3b4317dd3689791f41fe201",
+      "verdict": "supported_correct",
+      "rationale": "A direct corollary of the propagation change; does not overreach into claiming what the caller does with the failure (unlike ca-5). Both passes agreed.",
+      "confidence_expressed": "inferred",
+      "confidence_appropriate": true,
+      "maps_to_required_fact_id": "malformed-config-now-raises",
+      "materiality": 4,
+      "evidence_anchor_cited": [],
+      "overlaps_with": [],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T10:30:00Z"
+      }
+    }
+  ],
+  "audit_coverage": [
+    {
+      "field": "/summary",
+      "claim_ids": [
+        "ca-1",
+        "ca-2"
+      ],
+      "decomposition_complete": true
+    },
+    {
+      "field": "/items/0/before",
+      "claim_ids": [
+        "ca-3",
+        "ca-4",
+        "ca-5"
+      ],
+      "decomposition_complete": true
+    },
+    {
+      "field": "/items/0/after",
+      "claim_ids": [
+        "ca-6",
+        "ca-7"
+      ],
+      "decomposition_complete": true
+    },
+    {
+      "field": "/items/0/title",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Title restates the same propagation fact already decomposed and graded via /summary and /items/0/before,after; it introduces no new factual content to separately audit."
+    }
+  ],
+  "annotation_passes": [
+    {
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "Independent annotator pass",
+          "organization": null,
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli task sub-agent",
+          "version": "1.0.80"
+        },
+        "method": "Fresh sub-agent given only the rubric and the exact captured candidate text; no access to any other pass's output.",
+        "timestamp": "2026-09-02T10:30:00Z"
+      },
+      "notes": "See adjudication rationale for reconciliation."
+    },
+    {
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "Independent annotator pass",
+          "organization": null,
+          "model": "gpt-5.3-codex",
+          "tool": "copilot-cli task sub-agent",
+          "version": "1.0.80"
+        },
+        "method": "Fresh sub-agent given only the rubric and the exact captured candidate text; no access to any other pass's output.",
+        "timestamp": "2026-09-02T10:30:00Z"
+      },
+      "notes": "See adjudication rationale for reconciliation."
+    }
+  ],
+  "adjudication": {
+    "annotation_provenance": {
+      "actor_type": "agent",
+      "actor": {
+        "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+        "organization": "GitHub",
+        "model": "claude-sonnet-5",
+        "tool": "copilot-cli",
+        "version": "1.0.80"
+      },
+      "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+      "timestamp": "2026-09-02T10:30:00Z"
+    },
+    "overridden_claim_ids": [],
+    "rationale": "0 of 7 adjudicated claims involved a substantive disagreement (disagreement_rate 0/7 = 0.0): both independent passes reached identical verdicts, confidence_appropriate judgments, and required-fact mappings for every claim, differing only in decomposition granularity (pass 2 split the /items/0/after field into finer pieces than pass 1), which this adjudication reconciles into one stable claim set. Both passes independently identified the same single overreach (ca-5, 'and execution continued') and the same two missed required facts (callers-impact-unclear, success-path-unchanged). Coverage is 1/3: only malformed-config-now-raises is satisfied; the explanation never engages with the unresolvable caller-impact question (it asserts a definite consequence instead of hedging, which is exactly the overreach both passes flagged) and never mentions the unchanged success path at all."
+  }
+}

@@ -214,6 +214,56 @@ def test_every_case_has_exactly_the_two_predeclared_real_captures(case_id: str) 
                 )
 
 
+FREEZE_COMMIT = "5c7289bd8e540317ce45d4407044c5c846698ecb"
+
+
+def test_all_official_captures_bind_to_the_frozen_commit_with_unique_handles() -> None:
+    """Every one of the 12 official captures -- not just the six generated
+    immediately after the freeze, but also the six unaffected-case captures
+    that were later archived and freshly recaptured once their prior
+    protocol commit (7b9d99b) was found to lack a committed
+    protocol_registry.json -- must reference the SAME protocol-freeze
+    commit, pass BOTH the content-equality and chronological-precommitment
+    checks against it, and carry a non-null, globally-unique
+    orchestrator_agent_handle. A handle collision across different
+    captures, or any capture silently bound to a different or unverified
+    commit, would defeat the entire point of a single, shared, precommitted
+    protocol."""
+    handles: dict[str, str] = {}
+    for case_id in CASE_IDS:
+        for config in PREDECLARED_CONFIGS:
+            agent_run_path = CASES_DIR / case_id / "captured" / config / "agent-run.json"
+            agent_run = v.load_json_strict(agent_run_path)
+            protocol = agent_run["benchmark_protocol_commit"]
+            assert protocol["commit"] == FREEZE_COMMIT, (
+                f"{case_id}/{config}: expected benchmark_protocol_commit.commit "
+                f"{FREEZE_COMMIT!r}, found {protocol['commit']!r}"
+            )
+            assert ah.verify_protocol_precommitment(agent_run), (
+                f"{case_id}/{config}: the freeze commit's committer date must strictly "
+                "precede this capture's own capture_ingested_at_utc"
+            )
+            handle = agent_run["invocation"]["orchestrator_agent_handle"]
+            assert handle["externally_verifiable"] is False, (
+                f"{case_id}/{config}: orchestrator_agent_handle must never claim to be "
+                "externally verifiable -- it is a caller-supplied label, not provider/"
+                "platform attestation"
+            )
+            assert handle["value"], (
+                f"{case_id}/{config}: every official capture must carry a non-null "
+                "orchestrator_agent_handle.value (null is only for archived/legacy records)"
+            )
+            key = f"{case_id}/{config}"
+            assert handle["value"] not in handles.values(), (
+                f"{key}'s orchestrator_agent_handle {handle['value']!r} collides with "
+                f"{[k for k, v_ in handles.items() if v_ == handle['value']]} -- handles "
+                "must be unique across all official captures so this benchmark's own "
+                "bookkeeping can distinguish invocations"
+            )
+            handles[key] = handle["value"]
+    assert len(handles) == 12, f"expected 12 official captures, found {len(handles)}"
+
+
 def _captured_candidate_dirs(case_id: str) -> list[Path]:
     case_dir = CASES_DIR / case_id
     captured_root = case_dir / "captured"

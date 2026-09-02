@@ -507,8 +507,8 @@ commit that `benchmark_protocol_commit` resolved to did not **precede**
 that capture's own generation. Specifically (all times UTC):
 
 - `reordering-guard-clause`'s two captures were ingested before this
-  repository's very first commit even existed, let alone before its
-  predeclared capture configurations (`af94f95`) or its harness
+  benchmark's very first commit (`0aaeb5c`) even existed, let alone before
+  its predeclared capture configurations (`af94f95`) or its harness
   (`7b9d99b`) were committed.
 - `context-limited-helper-call`'s two captures were ingested after that
   case's answer-leak fix (`4c8994a`) was made on disk, but before that fix

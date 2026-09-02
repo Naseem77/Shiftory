@@ -481,3 +481,31 @@ def test_exactly_eight_archived_captures_with_distinct_reasons() -> None:
         "invalidated-answer-leak-v1": 2,
         "invalidated-protocol-not-precommitted-v1": 6,
     }, by_status
+
+
+PROTOCOL_REGISTRY_PATH = CASES_DIR.parent / "protocol_registry.json"
+
+
+def test_protocol_registry_matches_committed_case_revisions() -> None:
+    """The committed protocol-freeze registry must validate against its
+    schema and its `case_revisions` map must exactly match the actual,
+    currently-committed `case.json` `version` for every case it references
+    -- this is the check that makes `protocol_registry.json` a real,
+    machine-verifiable freeze rather than a document nobody actually reads.
+    A hand-edited registry that drifts from committed case content, or a
+    case-version bump that forgets to update the registry, must fail here,
+    not go unnoticed."""
+    registry = v.load_json_strict(PROTOCOL_REGISTRY_PATH)
+    v.validate_protocol_registry(registry, CASES_DIR)
+
+
+def test_protocol_registry_rejects_a_mismatched_case_revision() -> None:
+    """A registry claiming the wrong case.json version for a real case must
+    be rejected, not silently accepted -- proving the check above is a real
+    cross-check, not a no-op that happens to pass on today's content."""
+    registry = v.load_json_strict(PROTOCOL_REGISTRY_PATH)
+    tampered = json.loads(json.dumps(registry))
+    case_id = next(iter(tampered["case_revisions"]))
+    tampered["case_revisions"][case_id] = tampered["case_revisions"][case_id] + 999
+    with pytest.raises(v.AgentQualityError):
+        v.validate_protocol_registry(tampered, CASES_DIR)

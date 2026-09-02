@@ -71,5 +71,15 @@
         "path": {"type": "string", "minLength": 1}
       }
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "invalidated-protocol-not-precommitted-v1"}}},
+      "then": {"required": ["reason_code"]}
+    },
+    {
+      "if": {"properties": {"status": {"const": "invalidated-answer-leak-v1"}}},
+      "then": {"not": {"required": ["reason_code"]}}
+    }
+  ]
 }

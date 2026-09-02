@@ -16,6 +16,8 @@ SCHEMA_NAMES = [
     "claim-record-v1",
     "candidate-evaluation-v1",
     "agent-run-v1",
+    "agent-run-v2",
+    "invalidated-capture-v1",
     "score-v1",
     "scores-v1",
 ]

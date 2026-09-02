@@ -50,9 +50,20 @@ workflow.
   capture has general filesystem/shell/network access -- which every capture
   in this repository so far does, since it runs as a Copilot CLI sub-agent in
   the same environment as the orchestrating session -- nothing here prevents
-  it from reading the rubric directly. Every `agent-run-v1` record has a
+  it from reading the rubric directly. Every `agent-run-v2` record has a
   `generator_access_profile` and `isolation_method: "protocol"` stating this
   plainly, so readers can judge how much to trust a given capture's blindness.
+- **Generation timing is honestly bounded, not fabricated.** `agent-run-v2`'s
+  `invocation` is a tagged union: for a `copilot_task` invocation (every
+  capture in this repository today), this harness never controlled or
+  streamed the generating sub-agent, so real generation start/end time is
+  `null` with an explicit reason unless genuinely obtained -- never
+  substituted with `capture_ingested_at_utc` (when this harness read the
+  already-completed `RAW_RESPONSE`), which is separately and honestly
+  labeled. This replaces `agent-run-v1`'s `started_at_utc`/`finished_at_utc`,
+  which were, for every capture here, only ever microseconds apart -- proof
+  they were bookkeeping time, not generation time. See
+  ["Provenance" in the methodology doc](../../docs/agent-quality-benchmark-methodology.md#provenance-engine-identity-and-protocol-commit).
 - **`captured/*` candidates are real, unedited agent output.** A raw response
   is preserved as `raw-response.txt`/`.bin` and only promoted to
   `explanation.json` when it is, byte-for-byte, exactly one valid JSON

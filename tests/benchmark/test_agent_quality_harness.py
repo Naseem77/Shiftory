@@ -218,7 +218,29 @@ def _base_capture_kwargs(prompt_dir: Path, out_dir: Path) -> dict:
         prompt_package_manifest=[],
         prompt_package_digest="a" * 64,
         evidence_sha256="b" * 64,
-        shiftory_commit="c" * 40,
+        engine_identity={
+            "component": "shiftory",
+            "verification_method": "unknown",
+            "value": "unknown",
+        },
+        benchmark_protocol_commit={
+            "commit": None,
+            "verification_method": "unverified",
+            "verified": False,
+            "note": "test fixture, no real protocol commit to verify against",
+        },
+        copilot_task_info={
+            "agent_type": "general-purpose",
+            "configured_model": "test-model",
+            "tool": "copilot-cli",
+            "tool_version": "1.0.0",
+            "task_id": None,
+            "generation_started_at_utc": None,
+            "generation_finished_at_utc": None,
+            "generation_timing_unavailable_reason": (
+                "test fixture: no real sub-agent invocation to time"
+            ),
+        },
     )
 
 
@@ -239,7 +261,7 @@ def test_capture_result_writes_explanation_for_valid_raw_response(tmp_path: Path
         out_dir / "raw-response.txt"
     )
     agent_run = json.loads((out_dir / "agent-run.json").read_text())
-    v.validate_against_schema(agent_run, "agent-run-v1")
+    v.validate_against_schema(agent_run, "agent-run-v2")
     assert agent_run["isolation_method"] == "protocol"
     assert agent_run["raw_response_sha256"] == v.sha256_bytes(raw_bytes)
 
@@ -393,3 +415,126 @@ def test_run_capped_subprocess_reports_exit_status(tmp_path: Path) -> None:
     assert result["stdout"].strip() == b"hi"
     assert result["timed_out"] is False
     assert result["truncated"] is False
+
+
+# -- agent-run-v2 tagged invocation invariants -------------------------------
+
+
+def test_capture_result_requires_copilot_task_info_without_command_argv(
+    tmp_path: Path,
+) -> None:
+    """A capture_result call with no command_argv and no copilot_task_info
+    would otherwise silently produce a record with an undefined invocation
+    shape; this must fail loudly instead."""
+    prompt_dir = tmp_path / "prompt"
+    prompt_dir.mkdir()
+    out_dir = tmp_path / "out"
+    (prompt_dir / "RAW_RESPONSE").write_bytes(json.dumps(_explanation_document()).encode())
+
+    kwargs = _base_capture_kwargs(prompt_dir, out_dir)
+    kwargs["copilot_task_info"] = None
+    with pytest.raises(v.AgentQualityError, match="copilot_task_info"):
+        ah.capture_result(**kwargs)
+
+
+def test_capture_result_copilot_task_never_fabricates_generation_timing(
+    tmp_path: Path,
+) -> None:
+    """When the caller cannot honestly report the generating sub-agent's real
+    start/end time, capture_result must record null timing with a reason --
+    never the time this bookkeeping function itself happened to run, which
+    would misrepresent when generation actually occurred (the exact defect
+    v1's started_at_utc/finished_at_utc had for every copilot_task capture
+    in this repository: they were always mere microseconds apart)."""
+    prompt_dir = tmp_path / "prompt"
+    prompt_dir.mkdir()
+    out_dir = tmp_path / "out"
+    (prompt_dir / "RAW_RESPONSE").write_bytes(json.dumps(_explanation_document()).encode())
+
+    result = ah.capture_result(**_base_capture_kwargs(prompt_dir, out_dir))
+
+    invocation = result["agent_run"]["invocation"]
+    assert invocation["kind"] == "copilot_task"
+    assert invocation["generation_started_at_utc"] is None
+    assert invocation["generation_finished_at_utc"] is None
+    assert invocation["generation_timing_unavailable_reason"]
+    # capture_ingested_at_utc is always present and distinct in meaning from
+    # (unset) generation timing -- it must never be silently substituted in.
+    assert result["agent_run"]["capture_ingested_at_utc"]
+
+
+def test_capture_result_local_process_records_real_observed_timing(tmp_path: Path) -> None:
+    """A local_process invocation is one capture_result itself starts and
+    waits on, so real generation timing must be recorded, non-null, and
+    command_argv must be the actual non-empty argv used -- never an empty
+    list masquerading as 'a local process ran with no arguments'."""
+    prompt_dir = tmp_path / "prompt"
+    prompt_dir.mkdir()
+    out_dir = tmp_path / "out"
+    document = _explanation_document()
+    argv = [
+        sys.executable,
+        "-c",
+        f"open('RAW_RESPONSE', 'w').write({json.dumps(json.dumps(document))})",
+    ]
+
+    kwargs = _base_capture_kwargs(prompt_dir, out_dir)
+    kwargs.pop("copilot_task_info")
+    kwargs["command_argv"] = argv
+    kwargs["env"] = ah.build_allowlisted_env()
+    result = ah.capture_result(**kwargs)
+
+    invocation = result["agent_run"]["invocation"]
+    assert invocation["kind"] == "local_process"
+    assert invocation["command_argv"] == argv
+    assert invocation["command_argv"] != []
+    assert invocation["generation_started_at_utc"] is not None
+    assert invocation["generation_finished_at_utc"] is not None
+    assert invocation["exit_status"] == 0
+    assert result["agent_run"]["capture_ingested_at_utc"] is not None
+
+
+def test_agent_run_v2_schema_rejects_copilot_task_with_missing_timing_reason() -> None:
+    """The schema itself, not just capture_result's Python logic, must
+    require generation_timing_unavailable_reason whenever
+    generation_started_at_utc is null for a copilot_task invocation."""
+    base = _base_capture_kwargs(Path("/x"), Path("/y"))
+    agent_run = {
+        "schema": "shiftory.benchmark-agent-quality-agent-run/v2",
+        "case_id": CASE_ID,
+        "candidate_id": "captured-a",
+        "provider": "test-provider",
+        "model": {"name": "test-model", "version": "1.0"},
+        "agent_tool_version": "1.0.0",
+        "evaluation_protocol": "manual test invocation",
+        "invocation": {
+            "kind": "copilot_task",
+            "agent_type": "general-purpose",
+            "configured_model": "test-model",
+            "tool": "copilot-cli",
+            "tool_version": "1.0.0",
+            "task_id": None,
+            "generation_started_at_utc": None,
+            "generation_finished_at_utc": None,
+            # generation_timing_unavailable_reason deliberately omitted
+        },
+        "capture_ingested_at_utc": "2024-01-01T00:00:00Z",
+        "prompt_package_manifest": [],
+        "prompt_package_digest": "a" * 64,
+        "evidence_sha256": "b" * 64,
+        "engine_identity": base["engine_identity"],
+        "benchmark_protocol_commit": base["benchmark_protocol_commit"],
+        "generator_access_profile": {
+            "repository_access": True,
+            "filesystem_scope": "x",
+            "network_access": False,
+            "tool_access": [],
+        },
+        "isolation_method": "protocol",
+        "raw_response_sha256": "d" * 64,
+        "raw_response_bytes": 0,
+        "truncated": False,
+        "migrated_from_v1_sha256": None,
+    }
+    with pytest.raises(v.AgentQualityError, match="does not match its schema"):
+        v.validate_against_schema(agent_run, "agent-run-v2")

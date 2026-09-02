@@ -7,10 +7,13 @@ This benchmark measures the semantic quality of **real, agent-authored**
 is a distinct layer from the deterministic accounting benchmark described in
 [`benchmark-methodology.md`](benchmark-methodology.md): that benchmark proves
 accounting (ownership, coverage, citation resolution, byte stability); this
-one measures whether prose correctly, completely, and honestly explains
-behavior, and it does so only for six small cases with real or hand-built
-candidates, not as a general claim about Shiftory or any agent's overall
-capability.
+one **aggregates agent-audited claim labels** against hand-authored rubrics
+for six small cases with real or hand-built candidates -- it does not itself
+prove that a candidate's prose is semantically true, and it is not a general
+claim about Shiftory or any agent's overall capability. Whether a specific
+claim is actually correct remains a human-or-agent judgment call recorded in
+a `candidate-evaluation-v1`; this benchmark's code sums and reports those
+judgments honestly, it does not verify them against reality on its own.
 
 Everything in this document and the code it describes is subject to one
 governing honesty rule, stated in
@@ -82,10 +85,22 @@ All are JSON Schema draft 2020-12, `additionalProperties: false`, versioned
   and `adjudication` record a dual-audit workflow when used.
   `invalid_candidate` (mutually exclusive with `claims`) captures a
   structural failure instead of pretending one didn't happen.
-- **`agent-run-v1`**: full capture provenance, including
+- **`agent-run-v1`** (superseded by `agent-run-v2`; preserved only in
+  withdrawn-capture archives, see
+  ["Withdrawn captures"](#withdrawn-captures-the-delete-add-not-a-rename-leak)):
+  the original capture provenance schema. Its `started_at_utc`/
+  `finished_at_utc` conflated capture_result's own post-hoc bookkeeping time
+  with real generation timing -- see `agent-run-v2` below.
+- **`agent-run-v2`**: full capture provenance, including
   `prompt_package_manifest` (per-file hashes of exactly what a capture's
   generator could see), `generator_access_profile`, and
-  `isolation_method: "protocol"`.
+  `isolation_method: "protocol"`. Adds a tagged `invocation`
+  (`local_process`/`copilot_task`) so command-argv and generation-timing
+  fields only ever describe what was genuinely observed for that invocation
+  kind, a separately labeled `capture_ingested_at_utc` (when this harness
+  actually read `RAW_RESPONSE`, distinct from generation time), and
+  `engine_identity`/`benchmark_protocol_commit` -- see
+  ["Provenance: engine identity and protocol commit"](#provenance-engine-identity-and-protocol-commit).
 - **`score-v1`**: the arithmetic aggregation described below, plus
   `rubric_match_heuristic` (separate, labeled non-authoritative),
   `audit_status`, and `gate` (present only for synthetic candidates -- see
@@ -175,6 +190,64 @@ judgment:
 `gate` is always `null` for every `candidate_kind: captured_real_run`
 candidate. Real-run scores are computed, snapshot-pinned for integrity, and
 reported -- never turned into a pass/fail bar on Shiftory's correctness.
+
+## Provenance: engine identity and protocol commit
+
+`agent-run-v2`'s `invocation` field is a tagged union distinguishing two
+fundamentally different situations, so no record can imply more precision
+than was actually observed:
+
+- **`local_process`**: `agent_harness.capture_result` itself started and
+  waited on a subprocess (`agent_harness.run_capped_subprocess`). Real
+  generation timing, the actual non-empty `command_argv`, and stdout/stderr
+  hashes are all directly observed and required.
+- **`copilot_task`**: the generating agent ran to completion as a Copilot CLI
+  task sub-agent in a separate conversation this harness never controlled or
+  streamed output from, and left `RAW_RESPONSE` behind for `capture_result`
+  to read afterward. Every capture in this repository today is this kind.
+  `generation_started_at_utc`/`generation_finished_at_utc` are only ever set
+  from a value the caller genuinely obtained from that sub-agent; when
+  unavailable (true for every capture in this repository so far) both are
+  `null` and `generation_timing_unavailable_reason` says so explicitly.
+  `capture_ingested_at_utc` -- always present, always distinct in meaning --
+  is when `capture_result` actually read `RAW_RESPONSE`. This is a real fix,
+  not a cosmetic rename: `agent-run-v1`'s `started_at_utc`/`finished_at_utc`
+  were, for every `copilot_task` capture in this repository, only ever
+  **microseconds apart** (confirmed by an independent review of this exact
+  chronology), because they were set around that same post-hoc bookkeeping
+  read, never around the actual generation, which took tens of seconds to
+  minutes. v1 presented that as run provenance; v2 does not.
+
+Two further fields separate two facts v1 conflated into one ambiguous
+`shiftory_commit`:
+
+- **`engine_identity`**: what ran `shiftory analyze`/`explain` to produce the
+  evidence a capture is based on -- `verification_method` states exactly how
+  `value` was established (`git_commit`, `source_tree_digest`, or `unknown`),
+  never fabricated.
+- **`benchmark_protocol_commit`**: the repository commit whose committed
+  `benchmarks/agent_quality/` tree defines the case/rubric/harness protocol a
+  capture was generated under. `verified: true` on the record is only ever
+  a hint written when the record was authored -- it is never trusted on its
+  own. `validation.recompute_benchmark_protocol_commit_verification`
+  independently recomputes it every time (including in
+  `test_every_case_has_exactly_the_two_predeclared_real_captures`, so a
+  regression is caught by CI, not just a one-time manual check): it runs
+  `git show <commit>:.../case.json` against the actual repository and
+  compares its sha256 to the same capture's own `prompt_package_manifest`
+  case.json entry (already hash-anchored to the real materialized prompt
+  package). This is a **stronger, wall-clock-independent proof** that a
+  capture used a given protocol version, not a weaker proxy based on
+  comparing the commit's timestamp against the capture's timestamps. All 12
+  official captures' `benchmark_protocol_commit.verified` independently
+  recomputes to `true`: for `cross-file-validation-edit` and
+  `context-limited-helper-call`, whose leak-fix commits (`d1af70b`,
+  `4c8994a`) were made *after* their captures' `capture_ingested_at_utc`
+  (because the corrected `case.json` was already on disk, and the fix was
+  committed afterward, not before -- an ordinary build-then-commit workflow),
+  this hash-based proof is exactly what establishes the captures actually
+  used the corrected, leak-free content regardless of that commit-ordering
+  detail, which by itself proves nothing either way.
 
 ## Bounded execution
 

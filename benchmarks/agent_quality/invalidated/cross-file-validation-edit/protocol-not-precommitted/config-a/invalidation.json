@@ -1,0 +1,27 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-invalidated-capture/v1",
+  "status": "invalidated-protocol-not-precommitted-v1",
+  "reason_code": "neutral-prompt-not-committed-before-generation",
+  "config_id": "config-a",
+  "original_case_id": "cross-file-validation-edit",
+  "corrected_case_id": "cross-file-validation-edit",
+  "reason": "This case's current (post-leak-fix) captures were generated after its case.json/category/commit-message answer-key-leak fix was made on disk, but before that fix (d1af70b) was committed to this repository's git history -- an ordinary build-then-commit workflow, not a structural defect, but the coordinating reviewer's requirement is that the neutralized prompt content itself be committed strictly before generation. This is a SEPARATE, later withdrawal from this case's earlier invalidated-answer-leak-v1 archive (see the sibling config-a/config-b directories at this case's invalidated/ root): that archive holds the original, leak-contaminated captures; this one holds the captures that replaced them, which were content-correct but not precommitted. Withdrawn and replaced with a fresh capture generated after the protocol-freeze commit that added benchmarks/agent_quality/protocol_registry.json and bumped this case's case.json to version 3.",
+  "discovered_by": {
+    "actor_type": "agent",
+    "actor": "GitHub Copilot CLI (parent coordinating session)",
+    "method": "Chronology audit comparing each capture's capture_ingested_at_utc against the git committer date of the commit that first established or corrected its prompt-package content.",
+    "timestamp": "2026-09-02T05:30:00Z"
+  },
+  "original_prompt_package_digest": "40b40c7d28ed2d3e8d6962541c042a7ef9ee1949f8eacc83270bc7d6534f9f6d",
+  "archived_raw_response_sha256": "16b5e4def2a4583529adbfb6974f7870418be7b9b1ccf41ac68cf5d74a618fe7",
+  "archived_raw_response_bytes": 2272,
+  "archived_explanation_sha256": "16b5e4def2a4583529adbfb6974f7870418be7b9b1ccf41ac68cf5d74a618fe7",
+  "archived_agent_run_sha256": "918d99e873a10105f4362029a21ce715b38e63b547ffe45bd1bbcdb468f50f3e",
+  "archived_evaluation_sha256": "15b856692329fe75d280d03be5daff6f3744ed8be78ff915c5270440f0a2c1d5",
+  "archived_score_sha256": "c0463473b5d638a9a724cb9db6028e5943118f80d88ec8e23b1d1ede4d118302",
+  "replacement_capture": {
+    "case_id": "cross-file-validation-edit",
+    "config_id": "config-a",
+    "path": "benchmarks/agent_quality/cases/cross-file-validation-edit/captured/config-a"
+  }
+}

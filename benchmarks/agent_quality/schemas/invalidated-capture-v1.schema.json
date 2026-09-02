@@ -2,20 +2,29 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://shiftory.dev/schemas/benchmark-agent-quality-invalidated-capture-v1.json",
   "title": "Shiftory agent-quality invalidated real capture",
-  "description": "A record explaining why one real agent capture was withdrawn from the official, scored suite and archived instead of silently overwritten or deleted. Exists specifically for the answer-key-leak class of defect: if a case's prompt package (materialized by agent_harness.prepare_prompt_package from case.json) is later found to have disclosed a rubric conclusion to the generating agent, every capture made under that leaked package is contaminated regardless of whether its own text happens to echo the leaked wording, and the only honest remedy is withdrawal plus a fresh capture under a corrected package -- never patching the description in place while keeping the old capture. This schema forces the archive to carry hash-verifiable pointers to the exact bytes that were withdrawn (raw response, materialized explanation when one existed, agent-run provenance, the prior candidate-evaluation-v1 record, and the prior score-v1 record) plus an explicit pointer to the replacement capture, so the withdrawal is auditable rather than merely asserted. This record documents a leak that was found and fixed for one case; it is not itself proof that no other case leaks -- see benchmarks/agent_quality/README.md for why only manual complete-package review can establish that.",
+  "description": "A record explaining why one real agent capture was withdrawn from the official, scored suite and archived instead of silently overwritten or deleted. Covers two distinct classes of withdrawal: 'invalidated-answer-leak-v1' (a case's prompt package disclosed a rubric conclusion to the generating agent -- every capture made under that leaked package is contaminated regardless of whether its own text echoes the leaked wording) and 'invalidated-protocol-not-precommitted-v1' (the capture's protocol/prompt content, though byte-identical to what is now committed, was not committed to this repository strictly before that capture's own ingestion timestamp, so precommitment -- not merely content equality -- cannot be established for it). Either way, the only honest remedy is withdrawal plus a fresh capture under a corrected/precommitted package -- never patching or re-dating a record while keeping the old capture. This schema forces the archive to carry hash-verifiable pointers to the exact bytes that were withdrawn (raw response, materialized explanation when one existed, agent-run provenance, the prior candidate-evaluation-v1 record, and the prior score-v1 record) plus an explicit pointer to the replacement capture, so the withdrawal is auditable rather than merely asserted.",
   "type": "object",
   "additionalProperties": false,
   "required": [
     "schema", "status", "config_id", "original_case_id", "corrected_case_id",
-    "reason", "leaked_prompt_package_fields", "leaked_required_fact_ids",
-    "discovered_by", "original_prompt_package_digest",
+    "reason", "discovered_by", "original_prompt_package_digest",
     "archived_raw_response_sha256", "archived_raw_response_bytes",
     "archived_explanation_sha256", "archived_agent_run_sha256",
     "archived_evaluation_sha256", "archived_score_sha256", "replacement_capture"
   ],
   "properties": {
     "schema": {"const": "shiftory.benchmark-agent-quality-invalidated-capture/v1"},
-    "status": {"const": "invalidated-answer-leak-v1"},
+    "status": {
+      "enum": ["invalidated-answer-leak-v1", "invalidated-protocol-not-precommitted-v1"]
+    },
+    "reason_code": {
+      "description": "A machine-readable reason code for invalidated-protocol-not-precommitted-v1 records.",
+      "enum": [
+        "protocol-not-predeclared-before-generation",
+        "prompt-fix-not-committed-before-generation",
+        "neutral-prompt-not-committed-before-generation"
+      ]
+    },
     "config_id": {"enum": ["config-a", "config-b"]},
     "original_case_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"},
     "corrected_case_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"},

@@ -1,0 +1,27 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-invalidated-capture/v1",
+  "status": "invalidated-protocol-not-precommitted-v1",
+  "reason_code": "protocol-not-predeclared-before-generation",
+  "config_id": "config-b",
+  "original_case_id": "reordering-guard-clause",
+  "corrected_case_id": "reordering-guard-clause",
+  "reason": "This case's first captures were generated before the two predeclared configurations and the capture harness were committed to this repository's git history (agent_harness.py was committed in 7b9d99b; this capture's own capture_ingested_at_utc predates it). Content equality with the currently-committed protocol was independently verified (see the archived agent-run.json's benchmark_protocol_commit), but the coordinating reviewer's requirement is precommitment, not merely content equality: the protocol must be committed strictly before generation, not only provably identical to it after the fact. Withdrawn and replaced with a fresh capture generated after the protocol-freeze commit that added benchmarks/agent_quality/protocol_registry.json.",
+  "discovered_by": {
+    "actor_type": "agent",
+    "actor": "GitHub Copilot CLI (parent coordinating session)",
+    "method": "Chronology audit comparing each capture's capture_ingested_at_utc against the git committer date of the commit that first established or corrected its prompt-package content.",
+    "timestamp": "2026-09-02T05:30:00Z"
+  },
+  "original_prompt_package_digest": "f54f0c50d0c9fb897f3ca4253fd57806e94d5d650f4779bf39845be89e3c1548",
+  "archived_raw_response_sha256": "832e6ad6a6e8c495abb2f9a6b0ad6750e77dad3f7a7d2293b095f515a264fcca",
+  "archived_raw_response_bytes": 985,
+  "archived_explanation_sha256": "832e6ad6a6e8c495abb2f9a6b0ad6750e77dad3f7a7d2293b095f515a264fcca",
+  "archived_agent_run_sha256": "00ed21f63b190a75155513a2b7f0605f43bdc4a0a2dee5f7eafbea77f7800259",
+  "archived_evaluation_sha256": "4091a073bc1da3ce327aa0a226e850ad6ee7eee3086e54031fbd881f1e6db564",
+  "archived_score_sha256": "8b76117b8a6f1942e24cd790030ac1d52988e6fe9c0ddc81a256a572043eea33",
+  "replacement_capture": {
+    "case_id": "reordering-guard-clause",
+    "config_id": "config-b",
+    "path": "benchmarks/agent_quality/cases/reordering-guard-clause/captured/config-b"
+  }
+}

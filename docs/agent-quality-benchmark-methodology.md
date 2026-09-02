@@ -25,12 +25,17 @@ judgment of whether a claim is actually true.
 ```
 benchmarks/agent_quality/
   schemas/            case, rubric, claim-record, candidate-evaluation,
-                       agent-run, score, and scores (published-suite) schemas
+                       agent-run, score, scores (published-suite), and
+                       invalidated-capture schemas
   cases/<id>/         public case.json + offline git fast-import fixture +
                        synthetic baseline/adversarial explanations +
                        captured/<config>/ real agent output (when present)
   auditor/<id>/       rubric.json (required facts) + evaluations/*.json
                        (audited claim records for every candidate)
+  invalidated/<id>/   withdrawn captures found to be contaminated after the
+                       fact (e.g. an answer-key leak) -- preserved with full
+                       provenance, never scored or published as official
+                       results; see "Withdrawn captures" below
   validation.py       duplicate-key-rejecting loader, schema validation,
                        structural invariants, bounded caps
   aggregate.py        pure arithmetic: candidate-evaluation-v1 -> score-v1
@@ -193,15 +198,17 @@ reported -- never turned into a pass/fail bar on Shiftory's correctness.
 Every one of the six cases has two real captures from the two predeclared
 configurations (`gpt-5.3-codex` and `gemini-3.7-flash`, see
 [`benchmarks/agent_quality/README.md`](../benchmarks/agent_quality/README.md)).
-All 12 happened to produce structurally valid, schema-conformant JSON on the
-first attempt -- no timeouts, protocol violations, or structural failures
-occurred in this round, which is itself reported honestly rather than omitted.
-Every capture was dual-audited (two independent annotation passes plus one
-adjudication pass); the table reports `required_behavior_coverage` (satisfied
-out of 3 required facts), raw `unsupported_claims`/`contradicted_claims`
-counts, `uncertainty_honesty` violations out of claims checked, and the
-adjudication `disagreement_rate` between the two independent passes, exactly
-as regenerated in `docs/benchmarks/agent-quality/<case>/scores-v1.json`:
+All 12 currently official captures produced structurally valid,
+schema-conformant JSON on the first attempt of their respective prompt
+package version -- no timeouts, protocol violations, or structural failures
+occurred in this round, which is itself reported honestly rather than
+omitted. Every capture was dual-audited (two independent annotation passes
+plus one adjudication pass); the table reports `required_behavior_coverage`
+(satisfied out of 3 required facts), raw `unsupported_claims`/
+`contradicted_claims` counts, `uncertainty_honesty` violations out of claims
+checked, and the adjudication `disagreement_rate` between the two
+independent passes, exactly as regenerated in
+`docs/benchmarks/agent-quality/<case>/scores-v1.json`:
 
 | Case | Candidate | Coverage | Unsupported | Contradicted | Uncertainty violations | Disagreement rate |
 |---|---|---:|---:|---:|---:|---:|
@@ -211,37 +218,95 @@ as regenerated in `docs/benchmarks/agent-quality/<case>/scores-v1.json`:
 | error-swallow-to-raise | captured_config_b | 1/3 | 0 | 0 | 0/3 | 0.0 |
 | threshold-value-replacement | captured_config_a | 2/3 | 0 | 0 | 4/4 | 0.0 |
 | threshold-value-replacement | captured_config_b | 2/3 | 0 | 0 | 0/7 | 0.0 |
-| delete-add-not-a-rename | captured_config_a | 2/3 | 0 | 0 | 4/4 | 0.0 |
-| delete-add-not-a-rename | captured_config_b | 2/3 | 0 | 0 | 5/5 | 1.0 |
+| cross-file-validation-edit | captured_config_a | **3/3** | 0 | 0 | 4/9 | 0.44 |
+| cross-file-validation-edit | captured_config_b | 2/3 | 0 | 0 | 8/9 | 0.33 |
 | binary-asset-replacement | captured_config_a | 2/3 | 0 | 0 | 0/3 | 0.33 |
 | binary-asset-replacement | captured_config_b | 1/3 | 0 | 0 | 0/4 | 0.0 |
 | context-limited-helper-call | captured_config_a | 1/3 | 2 | 0 | 2/5 | 0.0 |
 | context-limited-helper-call | captured_config_b | 2/3 | 0 | 0 | 2/6 | 0.33 |
 
-Read honestly, not as a leaderboard: no real capture ever reached 3/3 coverage.
-Every capture correctly identified the single most important (highest-importance)
-required fact, but every single one **omitted at least one lower-importance
-required fact** (most often the genuinely-ambiguous "what does this imply, and
-what can't be known" fact or the "what stayed the same" fact) -- both captured
-models consistently produced a single, narrowly-scoped explanation item rather
-than covering every required behavior. `threshold-value-replacement`'s and
-`delete-add-not-a-rename`'s `captured_config_a` runs also show every
-audited claim's `confidence: "inferred"` judged mildly miscalibrated
-(`confidence_appropriate: false`) for facts that were, in fact, directly
-extractable from the diff -- independently confirmed by two annotator passes
-each, not an adjudicator override -- a real, reproducible finding that
-under-hedging directly-visible facts is itself a mild honesty violation in
-this rubric's model, distinct from over-claiming. The `delete-add-not-a-rename`
-`captured_config_b` disagreement-rate-1.0 case reflects a genuine, documented
-adjudication call (see that case's evaluation record) rather than a hidden
-default. `context-limited-helper-call`'s captures were regenerated after an
-initial `case.json`/`metadata.json` description leaked this case's own
-ambiguity conclusion into the materialized prompt package (found during
-independent review); the fresh, unleaked `captured_config_a` capture
-correctly omits the ambiguity fact entirely (coverage dropped from 2/3 to
-1/3), while `captured_config_b` independently produced an honest ambiguity
-acknowledgment on its own -- a concrete demonstration of why leakage checks
-matter, not just a claim that they were performed.
+Read honestly, not as a leaderboard. `cross-file-validation-edit`'s
+`captured_config_a` is this benchmark's first real capture to reach 3/3
+required-fact coverage -- but the adjudication record for that case is
+explicit that this is a partial win, not an unqualified one: both
+independent annotator passes flagged that the candidate never gives a
+concrete counterexample string (e.g. `'a@'`, `'@@@'`) for the central,
+central-importance "not a behavior-preserving move" fact, and its own
+"relocated and simplified" framing arguably undersells that this is a real
+behavior regression rather than a benign refactor; the fact was graded
+satisfied on the strength of two independent passes reaching that
+conclusion despite the hedge, not because the case for it is airtight. Its
+sibling capture, `captured_config_b`, splits the same change into two
+unconnected removal/addition items and is a clean, cross-validated
+counterexample: neither of its two independent annotation passes mapped any
+claim to that fact at all, so it scores 2/3 -- the same rubric, two
+genuinely different real explanations of the identical diff, two
+genuinely different, independently-audited outcomes. Every other capture
+correctly identified the single most important (highest-importance)
+required fact, but **omitted at least one lower-importance required fact**
+(most often the genuinely-ambiguous "what does this imply, and what can't
+be known" fact or the "what stayed the same" fact) -- both captured models
+otherwise consistently produced a single, narrowly-scoped explanation item
+rather than covering every required behavior. `threshold-value-replacement`'s
+and `cross-file-validation-edit`'s `captured_config_a` runs also show
+several audited claims' `confidence: "extracted"`/`"inferred"` judged mildly
+miscalibrated (`confidence_appropriate: false`) for facts that were, in
+fact, directly extractable from the diff, or that required more
+interpretation than their stated confidence admitted -- independently
+confirmed by two annotator passes each, not an adjudicator override -- a
+real, reproducible finding that both under-hedging directly-visible facts
+and over-stating interpretive synthesis as direct extraction are honesty
+violations in this rubric's model. `context-limited-helper-call`'s captures
+were regenerated after an initial `case.json`/`metadata.json` description
+leaked this case's own ambiguity conclusion into the materialized prompt
+package (found during independent review); the fresh, unleaked
+`captured_config_a` capture correctly omits the ambiguity fact entirely
+(coverage dropped from 2/3 to 1/3), while `captured_config_b` independently
+produced an honest ambiguity acknowledgment on its own -- a concrete
+demonstration of why leakage checks matter, not just a claim that they were
+performed.
+
+### Withdrawn captures: the `delete-add-not-a-rename` leak
+
+A second, more serious leak was found by an independent review of the
+previous revision's `delete-add-not-a-rename` case: its `category`
+(`deletion-addition-confused-with-move`) and `description` ("a similarly
+named, but behaviorally weaker, function is added") disclosed both of the
+case's importance-5 rubric conclusions directly into the materialized
+prompt package, and its fixture's own commit messages repeated the
+answer-bearing id. One of the two original captures for that case used the
+word "weaker" verbatim, matching the leak.
+
+Both original captures were **withdrawn, not edited in place**: patching
+only the description while keeping captures generated under the leaked
+version would let contaminated evidence keep counting as if it were blind.
+They are preserved byte-for-byte, with full agent-run provenance, their
+original candidate-evaluation-v1 records, and their original score-v1
+records, under
+[`benchmarks/agent_quality/invalidated/cross-file-validation-edit/`](../benchmarks/agent_quality/invalidated/cross-file-validation-edit/)
+as `invalidated-answer-leak-v1` records (see
+`schemas/invalidated-capture-v1.schema.json`); `validation.py`'s
+`validate_invalidated_capture` recomputes every referenced artifact's
+sha256 against the archive to prove it is an honest, unmodified copy of
+what was withdrawn. This archive is deliberately outside `cases/` and
+`auditor/` so it can never be accidentally enumerated, scored, or published
+by `runner.py` as an official result -- `case_ids()`/`captured_candidates()`
+only ever look inside `cases/<id>/captured/`, which the withdrawn files are
+not part of.
+
+The case was renamed to `cross-file-validation-edit`, its `category` and
+`description` rewritten to state only directly-visible, mechanical facts (a
+function name, the two files involved, deletion vs. addition -- nothing
+about behavior, strength, or whether this resembles a move), and its
+fixture's commit messages changed to match (which changes the fixture's
+pinned base/head commit SHAs in `metadata.json`, since fast-import commit
+identity includes the message). **Both captures were then redone from
+scratch**, using two entirely fresh sub-agent invocations against the
+corrected package -- see the results table above for the outcome. Every
+one of the six cases' materialized prompt packages was manually re-read
+against its own rubric for this same class of leak as part of this
+revision's independent review; no further leaks were found, though see
+"Limitations" below for what that check can and cannot establish.
 
 ## Limitations
 
@@ -255,11 +320,24 @@ matter, not just a claim that they were performed.
   candidate -- a genuine self-assessment overlap, disclosed in full in
   [`benchmarks/agent_quality/README.md`](../benchmarks/agent_quality/README.md#dual-audit-annotation-workflow)
   rather than hidden. `captured_config_b` is unaffected.
-- All 12 captures in this round happened to succeed structurally; the harness
-  and schemas support recording timeouts/protocol violations/structural
-  failures as `invalid_candidate` records, but this benchmark has not yet
-  observed one in practice, so that code path is currently exercised only by
-  unit tests, not a real capture.
+- All 12 currently-official captures happened to succeed structurally; the
+  harness and schemas support recording timeouts/protocol
+  violations/structural failures as `invalid_candidate` records, but this
+  benchmark has not yet observed one in practice, so that code path is
+  currently exercised only by unit tests, not a real capture.
+- Answer-key leakage into a case's own `category`/`description` -- the
+  defect found and fixed twice now in this benchmark's short history (once
+  for `context-limited-helper-call`, once for `delete-add-not-a-rename`) --
+  is fundamentally a semantic judgment call that automated string matching
+  can only partially catch. `test_agent_quality_harness.py` pins every
+  case's currently-reviewed category/description to an explicit allowlist
+  (so a future silent edit fails CI) and checks for exact-sentence rubric
+  copies and the specific previously-leaked phrases, but it cannot prove a
+  *new* case's public fields are free of a *novel* paraphrased leak --
+  that requires a human/agent to actually read the case against its rubric
+  and judge inferability, which is what the independent review rounds in
+  this benchmark's history have done and what any future case addition
+  must repeat.
 - The literal-alias heuristic is a labeled, non-authoritative aid with real
   false-positive/false-negative rates (see `heuristic.py`'s module
   docstring); it is never a substitute for audited claim verdicts.

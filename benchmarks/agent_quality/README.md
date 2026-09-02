@@ -67,6 +67,19 @@ workflow.
   evidence about how a real agent performs, and `gate` is always `null` for
   every `captured_real_run` candidate -- see
   ["Gating" in the methodology doc](../../docs/agent-quality-benchmark-methodology.md#gating).
+- **A capture generated under a leaked prompt package is withdrawn, never
+  edited in place.** If `case.json`'s `category`/`description` are later
+  found to have disclosed a rubric conclusion (this has happened twice in
+  this benchmark's short history), every capture made under that leaked
+  version is contaminated, regardless of whether its own wording happens to
+  echo the leak. It is moved to `invalidated/<case>/` as an
+  `invalidated-answer-leak-v1` record with hash-verified pointers to its
+  original raw response, agent-run provenance, evaluation, and score (see
+  `validation.py`'s `validate_invalidated_capture`), and a genuinely fresh
+  capture is made under the corrected package. `invalidated/` is outside
+  `cases/` and `auditor/` specifically so `runner.py`'s `case_ids()`/
+  `captured_candidates()` can never accidentally enumerate, score, or
+  publish it as an official result.
 
 ## Predeclared capture configurations
 
@@ -136,14 +149,31 @@ caveat above.
    `rubric_provenance` records who authored it and its review status --
    today, authored and not yet independently re-reviewed; treat every rubric
    in this repository as provisional until a second reviewer signs off.
-3. Synthetic `baseline`/`adversarial` explanations and their
+3. **Before any real capture is generated**, a reviewer manually reads
+   `case.json`'s `category` and `description` -- the only two case fields
+   that are ever materialized into the prompt package -- against the full
+   rubric and asks: could an agent infer any required fact's conclusion, even
+   paraphrased, from these two fields alone plus commit messages in
+   `history.fast-import` (which are also visible to a generating agent via
+   `git log`)? This benchmark has already shipped two leaks past its
+   automated checks that this manual step is meant to catch (see
+   ["Withdrawn captures"](../../docs/agent-quality-benchmark-methodology.md#withdrawn-captures-the-delete-add-not-a-rename-leak)
+   in the methodology doc) -- `test_prepare_never_copies_auditor_content` and
+   the reviewed-neutral-field allowlist in
+   `tests/benchmark/test_agent_quality_harness.py` catch verbatim rubric-text
+   copies and regressions of specific known-bad phrases, but neither can
+   prove a new case's fields are free of a *novel* paraphrase. If a capture
+   is later found to have been generated under a leaked package, it must be
+   withdrawn (see below), never edited in place while keeping the
+   contaminated capture.
+4. Synthetic `baseline`/`adversarial` explanations and their
    `candidate-evaluation-v1` records are hand-authored to unit-test the
    scorer: a claim-perfect candidate and a deliberately defective one (at
    least one hallucination, one omission, one overconfident claim on a
    genuinely ambiguous fact, and one low-content padding item), always
    validated against the real `shiftory.explain.validator` before being
    committed.
-4. Any change to a rubric's required facts requires bumping its `version`
+5. Any change to a rubric's required facts requires bumping its `version`
    and re-validating every existing `candidate-evaluation-v1` record for that
    case against the new version (the runner's `rubric_version` field on each
    evaluation makes a version mismatch structurally checkable).

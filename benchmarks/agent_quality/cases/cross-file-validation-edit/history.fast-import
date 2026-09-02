@@ -3,7 +3,7 @@ mark :1
 author Shiftory Fixture <fixture@shiftory.invalid> 1707264000 +0000
 committer Shiftory Fixture <fixture@shiftory.invalid> 1707264000 +0000
 data <<BASE_MESSAGE
-delete-add-not-a-rename base
+cross-file-validation-edit base
 BASE_MESSAGE
 M 100644 inline validators.py
 data <<BASE_VALIDATORS
@@ -26,7 +26,7 @@ mark :2
 author Shiftory Fixture <fixture@shiftory.invalid> 1707350400 +0000
 committer Shiftory Fixture <fixture@shiftory.invalid> 1707350400 +0000
 data <<HEAD_MESSAGE
-delete-add-not-a-rename head
+cross-file-validation-edit head
 HEAD_MESSAGE
 from :1
 M 100644 inline validators.py

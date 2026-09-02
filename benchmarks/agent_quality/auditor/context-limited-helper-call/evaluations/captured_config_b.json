@@ -45,7 +45,7 @@
       "materiality": 5,
       "confidence_expressed": "inferred",
       "confidence_appropriate": false,
-      "rationale": "Both passes agreed correct; pass 2 flagged 'inferred' as under-claiming this directly-visible fact, consistent with the pattern established across this benchmark's other captures (threshold-value-replacement, delete-add-not-a-rename); adjudicator sides with pass 2 for cross-case consistency.",
+      "rationale": "Both passes agreed correct; pass 2 flagged 'inferred' as under-claiming this directly-visible fact, consistent with the pattern established across this benchmark's other captures (threshold-value-replacement, cross-file-validation-edit); adjudicator sides with pass 2 for cross-case consistency.",
       "annotation_provenance": {
         "actor_type": "agent",
         "actor": {

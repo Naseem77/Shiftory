@@ -1,6 +1,6 @@
 {
   "schema": "shiftory.benchmark-agent-quality-rubric/v1",
-  "case_id": "delete-add-not-a-rename",
+  "case_id": "cross-file-validation-edit",
   "version": 1,
   "rubric_provenance": {
     "actor_type": "agent",

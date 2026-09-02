@@ -1,6 +1,6 @@
 {
   "schema": "shiftory.benchmark-agent-quality-candidate-evaluation/v1",
-  "case_id": "delete-add-not-a-rename",
+  "case_id": "cross-file-validation-edit",
   "rubric_version": 1,
   "candidate_id": "synthetic_adversarial",
   "candidate_kind": "synthetic_adversarial",

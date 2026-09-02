@@ -15,7 +15,7 @@
         "ordering-control-flow",
         "state-error-handling",
         "value-replacement-with-implications",
-        "deletion-addition-confused-with-move",
+        "cross-file-definition-change",
         "non-text-unsupported",
         "ambiguous-context-limited"
       ]

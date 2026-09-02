@@ -323,3 +323,66 @@ def validate_candidate_evaluation(
     required_fact_ids = {fact["id"] for fact in rubric["required_facts"]}
     check_claim_fact_references(claims, required_fact_ids)
     check_audit_coverage(explanation, claims, evaluation.get("audit_coverage", []))
+
+
+def validate_invalidated_capture(case_root: Path, config_id: str) -> dict[str, Any]:
+    """Full structural validation of one withdrawn (answer-key-leak) capture
+    archived under ``benchmarks/agent_quality/invalidated/<case_id>/``.
+
+    Loads ``<config_id>/invalidation.json``, validates it against
+    ``invalidated-capture-v1``, and recomputes sha256 over every archived
+    artifact it points at (raw response, explanation when one existed,
+    agent-run provenance, the withdrawn candidate-evaluation-v1 record, and
+    the withdrawn score-v1 record), raising if any recorded digest does not
+    match the actual archived bytes. This proves the archive is an honest,
+    unmodified copy of what was withdrawn -- it does not, and cannot, prove
+    that the replacement capture referenced by ``replacement_capture`` is
+    itself free of the same or a different leak; that remains a manual
+    review judgment.
+    """
+    config_dir = case_root / config_id
+    record = load_json_strict(config_dir / "invalidation.json")
+    validate_against_schema(record, "invalidated-capture-v1")
+    if record["config_id"] != config_id:
+        raise AgentQualityError(
+            f"{config_dir}: invalidation.json config_id {record['config_id']!r} "
+            f"does not match its directory name {config_id!r}"
+        )
+
+    raw_path = config_dir / "raw-response.txt"
+    if not raw_path.is_file():
+        raw_path = config_dir / "raw-response.bin"
+    check_file_size(raw_path, MAX_RAW_RESPONSE_BYTES, f"{config_dir}/raw-response")
+    raw_bytes = raw_path.read_bytes()
+    if sha256_bytes(raw_bytes) != record["archived_raw_response_sha256"]:
+        raise AgentQualityError(f"{config_dir}: archived raw response bytes do not hash-match")
+    if len(raw_bytes) != record["archived_raw_response_bytes"]:
+        raise AgentQualityError(f"{config_dir}: archived raw response byte count does not match")
+
+    explanation_path = config_dir / "explanation.json"
+    if record["archived_explanation_sha256"] is None:
+        if explanation_path.is_file():
+            raise AgentQualityError(
+                f"{config_dir}: archived_explanation_sha256 is null but explanation.json exists"
+            )
+    else:
+        if not explanation_path.is_file():
+            raise AgentQualityError(
+                f"{config_dir}: archived_explanation_sha256 is set but explanation.json is missing"
+            )
+        if sha256_file(explanation_path) != record["archived_explanation_sha256"]:
+            raise AgentQualityError(f"{config_dir}: archived explanation.json does not hash-match")
+
+    agent_run_path = config_dir / "agent-run.json"
+    if sha256_file(agent_run_path) != record["archived_agent_run_sha256"]:
+        raise AgentQualityError(f"{config_dir}: archived agent-run.json does not hash-match")
+
+    evaluation_path = case_root / "evaluations" / f"{config_id}.json"
+    if sha256_file(evaluation_path) != record["archived_evaluation_sha256"]:
+        raise AgentQualityError(f"{evaluation_path}: does not hash-match its archived digest")
+
+    score_path = case_root / "scores" / f"{config_id}.json"
+    if sha256_file(score_path) != record["archived_score_sha256"]:
+        raise AgentQualityError(f"{score_path}: does not hash-match its archived digest")
+
+    return cast(dict[str, Any], record)

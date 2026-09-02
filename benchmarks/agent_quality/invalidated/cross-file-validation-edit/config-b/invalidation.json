@@ -1,0 +1,34 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-invalidated-capture/v1",
+  "status": "invalidated-answer-leak-v1",
+  "config_id": "config-b",
+  "original_case_id": "delete-add-not-a-rename",
+  "corrected_case_id": "cross-file-validation-edit",
+  "reason": "The original case.json/metadata.json description ('a similarly named, but behaviorally weaker, function is added') and category ('deletion-addition-confused-with-move') were materialized verbatim into this capture's prompt package (agent_harness.prepare_prompt_package copies case.json unmodified). Together they disclosed both importance-5 rubric conclusions -- that the replacement is weaker, and that this is not a behavior-preserving move/rename -- before the generating agent analyzed the diff. This capture's own explanation avoided the word 'weaker' and did not explicitly assert a move/rename conclusion either way, but it was still produced under the same leaked prompt package as config-a's contaminated capture, so isolation cannot be established for it either; every capture made under a leaked package is withdrawn uniformly rather than selectively judged by how much its own wording happens to echo the leak. Withdrawn rather than edited in place; the case was renamed and its description/category rewritten to state only mechanical, directly-visible facts (function name, affected files, deletion vs. addition), and both captures for this case were redone from scratch under the corrected package.",
+  "leaked_prompt_package_fields": {
+    "category": "deletion-addition-confused-with-move",
+    "description": "A validate_email function is deleted from one file and a similarly named, but behaviorally weaker, function is added to a different file."
+  },
+  "leaked_required_fact_ids": [
+    "weaker-validate-email-added-to-utils",
+    "not-a-behavior-preserving-move"
+  ],
+  "discovered_by": {
+    "actor_type": "agent",
+    "actor": "GitHub Copilot CLI (parent coordinating session, cross-session review)",
+    "method": "Independent complete-diff review of the pushed PR #4 head, auditing every materialized prompt package's case.json against its rubric's required_facts for verbatim or paraphrased conclusion leakage.",
+    "timestamp": "2026-09-02T03:00:00Z"
+  },
+  "original_prompt_package_digest": "3e46a931b7564e481523f60ad5f20adb8ea07857ea9b6eeaef69daa7220493b7",
+  "archived_raw_response_sha256": "e9d293f025f28e937c3737134a62ad45d3245e0853179a54e8fc872e8c89d5a1",
+  "archived_raw_response_bytes": 2210,
+  "archived_explanation_sha256": "e9d293f025f28e937c3737134a62ad45d3245e0853179a54e8fc872e8c89d5a1",
+  "archived_agent_run_sha256": "f1bf56469b2092830b693152e401fe6a720211850966e35e2e14490fb0fcf10a",
+  "archived_evaluation_sha256": "e30432326f53f51d089a1fdd43f678d78b6d39a999a0a054db36f23bc307699a",
+  "archived_score_sha256": "6b0cf60f8701ae7f026da180bee473d1a3f64ab5eeec05f7b8d8b617f9e7b01b",
+  "replacement_capture": {
+    "case_id": "cross-file-validation-edit",
+    "config_id": "config-b",
+    "path": "benchmarks/agent_quality/cases/cross-file-validation-edit/captured/config-b"
+  }
+}

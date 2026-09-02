@@ -32,6 +32,25 @@ def test_empty_diff_requires_and_accepts_explicit_no_changes(repo_factory) -> No
     assert "Change units: 0/0 (100%)" in markdown
 
 
+def test_empty_diff_satisfies_required_grounding_without_any_claim(repo_factory) -> None:
+    repository = repo_factory()
+    evidence = analyze(AnalyzeOptions(repo=repository, graphora="off")).to_dict()
+    explanation = {
+        "schema": "shiftory.explanation/v1",
+        "summary": "No changes are present.",
+        "items": [],
+        "coverage_owners": [],
+    }
+    result = validate_explanation(evidence, explanation, require_grounding=True)
+    assert result.grounding is not None
+    assert result.grounding.claim_total == 0
+    assert result.grounding.grounded_items == 0
+
+    report = build_report(evidence, explanation, require_grounding=True)
+    assert "grounding" not in report
+    assert report["guarantee"].endswith("it does not verify semantic correctness.")
+
+
 def test_empty_diff_rejects_items_and_implicit_summary(repo_factory) -> None:
     repository = repo_factory()
     evidence = analyze(AnalyzeOptions(repo=repository, graphora="off")).to_dict()

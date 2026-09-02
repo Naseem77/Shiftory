@@ -68,8 +68,12 @@
       "type": "array",
       "items": {"$ref": "#/$defs/owner"}
     },
+    "grounding": {"$ref": "#/$defs/grounding"},
     "guarantee": {
-      "const": "Shiftory verified accounting and citation references; it does not verify semantic correctness."
+      "enum": [
+        "Shiftory verified accounting and citation references; it does not verify semantic correctness.",
+        "Shiftory verified accounting, citation references, and every declared grounding claim against the exact evidence bound to it; verified claims are source-level facts and do not establish runtime behavior or semantic correctness."
+      ]
     }
   },
   "additionalProperties": false,
@@ -115,6 +119,67 @@
         "citations": {
           "type": "array",
           "items": {"$ref": "#/$defs/citation"}
+        },
+        "grounding": {"type": "object"}
+      },
+      "additionalProperties": false
+    },
+    "grounding": {
+      "type": "object",
+      "required": [
+        "mode", "grounded_items", "claim_total", "verified", "inferred",
+        "ambiguous", "unresolved", "unavailable", "items"
+      ],
+      "properties": {
+        "mode": {"enum": ["optional", "required"]},
+        "grounded_items": {"type": "integer", "minimum": 0},
+        "claim_total": {"type": "integer", "minimum": 1},
+        "verified": {"type": "integer", "minimum": 0},
+        "inferred": {"type": "integer", "minimum": 0},
+        "ambiguous": {"type": "integer", "minimum": 0},
+        "unresolved": {"type": "integer", "minimum": 0},
+        "unavailable": {"type": "integer", "minimum": 0},
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/groundedItem"}
+        }
+      },
+      "additionalProperties": false
+    },
+    "groundedItem": {
+      "type": "object",
+      "required": ["item_id", "claims"],
+      "properties": {
+        "item_id": {"$ref": "#/$defs/nonEmptyString"},
+        "claims": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/groundedClaim"}
+        }
+      },
+      "additionalProperties": false
+    },
+    "groundedClaim": {
+      "type": "object",
+      "required": ["claim_id", "type", "support_level", "proof", "limits"],
+      "properties": {
+        "claim_id": {"$ref": "#/$defs/nonEmptyString"},
+        "type": {
+          "enum": [
+            "addition", "deletion", "graph_relation", "non_text_change",
+            "source_order", "text_absence", "text_presence", "value_change"
+          ]
+        },
+        "support_level": {
+          "enum": ["verified", "inferred", "ambiguous", "unresolved", "unavailable"]
+        },
+        "proof": {"$ref": "#/$defs/nonEmptyString"},
+        "limits": {
+          "oneOf": [
+            {"$ref": "#/$defs/nonEmptyString"},
+            {"type": "null"}
+          ]
         }
       },
       "additionalProperties": false

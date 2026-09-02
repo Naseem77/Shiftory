@@ -1,0 +1,52 @@
+{
+  "fixture_schema": "shiftory.grounding-adversarial/v1",
+  "scenario": "reorder",
+  "expect": "reject",
+  "expected_codes": ["grounding.operand_missing"],
+  "intent": "An ordering statement about two operations while only one of them appears in the cited evidence.",
+  "manifest": {
+    "schema": "shiftory.explanation/v1",
+    "summary": "The save path reorders cache invalidation and the database commit.",
+    "items": [
+      {
+        "id": "save-order",
+        "kind": "behavioral",
+        "title": "Invalidation and commit order",
+        "before": "The commit ran before the cache entry was invalidated.",
+        "after": "Cache invalidation now happens before the database commit.",
+        "confidence": "extracted",
+        "citations": ["{citation:service.py:after:3}"],
+        "grounding": {
+          "claims": [
+            {
+              "id": "result",
+              "type": "value_change",
+              "support_level": "verified",
+              "support": [
+                "{span:service.py:before:4}",
+                "{span:service.py:after:3}"
+              ],
+              "before_literal": "return \"ok\"",
+              "after_literal": "return \"done\""
+            },
+            {
+              "id": "order",
+              "type": "source_order",
+              "support_level": "verified",
+              "support": ["{citation:service.py:after:3}"],
+              "side": "after",
+              "first": "cache.invalidate(record)",
+              "second": "database.commit()"
+            }
+          ]
+        }
+      }
+    ],
+    "coverage_owners": [
+      {"evidence_id": "{line:service.py:before:2}", "owner_id": "save-order"},
+      {"evidence_id": "{line:service.py:before:4}", "owner_id": "save-order"},
+      {"evidence_id": "{line:service.py:after:3}", "owner_id": "save-order"},
+      {"evidence_id": "{line:service.py:after:4}", "owner_id": "save-order"}
+    ]
+  }
+}

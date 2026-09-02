@@ -1,0 +1,66 @@
+{
+  "fixture_schema": "shiftory.grounding-adversarial/v1",
+  "scenario": "addition",
+  "expect": "accept",
+  "intent": "A pure addition with a verified addition claim and a verified non-text mode unit claim.",
+  "manifest": {
+    "schema": "shiftory.explanation/v1",
+    "summary": "A new feature module is added.",
+    "items": [
+      {
+        "id": "feature-body",
+        "kind": "behavioral",
+        "title": "Feature entry point",
+        "before": null,
+        "after": "A feature function returns the string \"new\".",
+        "absence": "before",
+        "confidence": "extracted",
+        "citations": ["{citation:feature.py:after:1}"],
+        "grounding": {
+          "claims": [
+            {
+              "id": "body",
+              "type": "addition",
+              "support_level": "verified",
+              "support": ["{span:feature.py:after:1}"],
+              "literal": "return \"new\""
+            },
+            {
+              "id": "definition-order",
+              "type": "source_order",
+              "support_level": "verified",
+              "support": ["{citation:feature.py:after:1}"],
+              "side": "after",
+              "first": "def feature():",
+              "second": "return \"new\""
+            }
+          ]
+        }
+      },
+      {
+        "id": "feature-file",
+        "kind": "structural",
+        "title": "New regular file record",
+        "confidence": "extracted",
+        "citations": [],
+        "grounding": {
+          "claims": [
+            {
+              "id": "mode",
+              "type": "non_text_change",
+              "support_level": "verified",
+              "support": ["{unit:feature.py:mode}"],
+              "unit_kind": "mode",
+              "metadata": {"new_mode": "100644", "old_mode": null}
+            }
+          ]
+        }
+      }
+    ],
+    "coverage_owners": [
+      {"evidence_id": "{line:feature.py:after:1}", "owner_id": "feature-body"},
+      {"evidence_id": "{line:feature.py:after:2}", "owner_id": "feature-body"},
+      {"evidence_id": "{unit:feature.py:mode}", "owner_id": "feature-file"}
+    ]
+  }
+}

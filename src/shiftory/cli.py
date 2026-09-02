@@ -21,6 +21,7 @@ from shiftory import __version__
 from shiftory.cache.store import CacheStore
 from shiftory.errors import ScopeError, ShiftoryError, ValidationError
 from shiftory.evidence.builder import AnalyzeOptions, analyze
+from shiftory.explain.grounding import CLAIM_TYPES, GRAPH_FACT_KINDS, SUPPORT_LEVELS
 from shiftory.git.repository import ScopeSpec, repository_identity, resolve_repository
 from shiftory.models.json import canonical_json, load_json, pretty_json
 from shiftory.render.evidence import render_evidence_markdown
@@ -43,9 +44,11 @@ def _parser() -> argparse.ArgumentParser:
 
     verify_parser = commands.add_parser("verify", help="validate an explanation manifest")
     _add_manifest_args(verify_parser)
+    _add_grounding_option(verify_parser)
 
     render_parser = commands.add_parser("render", help="render a verified explanation")
     _add_manifest_args(render_parser)
+    _add_grounding_option(render_parser)
     render_parser.add_argument("--format", choices=("markdown", "json"), default="markdown")
     render_parser.add_argument("--output", type=Path)
 
@@ -68,11 +71,28 @@ def _parser() -> argparse.ArgumentParser:
     )
     _add_scope(explain_parser)
     _add_analysis_options(explain_parser)
+    _add_grounding_option(explain_parser, default=None)
     explain_parser.add_argument("--resume", type=Path, help="run descriptor from an earlier phase")
     explain_parser.add_argument("--explanation", type=Path)
     explain_parser.add_argument("--output", type=Path)
     explain_parser.add_argument("--keep-artifacts", action="store_true")
     return parser
+
+
+def _add_grounding_option(
+    parser: argparse.ArgumentParser,
+    *,
+    default: str | None = "optional",
+) -> None:
+    parser.add_argument(
+        "--grounding",
+        choices=("optional", "required"),
+        default=default,
+        help=(
+            "require a grounding block on every explanation item "
+            f"(default: {default or 'required'}); declared grounding is always validated"
+        ),
+    )
 
 
 def _add_scope(parser: argparse.ArgumentParser) -> None:
@@ -184,33 +204,52 @@ def _load_manifest_paths(
 
 
 def _verify(args: argparse.Namespace) -> int:
-    report = _verify_manifest_paths(args.evidence, args.explanation)
+    report = _verify_manifest_paths(
+        args.evidence, args.explanation, require_grounding=args.grounding == "required"
+    )
     sys.stdout.write(
         canonical_json(
             {
                 "valid": True,
                 "comparison_identity": report["comparison_identity"],
                 "coverage": report["coverage"],
+                **({"grounding": report["grounding"]} if "grounding" in report else {}),
             }
         )
     )
     return 0
 
 
-def _verify_manifest_paths(evidence_path: Path, explanation_path: Path) -> dict[str, Any]:
+def _verify_manifest_paths(
+    evidence_path: Path,
+    explanation_path: Path,
+    *,
+    require_grounding: bool = False,
+) -> dict[str, Any]:
     evidence, explanation = _load_manifest_paths(evidence_path, explanation_path)
-    return build_report(evidence, explanation)
+    return build_report(evidence, explanation, require_grounding=require_grounding)
 
 
 def _render(args: argparse.Namespace) -> int:
-    payload = _render_manifest_paths(args.evidence, args.explanation, args.format)
+    payload = _render_manifest_paths(
+        args.evidence,
+        args.explanation,
+        args.format,
+        require_grounding=args.grounding == "required",
+    )
     _write_or_print(payload, args.output)
     return 0
 
 
-def _render_manifest_paths(evidence_path: Path, explanation_path: Path, output_format: str) -> str:
+def _render_manifest_paths(
+    evidence_path: Path,
+    explanation_path: Path,
+    output_format: str,
+    *,
+    require_grounding: bool = False,
+) -> str:
     evidence, explanation = _load_manifest_paths(evidence_path, explanation_path)
-    report = build_report(evidence, explanation)
+    report = build_report(evidence, explanation, require_grounding=require_grounding)
     _validate_schema(report, "report")
     return pretty_json(report) if output_format == "json" else render_report_markdown(report)
 
@@ -353,6 +392,22 @@ def _descriptor_path(descriptor: dict[str, Any], key: str, run: Path, filename: 
     return resolved
 
 
+def _recorded_grounding_mode(descriptor: dict[str, Any]) -> str:
+    """Read the grounding mode recorded during the first phase.
+
+    The mode is fixed when evidence is produced so that a resume invocation
+    cannot weaken the gate with a flag. A descriptor without a valid grounding
+    block fails closed rather than falling back to optional.
+    """
+    grounding = descriptor.get("grounding")
+    if not isinstance(grounding, dict):
+        raise ValidationError("The resume descriptor is missing its grounding block")
+    mode = grounding.get("mode")
+    if mode not in {"optional", "required"}:
+        raise ValidationError("The resume descriptor grounding mode must be optional or required")
+    return str(mode)
+
+
 def _validate_analysis_args(args: argparse.Namespace) -> None:
     if args.remote is not None and args.pr is None:
         raise ScopeError("--remote is only valid with --pr")
@@ -377,6 +432,7 @@ def _validate_explain_args(args: argparse.Namespace) -> None:
             args.remote is not None,
             args.repo != ".",
             args.graphora != "auto",
+            args.grounding is not None,
             args.max_evidence_bytes != 1_000_000,
             args.context_lines != 3,
             args.cache_dir is not None,
@@ -452,7 +508,9 @@ def _explain_in_run(args: argparse.Namespace, run: Path, descriptor_path: Path |
                 f"--explanation must be the run's recorded path: {recorded_explanation}"
             )
         _require_private_file(explanation_path, "Explanation")
+        require_grounding = _recorded_grounding_mode(descriptor) == "required"
     else:
+        grounding_mode = args.grounding or "required"
         evidence_path = run / "evidence.json"
         evidence = analyze(_options(args)).to_dict()
         _validate_schema(evidence, "evidence")
@@ -481,6 +539,12 @@ def _explain_in_run(args: argparse.Namespace, run: Path, descriptor_path: Path |
                 "requested_bytes": args.max_evidence_bytes,
                 "actual_bytes": evidence["metrics"]["evidence_bytes"],
             },
+            "grounding": {
+                "mode": grounding_mode,
+                "claim_types": list(CLAIM_TYPES),
+                "support_levels": list(SUPPORT_LEVELS),
+                "graph_fact_kinds": list(GRAPH_FACT_KINDS),
+            },
             "schema_command": ["shiftory", "schema", "explanation"],
             "verify_command": [
                 "shiftory",
@@ -489,6 +553,8 @@ def _explain_in_run(args: argparse.Namespace, run: Path, descriptor_path: Path |
                 str(evidence_path),
                 "--explanation",
                 str(template_path),
+                "--grounding",
+                grounding_mode,
             ],
             "render_command": [
                 "shiftory",
@@ -497,6 +563,8 @@ def _explain_in_run(args: argparse.Namespace, run: Path, descriptor_path: Path |
                 str(evidence_path),
                 "--explanation",
                 str(template_path),
+                "--grounding",
+                grounding_mode,
             ],
             "resume_command": [
                 "shiftory",
@@ -510,7 +578,9 @@ def _explain_in_run(args: argparse.Namespace, run: Path, descriptor_path: Path |
         _write_private(descriptor_path, pretty_json(descriptor))
         sys.stdout.write(pretty_json({**descriptor, "descriptor": str(descriptor_path)}))
         return 0
-    report = _verify_manifest_paths(evidence_path, explanation_path)
+    report = _verify_manifest_paths(
+        evidence_path, explanation_path, require_grounding=require_grounding
+    )
     verification_path = run / "verification.json"
     _write_private(
         verification_path,
@@ -519,10 +589,13 @@ def _explain_in_run(args: argparse.Namespace, run: Path, descriptor_path: Path |
                 "valid": True,
                 "comparison_identity": report["comparison_identity"],
                 "coverage": report["coverage"],
+                **({"grounding": report["grounding"]} if "grounding" in report else {}),
             }
         ),
     )
-    payload = _render_manifest_paths(evidence_path, explanation_path, "markdown")
+    payload = _render_manifest_paths(
+        evidence_path, explanation_path, "markdown", require_grounding=require_grounding
+    )
     report_path = run / "report.md"
     _write_private(report_path, payload)
     _write_or_print(payload, args.output)

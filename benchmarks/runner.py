@@ -738,6 +738,36 @@ def actual_unit_map(evidence: dict[str, Any]) -> dict[str, str]:
     return result
 
 
+def actual_span_map(evidence: dict[str, Any]) -> dict[str, str]:
+    result = {}
+    for file in evidence["files"]:
+        path = file["new_path"] or file["old_path"]
+        for index, span in enumerate(file["spans"], 1):
+            result[f"conceptual-span:{path}#{index}"] = span["id"]
+    return result
+
+
+def actual_citation_map(evidence: dict[str, Any]) -> dict[str, str]:
+    result = {}
+    for file in evidence["files"]:
+        path = file["new_path"] or file["old_path"]
+        for index, citation in enumerate(file["citations"], 1):
+            result[f"conceptual-citation:{path}#{index}"] = citation["id"]
+    return result
+
+
+def resolve_grounding(item: dict[str, Any], references: dict[str, str]) -> None:
+    grounding = item.get("grounding")
+    if not isinstance(grounding, dict):
+        return
+    for claim in grounding.get("claims", []):
+        claim["support"] = [
+            references.get(identity, identity) for identity in claim.get("support", [])
+        ]
+        for shared in claim.get("shared_support", []):
+            shared["evidence_id"] = references.get(shared["evidence_id"], shared["evidence_id"])
+
+
 def instantiate_manifest(
     template_document: dict[str, Any], evidence: dict[str, Any], scenario_id: str
 ) -> dict[str, Any]:
@@ -751,6 +781,7 @@ def instantiate_manifest(
     hunks = actual_hunk_map(evidence)
     units = actual_unit_map(evidence)
     concepts = {**hunks, **units}
+    references = {**concepts, **actual_span_map(evidence), **actual_citation_map(evidence)}
     owner_by_concept: dict[str, str] = {}
     for owner in manifest["coverage_owners"]:
         concept = owner["evidence_id"]
@@ -769,14 +800,15 @@ def instantiate_manifest(
         citations = []
         for citation in item.get("citations", []):
             identity = citation.get("id") if isinstance(citation, dict) else citation
-            if identity in concepts:
-                replacement = concepts[identity]
+            if identity in references:
+                replacement = references[identity]
                 citations.append(
                     {**citation, "id": replacement} if isinstance(citation, dict) else replacement
                 )
             else:
                 citations.append(citation)
         item["citations"] = citations
+        resolve_grounding(item, references)
     owners = []
     for file in evidence["files"]:
         path = file["new_path"] or file["old_path"]

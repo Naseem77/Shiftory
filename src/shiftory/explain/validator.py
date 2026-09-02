@@ -7,6 +7,12 @@ from dataclasses import dataclass
 from typing import Any
 
 from shiftory.errors import ValidationError
+from shiftory.explain.grounding import (
+    LITERAL_FIELDS,
+    OBLIGATION_LEVELS,
+    GroundingSummary,
+    evaluate_grounding,
+)
 
 _CONFIDENCE = {"extracted", "inferred", "ambiguous", "unresolved", "unavailable"}
 _DISALLOWED_FIELDS = {
@@ -66,6 +72,7 @@ class ValidationResult:
     unit_total: int
     unit_covered: int
     citation_count: int
+    grounding: GroundingSummary | None = None
 
     def to_dict(self) -> dict[str, int | float]:
         return {
@@ -89,7 +96,12 @@ def _ratio(covered: int, total: int) -> float:
     return 1.0 if total == 0 else covered / total
 
 
-def validate_explanation(evidence: dict[str, Any], explanation: dict[str, Any]) -> ValidationResult:
+def validate_explanation(
+    evidence: dict[str, Any],
+    explanation: dict[str, Any],
+    *,
+    require_grounding: bool = False,
+) -> ValidationResult:
     errors: list[dict[str, Any]] = []
     if evidence.get("schema") != "shiftory.evidence/v1":
         errors.append({"path": "$.evidence.schema", "message": "Expected shiftory.evidence/v1"})
@@ -112,7 +124,7 @@ def validate_explanation(evidence: dict[str, Any], explanation: dict[str, Any]) 
         else:
             item_ids.add(item_id)
         _validate_item(item, index, errors)
-    _validate_policy(explanation, items, errors)
+    _validate_policy(explanation, items, errors, _ClaimTextPolicy(_source_corpus(evidence)))
 
     ledger = _evidence_ledger(evidence, errors)
     owners_value = explanation.get("coverage_owners")
@@ -257,6 +269,18 @@ def validate_explanation(evidence: dict[str, Any], explanation: dict[str, Any]) 
         )
         for unit_id in ledger["units"]
     )
+    grounding = (
+        evaluate_grounding(
+            evidence=evidence,
+            items=items,
+            item_ids=item_ids,
+            owners=owners,
+            require_grounding=require_grounding,
+            errors=errors,
+        )
+        if not errors
+        else None
+    )
     if errors:
         raise ValidationError(
             f"Explanation validation failed with {len(errors)} error(s)",
@@ -272,6 +296,7 @@ def validate_explanation(evidence: dict[str, Any], explanation: dict[str, Any]) 
         len(ledger["units"]),
         unit_covered,
         citation_count,
+        grounding,
     )
 
 
@@ -401,11 +426,39 @@ def _contains_uncertainty(value: str) -> bool:
     return bool(re.search(r"\bmay\b", value) or _MODAL_PREDICATE.search(value))
 
 
+def _source_corpus(evidence: dict[str, Any]) -> str:
+    """Every piece of source text the evidence packet carries.
+
+    A claim value that occurs verbatim here is source-derived, exactly like the
+    quoted source the explanation-not-review check already permits elsewhere.
+    """
+    parts: list[str] = []
+    files = evidence.get("files")
+    for file in files if isinstance(files, list) else []:
+        if not isinstance(file, dict):
+            continue
+        hunks = file.get("hunks")
+        for hunk in hunks if isinstance(hunks, list) else []:
+            if not isinstance(hunk, dict):
+                continue
+            lines = hunk.get("lines")
+            for line in lines if isinstance(lines, list) else []:
+                if isinstance(line, dict) and isinstance(line.get("content"), str):
+                    parts.append(line["content"])
+        citations = file.get("citations")
+        for citation in citations if isinstance(citations, list) else []:
+            if isinstance(citation, dict) and isinstance(citation.get("text"), str):
+                parts.append(citation["text"])
+    return "\n".join(parts)
+
+
 def _validate_policy(
     explanation: dict[str, Any],
     items: list[Any],
     errors: list[dict[str, Any]],
+    policy: _ClaimTextPolicy | None = None,
 ) -> None:
+    policy = policy or _ClaimTextPolicy("")
     for field in sorted(explanation):
         normalized = field.lower().replace("-", "_")
         if normalized not in _DISALLOWED_FIELDS:
@@ -444,10 +497,138 @@ def _validate_policy(
                 continue
             unquoted = _QUOTED_OR_CODE.sub("", value)
             _validate_policy_text(unquoted, f"$.items[{index}].{field}", errors)
+        _validate_grounding_policy(raw_item, index, errors, policy)
     summary = explanation.get("summary")
     if isinstance(summary, str):
         unquoted = _QUOTED_OR_CODE.sub("", summary)
         _validate_policy_text(unquoted, "$.summary", errors)
+
+
+def _validate_grounding_policy(
+    item: dict[str, Any],
+    index: int,
+    errors: list[dict[str, Any]],
+    policy: _ClaimTextPolicy,
+) -> None:
+    grounding = item.get("grounding")
+    if not isinstance(grounding, dict):
+        return
+    claims = grounding.get("claims")
+    if not isinstance(claims, list):
+        return
+    for position, claim in enumerate(claims):
+        if not isinstance(claim, dict):
+            continue
+        claim_path = f"$.items[{index}].grounding.claims[{position}]"
+        for field in sorted(claim):
+            normalized = field.lower().replace("-", "_")
+            if normalized in _DISALLOWED_FIELDS:
+                errors.append(
+                    {
+                        "path": f"{claim_path}.{field}",
+                        "message": (
+                            f"{field!r} is a review/judgment structure, not an explanation field"
+                        ),
+                    }
+                )
+        limits = claim.get("limits")
+        if isinstance(limits, str):
+            _validate_policy_text(_QUOTED_OR_CODE.sub("", limits), f"{claim_path}.limits", errors)
+        _validate_claim_values(claim, claim_path, errors, policy)
+        shared = claim.get("shared_support")
+        if not isinstance(shared, list):
+            continue
+        for shared_position, entry in enumerate(shared):
+            reason = entry.get("reason") if isinstance(entry, dict) else None
+            if isinstance(reason, str):
+                _validate_policy_text(
+                    _QUOTED_OR_CODE.sub("", reason),
+                    f"{claim_path}.shared_support[{shared_position}].reason",
+                    errors,
+                )
+
+
+_EVIDENCE_FORCED_FIELDS: dict[str, tuple[str, ...]] = {
+    "addition": ("literal",),
+    "deletion": ("literal",),
+    "graph_relation": ("symbol", "target", "path"),
+    "non_text_change": (),
+    "source_order": ("first", "second"),
+    "text_absence": (),
+    "text_presence": ("literal",),
+    "value_change": ("before_literal", "after_literal"),
+}
+
+
+def _validate_claim_values(
+    claim: dict[str, Any],
+    claim_path: str,
+    errors: list[dict[str, Any]],
+    policy: _ClaimTextPolicy,
+) -> None:
+    """Scan every claim value that is not forced to come from the evidence.
+
+    An operand that an obligation makes match the evidence byte-for-byte is real
+    source or graph text, so diff content mentioning words such as "vulnerability"
+    must pass. `text_absence` inverts that: a verified absence proves the literal
+    is *not* in the cited source, and inferred or ambiguous absence constrains it
+    not at all, so its literal is agent prose at every level. Non-text metadata is
+    only compared with the unit at `verified`. Anything that occurs verbatim in
+    the packet's source text is treated as quoted source and left alone.
+    """
+    claim_type = claim.get("type")
+    level = claim.get("support_level")
+    forced: tuple[str, ...] = ()
+    if isinstance(claim_type, str) and isinstance(level, str) and level in OBLIGATION_LEVELS:
+        forced = _EVIDENCE_FORCED_FIELDS.get(claim_type, ())
+    for name in (*LITERAL_FIELDS, "target", "path", "id"):
+        if name in forced:
+            continue
+        value = claim.get(name)
+        if isinstance(value, str):
+            policy.scan(value, f"{claim_path}.{name}", errors)
+    if level == "verified":
+        return
+    metadata = claim.get("metadata")
+    if not isinstance(metadata, dict):
+        return
+    for key in sorted(metadata):
+        value = metadata[key]
+        if isinstance(key, str):
+            policy.scan(key, f"{claim_path}.metadata", errors)
+        if isinstance(value, str):
+            policy.scan(value, f"{claim_path}.metadata.{key}", errors)
+
+
+class _ClaimTextPolicy:
+    """Explanation-not-review scanning for authored grounding values.
+
+    The pattern scan runs first because it reads only the bounded value, while
+    the source-derived exemption has to search the whole packet. A value that
+    matches no pattern is accepted without touching the corpus, so the corpus is
+    searched only for text that already reads like a review, and each distinct
+    searched value is looked up once per validation.
+    """
+
+    def __init__(self, source_corpus: str) -> None:
+        self._corpus = source_corpus
+        self._derived: dict[str, bool] = {}
+        self.corpus_lookups = 0
+
+    def scan(self, value: str, path: str, errors: list[dict[str, Any]]) -> None:
+        flagged: list[dict[str, Any]] = []
+        _validate_policy_text(_QUOTED_OR_CODE.sub("", value), path, flagged)
+        if not flagged or self._source_derived(value):
+            return
+        errors.extend(flagged)
+
+    def _source_derived(self, value: str) -> bool:
+        cached = self._derived.get(value)
+        if cached is None:
+            self.corpus_lookups += 1
+            cached = value in self._corpus
+            self._derived[value] = cached
+        return cached
 
 
 def _validate_policy_text(

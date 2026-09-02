@@ -31,12 +31,30 @@ def _explanation_for(evidence: dict[str, Any]) -> dict[str, Any]:
                 "after": "The function returns two.",
                 "confidence": "extracted",
                 "citations": citation_ids,
+                "grounding": {"claims": [_replacement_claim(files)]},
             }
         ],
         "coverage_owners": [
             {"evidence_id": identity, "owner_id": "change"} for identity in [*line_ids, *unit_ids]
         ],
     }
+
+
+def _replacement_claim(files: list[dict[str, Any]]) -> dict[str, Any]:
+    for file in files:
+        spans = {span["id"]: span for span in file["spans"]}
+        for span in file["spans"]:
+            replacement = spans.get(span.get("replacement_span_id") or "")
+            if span["side"] == "before" and replacement is not None:
+                return {
+                    "id": "return-value",
+                    "type": "value_change",
+                    "support_level": "verified",
+                    "support": [span["id"], replacement["id"]],
+                    "before_literal": "return 1",
+                    "after_literal": "return 2",
+                }
+    raise AssertionError("The fixture comparison has no replacement-linked span pair")
 
 
 def test_cli_main_exercises_real_workflow_in_process(repo_factory, monkeypatch, capsys) -> None:

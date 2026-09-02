@@ -14,7 +14,28 @@
         "after": "The greeting accepts a defaulted name and includes it in the result.",
         "statement": "Greeting construction now interpolates its input.",
         "confidence": "extracted",
-        "citations": ["conceptual-hunk:app.py#1"]
+        "citations": ["conceptual-hunk:app.py#1"],
+        "grounding": {
+          "claims": [
+            {
+              "id": "signature",
+              "type": "value_change",
+              "support_level": "verified",
+              "support": ["conceptual-span:app.py#1", "conceptual-span:app.py#2"],
+              "before_literal": "def greeting():",
+              "after_literal": "def greeting(name: str = \"world\"):"
+            },
+            {
+              "id": "signature-precedes-body",
+              "type": "source_order",
+              "support_level": "verified",
+              "support": ["conceptual-citation:app.py#2"],
+              "side": "after",
+              "first": "def greeting(name: str = \"world\"):",
+              "second": "return f\"hello, {name}\""
+            }
+          ]
+        }
       },
       {
         "id": "greeting-observer",
@@ -22,7 +43,26 @@
         "title": "Observe a named greeting",
         "statement": "A test invokes the greeting with a name and compares the result.",
         "confidence": "extracted",
-        "citations": ["conceptual-hunk:tests/test_app.py#1"]
+        "citations": ["conceptual-hunk:tests/test_app.py#1"],
+        "grounding": {
+          "claims": [
+            {
+              "id": "assertion",
+              "type": "addition",
+              "support_level": "verified",
+              "support": ["conceptual-span:tests/test_app.py#1"],
+              "literal": "assert greeting(\"Shiftory\") == \"hello, Shiftory\""
+            },
+            {
+              "id": "regular-file",
+              "type": "non_text_change",
+              "support_level": "verified",
+              "support": ["conceptual-unit:tests/test_app.py#2"],
+              "unit_kind": "mode",
+              "metadata": {"new_mode": "100644", "old_mode": null}
+            }
+          ]
+        }
       }
     ],
     "coverage_owners": [

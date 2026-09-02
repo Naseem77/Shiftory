@@ -15,8 +15,9 @@ language model—or Graphora—as the source of truth.
 > [!IMPORTANT]
 > **Shiftory explains changes; it does not review them.** Its output does not make
 > bug findings, assign severity, rank risk, or recommend fixes. Verification proves
-> accounting, citation references, schema conformance, and this communication
-> boundary. It does not prove that the explanation is semantically correct.
+> accounting, citation references, schema conformance, declared claim grounding,
+> and this communication boundary. It does not prove that the explanation is
+> semantically correct.
 
 ## Install
 
@@ -144,8 +145,12 @@ After an agent writes `shiftory.explanation/v1`, validate it:
 ```bash
 shiftory verify \
   --evidence evidence.json \
-  --explanation explanation.json
+  --explanation explanation.json \
+  --grounding required
 ```
+
+`--grounding required` demands a grounding block on every item. It defaults to
+`optional` for `verify` and `render`, and to `required` for `shiftory explain`.
 
 Render only after verification succeeds:
 
@@ -188,14 +193,28 @@ Evidence: `source_ab12`
 
 Confidence: **extracted**
 
+## Grounded claims
+
+Grounding mode: **required**.
+
+- Claims: 1 across 1 explanation item(s)
+- Verified against bound evidence: 1
+
+### Grounding for `value-selection`
+
+- `literal` (`value_change`, **verified**): replacement span `span_ab12` ->
+  `span_cd34` changes 'return DEFAULT' to 'return value'
+
 ## Complete source-cited coverage appendix
 
 - Changed lines: 4/4 (100%)
 - Textual hunks: 1/1 (100%)
 - Change units: 1/1 (100%)
 
-> Shiftory verified accounting and citation references; it does not verify
-> semantic correctness.
+> Shiftory verified accounting, citation references, and every declared
+> grounding claim against the exact evidence bound to it; verified claims are
+> source-level facts and do not establish runtime behavior or semantic
+> correctness.
 ```
 
 ## What is accounted for
@@ -215,7 +234,43 @@ explanation owner. Textual hunk and text-unit coverage is derived from complete
 ownership of their descendant lines. Citations are independent references and
 may be reused by multiple items without changing ownership counts.
 
-Read [the evidence format](docs/evidence-format.md) for exact validation rules.
+## Grounded claims
+
+A citation that merely exists proves nothing about the sentence it is attached
+to. Each explanation item therefore carries `grounding.claims`: named predicates
+bound to the exact evidence the item owns.
+
+```json
+{
+  "id": "timeout",
+  "type": "value_change",
+  "support_level": "verified",
+  "support": ["span_before_ab12", "span_after_cd34"],
+  "before_literal": "TIMEOUT = 30",
+  "after_literal": "TIMEOUT = 60"
+}
+```
+
+Shiftory verifies eight claim types — `text_presence`, `text_absence`,
+`value_change`, `addition`, `deletion`, `source_order`, `graph_relation`, and
+`non_text_change` — using byte-exact operations over evidence text. Support must
+resolve into the change the item owns, on the side the claim is about, so an
+unrelated but valid citation, a wrong-side citation, or another item's evidence
+is rejected.
+
+What cannot be proven must be declared. `inferred`, `ambiguous`, `unresolved`,
+and `unavailable` claims require explicit `limits`, and an item's `confidence`
+may never exceed its weakest claim. An ordering statement must evidence **both**
+operations at every asserting level; `source_order` proves lexical order inside
+one cited region and never execution order.
+
+`shiftory explain` requires grounding by default and records that mode in its run
+descriptor so a resume invocation cannot weaken it with a flag. `shiftory verify`
+and `shiftory render` default to `--grounding optional`, so manifests from
+existing tooling keep working while any declared grounding is still validated.
+
+Read [the evidence format](docs/evidence-format.md) for exact validation rules
+and [the limitations](docs/limitations.md) for what grounding does not prove.
 
 ## Languages
 

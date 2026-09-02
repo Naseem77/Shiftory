@@ -1,0 +1,73 @@
+{
+  "fixture_schema": "shiftory.grounding-adversarial/v1",
+  "scenario": "reorder",
+  "expect": "accept",
+  "intent": "A verified replacement plus a verified source-order claim, with the moved commit statement honestly downgraded to inferred.",
+  "manifest": {
+    "schema": "shiftory.explanation/v1",
+    "summary": "The save path returns a different value and its commit statement moves.",
+    "items": [
+      {
+        "id": "save-result",
+        "kind": "behavioral",
+        "title": "Save result and following statement order",
+        "before": "The function returned \"ok\".",
+        "after": "The function returns \"done\", and the commit statement is written before that return.",
+        "confidence": "extracted",
+        "citations": [
+          "{citation:service.py:before:4}",
+          "{citation:service.py:after:3}"
+        ],
+        "grounding": {
+          "claims": [
+            {
+              "id": "result",
+              "type": "value_change",
+              "support_level": "verified",
+              "support": [
+                "{span:service.py:before:4}",
+                "{span:service.py:after:3}"
+              ],
+              "before_literal": "return \"ok\"",
+              "after_literal": "return \"done\""
+            },
+            {
+              "id": "order",
+              "type": "source_order",
+              "support_level": "verified",
+              "support": ["{citation:service.py:after:3}"],
+              "side": "after",
+              "first": "database.commit()",
+              "second": "return \"done\""
+            }
+          ]
+        }
+      },
+      {
+        "id": "moved-commit",
+        "kind": "structural",
+        "title": "Commit statement position",
+        "confidence": "inferred",
+        "citations": ["{citation:service.py:before:2}"],
+        "grounding": {
+          "claims": [
+            {
+              "id": "removed-here",
+              "type": "deletion",
+              "support_level": "inferred",
+              "limits": "The same call is added at another position in this file, so the evidence shows a move rather than a removal.",
+              "support": ["{span:service.py:before:2}"],
+              "literal": "database.commit()"
+            }
+          ]
+        }
+      }
+    ],
+    "coverage_owners": [
+      {"evidence_id": "{line:service.py:before:2}", "owner_id": "moved-commit"},
+      {"evidence_id": "{line:service.py:before:4}", "owner_id": "save-result"},
+      {"evidence_id": "{line:service.py:after:3}", "owner_id": "save-result"},
+      {"evidence_id": "{line:service.py:after:4}", "owner_id": "save-result"}
+    ]
+  }
+}

@@ -214,35 +214,62 @@ def test_every_case_has_exactly_the_two_predeclared_real_captures(case_id: str) 
                 )
 
 
-FREEZE_COMMIT = "5c7289bd8e540317ce45d4407044c5c846698ecb"
+UNAFFECTED_FREEZE_COMMIT = "5c7289bd8e540317ce45d4407044c5c846698ecb"
+V3_RECAPTURED_CASES = (
+    "error-swallow-to-raise",
+    "threshold-value-replacement",
+    "binary-asset-replacement",
+)
 
 
-def test_all_official_captures_bind_to_the_frozen_commit_with_unique_handles() -> None:
-    """Every one of the 12 official captures -- not just the six generated
-    immediately after the freeze, but also the six unaffected-case captures
-    that were later archived and freshly recaptured once their prior
-    protocol commit (7b9d99b) was found to lack a committed
-    protocol_registry.json -- must reference the SAME protocol-freeze
-    commit, pass BOTH the content-equality and chronological-precommitment
-    checks against it, and carry a non-null, globally-unique
-    orchestrator_agent_handle. A handle collision across different
-    captures, or any capture silently bound to a different or unverified
-    commit, would defeat the entire point of a single, shared, precommitted
-    protocol."""
+def test_all_official_captures_bind_to_a_verified_frozen_commit_with_unique_handles() -> None:
+    """Every one of the 12 official captures must independently verify for
+    both full-manifest-and-registry content-equality and chronological
+    precommitment, and carry a non-null, globally-unique
+    orchestrator_agent_handle. reordering-guard-clause,
+    context-limited-helper-call, and cross-file-validation-edit -- unaffected
+    by this round's registry_version 3 recapture -- must still reference the
+    original protocol-freeze commit. error-swallow-to-raise,
+    threshold-value-replacement, and binary-asset-replacement must reference
+    a DIFFERENT commit whose committed protocol_registry.json is
+    registry_version 3 or later (the registry_version 2 captures for these
+    three cases were themselves second invocations after an unrecoverable
+    shared-directory collision -- see the invalidated-generation-attempt-v1
+    incident records and their retry-after-unrecoverable-shared-directory-collision
+    archive records -- so registry_version 2 can never again be a valid
+    official protocol commit for these three cases). A handle collision
+    across different captures, or any capture silently bound to a different
+    or unverified commit, would defeat the entire point of a single,
+    precommitted protocol per case."""
     handles: dict[str, str] = {}
     for case_id in CASE_IDS:
         for config in PREDECLARED_CONFIGS:
             agent_run_path = CASES_DIR / case_id / "captured" / config / "agent-run.json"
             agent_run = v.load_json_strict(agent_run_path)
             protocol = agent_run["benchmark_protocol_commit"]
-            assert protocol["commit"] == FREEZE_COMMIT, (
-                f"{case_id}/{config}: expected benchmark_protocol_commit.commit "
-                f"{FREEZE_COMMIT!r}, found {protocol['commit']!r}"
+            assert ah.recompute_benchmark_protocol_commit_verification(agent_run), (
+                f"{case_id}/{config}: benchmark_protocol_commit does not independently "
+                "verify for full-manifest-and-registry content-equality"
             )
             assert ah.verify_protocol_precommitment(agent_run), (
-                f"{case_id}/{config}: the freeze commit's committer date must strictly "
+                f"{case_id}/{config}: the referenced commit's committer date must strictly "
                 "precede this capture's own capture_ingested_at_utc"
             )
+            if case_id in V3_RECAPTURED_CASES:
+                assert protocol["commit"] != UNAFFECTED_FREEZE_COMMIT, (
+                    f"{case_id}/{config}: this case was recaptured under registry_version 3 "
+                    "and must never again reference the registry_version 2 freeze commit"
+                )
+                registry = ah.reconstruct_protocol_registry_at_commit(protocol["commit"])
+                assert registry is not None and registry["registry_version"] >= 3, (
+                    f"{case_id}/{config}: expected a registry_version >= 3 commit, "
+                    f"found registry_version {registry['registry_version'] if registry else None!r}"
+                )
+            else:
+                assert protocol["commit"] == UNAFFECTED_FREEZE_COMMIT, (
+                    f"{case_id}/{config}: expected the unaffected freeze commit "
+                    f"{UNAFFECTED_FREEZE_COMMIT!r}, found {protocol['commit']!r}"
+                )
             handle = agent_run["invocation"]["orchestrator_agent_handle"]
             assert handle["externally_verifiable"] is False, (
                 f"{case_id}/{config}: orchestrator_agent_handle must never claim to be "
@@ -510,21 +537,28 @@ def test_withdrawn_captures_are_hash_verified_and_never_officially_enumerated(
     assert not str(INVALIDATED_DIR).startswith(str(CASES_DIR) + "/")
 
 
-def test_exactly_fourteen_archived_captures_with_distinct_reasons() -> None:
-    """Enforces the full-archive invariant: exactly 14 withdrawn captures
+def test_exactly_twenty_archived_captures_with_distinct_reasons() -> None:
+    """Enforces the full-archive invariant: exactly 20 withdrawn captures
     exist in total --
     2 answer-leak withdrawals (cross-file-validation-edit's original
-    delete-add-not-a-rename captures) plus 12 protocol-not-precommitted
-    withdrawals across four distinct reason codes: 2 each for
+    delete-add-not-a-rename captures) plus 18 protocol-not-precommitted
+    withdrawals across five distinct reason codes: 2 each for
     reordering-guard-clause (protocol-not-predeclared-before-generation),
     context-limited-helper-call (prompt-fix-not-committed-before-generation),
     cross-file-validation-edit's first freeze-era replacement pair
-    (neutral-prompt-not-committed-before-generation), and 2 each for
+    (neutral-prompt-not-committed-before-generation), 2 each for
     error-swallow-to-raise, threshold-value-replacement, and
-    binary-asset-replacement (protocol-config-not-precommitted, once the
-    protocol-commit verifier was strengthened to also check the committed
-    config registry, not just prompt-package content-equality) -- never
-    silently merged, deduplicated, or miscounted."""
+    binary-asset-replacement's registry_version-2-but-registry-less captures
+    (protocol-config-not-precommitted), and 2 more each for those same three
+    cases' registry_version 2 replacement captures
+    (retry-after-unrecoverable-shared-directory-collision -- these were
+    themselves second invocations, since the true first invocation for each
+    was silently lost to a shared-directory collision; see the six
+    invalidated-generation-attempt-v1 incident records, which this test
+    deliberately does NOT count here, since those have no recoverable bytes
+    to hash-verify and are enumerated separately by
+    test_exactly_six_lost_generation_attempt_incidents) -- never silently
+    merged, deduplicated, or miscounted."""
     total = 0
     by_status: dict[str, int] = {}
     by_reason_code: dict[str, int] = {}
@@ -536,17 +570,57 @@ def test_exactly_fourteen_archived_captures_with_distinct_reasons() -> None:
             reason_code = record.get("reason_code")
             if reason_code is not None:
                 by_reason_code[reason_code] = by_reason_code.get(reason_code, 0) + 1
-    assert total == 14, f"expected exactly 14 archived captures, found {total}"
+    assert total == 20, f"expected exactly 20 archived captures, found {total}"
     assert by_status == {
         "invalidated-answer-leak-v1": 2,
-        "invalidated-protocol-not-precommitted-v1": 12,
+        "invalidated-protocol-not-precommitted-v1": 18,
     }, by_status
     assert by_reason_code == {
         "protocol-not-predeclared-before-generation": 2,
         "prompt-fix-not-committed-before-generation": 2,
         "neutral-prompt-not-committed-before-generation": 2,
         "protocol-config-not-precommitted": 6,
+        "retry-after-unrecoverable-shared-directory-collision": 6,
     }, by_reason_code
+
+
+LOST_GENERATION_ATTEMPT_CASES = (
+    "error-swallow-to-raise",
+    "threshold-value-replacement",
+    "binary-asset-replacement",
+)
+
+
+def test_exactly_six_lost_generation_attempt_incidents() -> None:
+    """Pins the companion invariant to the archive count above: exactly six
+    invalidated-generation-attempt-v1 incident records exist (one config-a
+    and one config-b for each of the three cases affected by the
+    shared-directory collision), all schema-valid, all correctly labeled
+    with cause=shared-prompt-directory-raw-response-collision and
+    raw_response_status=unrecoverable_overwritten, and all bound to the
+    registry_version 2 protocol commit the lost invocation actually ran
+    under -- never silently dropped, duplicated, or miscounted."""
+    invalidated_dir = CASES_DIR.parent / "invalidated"
+    total = 0
+    for case_id in LOST_GENERATION_ATTEMPT_CASES:
+        incident_dir = invalidated_dir / case_id / "lost-generation-attempts"
+        assert incident_dir.is_dir(), f"{case_id} is missing its lost-generation-attempts/ dir"
+        present = sorted(path.stem for path in incident_dir.glob("*.json"))
+        assert present == ["config-a", "config-b"], (
+            f"{case_id}/lost-generation-attempts must contain exactly config-a.json and "
+            f"config-b.json, found {present}"
+        )
+        for config in present:
+            record = v.validate_invalidated_generation_attempt(incident_dir / f"{config}.json")
+            assert record["case_id"] == case_id
+            assert record["cause"] == "shared-prompt-directory-raw-response-collision"
+            assert record["raw_response_status"] == "unrecoverable_overwritten"
+            assert (
+                record["orchestrator_reported_metadata"]["provenance"]
+                == "orchestrator_tool_reported_not_provider_attested"
+            )
+            total += 1
+    assert total == 6, f"expected exactly 6 lost-generation-attempt incidents, found {total}"
 
 
 PROTOCOL_REGISTRY_PATH = CASES_DIR.parent / "protocol_registry.json"

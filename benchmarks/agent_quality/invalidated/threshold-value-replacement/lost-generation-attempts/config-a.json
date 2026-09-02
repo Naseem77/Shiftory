@@ -1,0 +1,23 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-invalidated-generation-attempt/v1",
+  "case_id": "threshold-value-replacement",
+  "config_id": "config-a",
+  "model_name": "gpt-5.3-codex",
+  "orchestrator_agent_handle": "legacy-recap-tvr-a",
+  "protocol_commit": "5c7289bd8e540317ce45d4407044c5c846698ecb",
+  "protocol_registry_version": 2,
+  "cause": "shared-prompt-directory-raw-response-collision",
+  "raw_response_status": "unrecoverable_overwritten",
+  "provenance_limitation": "This invocation (legacy-recap-tvr-a, gpt-5.3-codex) was launched against a prompt-package directory materialized once per CASE (shared across both config-a and config-b), not once per invocation. Both this invocation and its sibling config's invocation wrote RAW_RESPONSE to the identical shared path; one silently overwrote the other before agent_harness.capture_result ever read either. Which of the two invocations' bytes were actually ingested and which were lost cannot be determined after the fact -- the overwrite happened at the filesystem level, with no record of write order. This record does NOT claim to know whether this specific invocation's output was the one lost or the one that survived; it exists because the shared-directory protocol defect makes it impossible to state that with confidence for either config of this case. No raw bytes, sha256, explanation, or generation timing for this invocation were ever recorded or are recoverable. This is not a repair-worthy gap -- there is nothing to repair -- it is an honest acknowledgment that this invocation's actual output cannot be audited.",
+  "orchestrator_reported_metadata": {
+    "elapsed_seconds_at_discovery": 3256,
+    "total_turns": 1,
+    "provenance": "orchestrator_tool_reported_not_provider_attested"
+  },
+  "discovered_by": {
+    "actor_type": "agent",
+    "actor": "GitHub Copilot CLI (parent coordinating session)",
+    "method": "A subsequent integrity review identified that registry_version 2's surviving official captures for these three cases were themselves second invocations (violating registry_version 2's own one_attempt_only/no_retry invariants), because the first invocation's shared per-case prompt directory caused a silent RAW_RESPONSE overwrite before ingestion. Cross-referenced against this session's own still-idle agent registry to confirm the six original invocation handles/models/elapsed times.",
+    "timestamp": "2026-09-02T10:56:00Z"
+  }
+}

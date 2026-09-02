@@ -75,7 +75,13 @@ def test_every_case_has_exactly_the_two_predeclared_real_captures(case_id: str) 
     corresponding agent-run.json and either a materialized explanation.json +
     evaluation, or an invalid_candidate structural-failure evaluation.
     Prevents a partial-suite state (some cases missing real captures, or a
-    future capture silently reusing/swapping models) from passing again."""
+    future capture silently reusing/swapping models) from passing again.
+    Also enforces every official capture's provenance is truthful agent-run-v2
+    (never v1, which conflated ingestion time with generation time), that its
+    benchmark_protocol_commit is cryptographically verified against a real
+    committed case.json (not merely asserted), and that its tagged invocation
+    never lets an empty local_process argv or a missing copilot_task timing
+    reason pass silently."""
     captured_root = CASES_DIR / case_id / "captured"
     assert captured_root.is_dir(), f"{case_id} is missing its captured/ directory entirely"
 
@@ -93,7 +99,39 @@ def test_every_case_has_exactly_the_two_predeclared_real_captures(case_id: str) 
             f"{case_id}/{config} is missing its raw response bytes"
         )
         agent_run = v.load_json_strict(agent_run_path)
-        v.validate_against_schema(agent_run, "agent-run-v1")
+        v.validate_against_schema(agent_run, "agent-run-v2")
+        assert agent_run["schema"] == "shiftory.benchmark-agent-quality-agent-run/v2", (
+            f"{case_id}/{config}: every official capture must be agent-run-v2, never v1 "
+            "(v1 is preserved only in withdrawn-capture archives)"
+        )
+        protocol = agent_run["benchmark_protocol_commit"]
+        assert protocol["verified"] is True, (
+            f"{case_id}/{config}: benchmark_protocol_commit must be cryptographically "
+            f"verified (prompt_manifest_hash_match), found unverified: {protocol['note']!r}"
+        )
+        # Never trust the self-reported 'verified' flag alone -- independently
+        # recompute it against this repository's real git history every time,
+        # so a future edit to case.json or a hand-set true value can never
+        # silently pass.
+        assert v.recompute_benchmark_protocol_commit_verification(agent_run), (
+            f"{case_id}/{config}: benchmark_protocol_commit.verified is true, but "
+            "independently recomputing git show <commit>:.../case.json's sha256 does "
+            "not match this capture's own prompt_package_manifest -- the self-reported "
+            "flag does not hold up under real verification"
+        )
+        invocation = agent_run["invocation"]
+        if invocation["kind"] == "local_process":
+            assert invocation["command_argv"], (
+                f"{case_id}/{config}: a local_process invocation must never have empty "
+                "command_argv masquerading as a real subprocess invocation"
+            )
+        else:
+            assert invocation["kind"] == "copilot_task"
+            if invocation["generation_started_at_utc"] is None:
+                assert invocation.get("generation_timing_unavailable_reason"), (
+                    f"{case_id}/{config}: a copilot_task invocation with unknown generation "
+                    "timing must state why, never silently omit it"
+                )
         assert agent_run["model"]["name"] == PREDECLARED_MODELS[config], (
             f"{case_id}/{config} must use the predeclared model "
             f"{PREDECLARED_MODELS[config]!r}, found {agent_run['model']['name']!r}"
@@ -156,7 +194,7 @@ def test_captured_real_candidates_are_valid_and_never_gated(case_id: str) -> Non
         for directory in directories:
             candidate_id = f"captured_{directory.name.replace('-', '_')}"
             agent_run = v.load_json_strict(directory / "agent-run.json")
-            v.validate_against_schema(agent_run, "agent-run-v1")
+            v.validate_against_schema(agent_run, "agent-run-v2")
             assert agent_run["isolation_method"] == "protocol"
 
             evaluation = v.load_json_strict(

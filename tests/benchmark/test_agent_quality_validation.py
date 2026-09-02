@@ -5,6 +5,7 @@ exclusivity, and case-id path/traversal/symlink safety."""
 from __future__ import annotations
 
 import hashlib
+import json
 from pathlib import Path
 from typing import Any
 
@@ -391,9 +392,7 @@ def _write_invalidated_capture_fixture(case_root: Path, config_id: str) -> None:
             "path": f"benchmarks/agent_quality/cases/new-safe-case/captured/{config_id}",
         },
     }
-    (config_dir / "invalidation.json").write_text(
-        __import__("json").dumps(record), encoding="utf-8"
-    )
+    (config_dir / "invalidation.json").write_text(json.dumps(record), encoding="utf-8")
 
 
 def test_validate_invalidated_capture_accepts_consistent_archive(tmp_path: Path) -> None:
@@ -412,9 +411,9 @@ def test_validate_invalidated_capture_rejects_prompt_package_digest_mismatch(
     surrounding files can never verify by construction."""
     _write_invalidated_capture_fixture(tmp_path, "config-a")
     record_path = tmp_path / "config-a" / "invalidation.json"
-    record = __import__("json").loads(record_path.read_text())
+    record = json.loads(record_path.read_text())
     record["original_prompt_package_digest"] = "b" * 64
-    record_path.write_text(__import__("json").dumps(record), encoding="utf-8")
+    record_path.write_text(json.dumps(record), encoding="utf-8")
     with pytest.raises(v.AgentQualityError, match="original_prompt_package_digest"):
         v.validate_invalidated_capture(tmp_path, "config-a")
 
@@ -433,3 +432,65 @@ def test_validate_invalidated_capture_rejects_config_id_mismatch(tmp_path: Path)
         (tmp_path / "config-b" / name).write_bytes((tmp_path / "config-a" / name).read_bytes())
     with pytest.raises(v.AgentQualityError, match="does not match its directory name"):
         v.validate_invalidated_capture(tmp_path, "config-b")
+
+
+# -- benchmark_protocol_commit independent recomputation ----------------------
+
+
+def test_recompute_benchmark_protocol_commit_verification_confirms_real_capture() -> None:
+    """Every official capture's benchmark_protocol_commit.verified: true claim
+    must hold up under independent recomputation against this repository's
+    real git history, not merely be trusted as self-reported data."""
+    case_dir = Path(__file__).resolve().parents[2] / "benchmarks" / "agent_quality" / "cases"
+    agent_run = json.loads(
+        (
+            case_dir / "reordering-guard-clause" / "captured" / "config-a" / "agent-run.json"
+        ).read_text()
+    )
+    assert agent_run["benchmark_protocol_commit"]["verified"] is True
+    assert v.recompute_benchmark_protocol_commit_verification(agent_run) is True
+
+
+def test_recompute_benchmark_protocol_commit_verification_rejects_wrong_commit() -> None:
+    """A benchmark_protocol_commit whose recorded manifest hash does not
+    actually match the referenced commit's committed case.json must fail
+    recomputation -- proving this is a real comparison, not a rubber stamp."""
+    case_dir = Path(__file__).resolve().parents[2] / "benchmarks" / "agent_quality" / "cases"
+    agent_run = json.loads(
+        (
+            case_dir / "reordering-guard-clause" / "captured" / "config-a" / "agent-run.json"
+        ).read_text()
+    )
+    # Corrupt the manifest's recorded case.json hash so it can no longer
+    # match the real committed content at the (otherwise valid) commit.
+    manifest = agent_run["prompt_package_manifest"]
+    for entry in manifest:
+        if entry["path"] == "case.json":
+            entry["sha256"] = "0" * 64
+    assert v.recompute_benchmark_protocol_commit_verification(agent_run) is False
+
+
+def test_recompute_benchmark_protocol_commit_verification_rejects_missing_commit() -> None:
+    case_dir = Path(__file__).resolve().parents[2] / "benchmarks" / "agent_quality" / "cases"
+    agent_run = json.loads(
+        (
+            case_dir / "reordering-guard-clause" / "captured" / "config-a" / "agent-run.json"
+        ).read_text()
+    )
+    agent_run["benchmark_protocol_commit"] = dict(
+        agent_run["benchmark_protocol_commit"], commit=None
+    )
+    assert v.recompute_benchmark_protocol_commit_verification(agent_run) is False
+
+
+def test_recompute_benchmark_protocol_commit_verification_rejects_nonexistent_commit() -> None:
+    case_dir = Path(__file__).resolve().parents[2] / "benchmarks" / "agent_quality" / "cases"
+    agent_run = json.loads(
+        (
+            case_dir / "reordering-guard-clause" / "captured" / "config-a" / "agent-run.json"
+        ).read_text()
+    )
+    agent_run["benchmark_protocol_commit"] = dict(
+        agent_run["benchmark_protocol_commit"], commit="f" * 40
+    )
+    assert v.recompute_benchmark_protocol_commit_verification(agent_run) is False

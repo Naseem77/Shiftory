@@ -224,6 +224,24 @@ than was actually observed:
   read, never around the actual generation, which took tens of seconds to
   minutes. v1 presented that as run provenance; v2 does not.
 
+  `copilot_task`'s `orchestrator_agent_handle` records the caller-supplied
+  name given to the orchestrating session's own sub-agent-launch tool when
+  a capture's generating agent was invoked (e.g. `freeze-cap-reorder-a`),
+  echoed back by that tool's own session/agent registry as a runtime
+  handle. This is deliberately **not** presented as provider- or
+  platform-issued attestation: `externally_verifiable` is a hard
+  `const: false`, because the orchestrator itself chooses this string
+  before the call -- it aids this benchmark's own traceability (e.g.
+  confirming during review which sub-agent produced which raw response)
+  but cannot, on its own, prove that a given invocation was distinct from
+  another or that no retry occurred. Every official capture's handle is
+  required to be non-null and unique across all 12
+  (`test_all_official_captures_bind_to_the_frozen_commit_with_unique_handles`);
+  a capture's actual no-retry/one-attempt-only guarantee is instead a
+  **declared protocol attestation** in `protocol_registry.json`'s
+  `invocation_protocol` (see below), not something this field cryptographically
+  proves.
+
 Two further fields separate two facts v1 conflated into one ambiguous
 `shiftory_commit`:
 
@@ -232,39 +250,63 @@ Two further fields separate two facts v1 conflated into one ambiguous
   `value` was established (`git_commit`, `source_tree_digest`, or `unknown`),
   never fabricated.
 - **`benchmark_protocol_commit`**: the repository commit whose committed
-  prompt-package-defining files -- `case.json`, `metadata.json`,
-  `history.fast-import`, the bundled `SKILL.md`, and `agent_harness.py`'s
-  `INSTRUCTIONS` text -- define the exact protocol a capture was generated
-  under. `verified: true` on the record is only ever a hint written when the
-  record was authored -- it is never trusted on its own.
+  files define the exact protocol a capture was generated under:
+  `case.json`, `metadata.json`, `history.fast-import`, the bundled
+  `SKILL.md`, `agent_harness.py`'s `INSTRUCTIONS` text, **and**
+  `protocol_registry.json` (the predeclared config-a/config-b registry,
+  prompt/skill digests, invocation-protocol invariants, and case-revision
+  pins -- see "Protocol freeze and recapture" below). `verified: true` on
+  the record is only ever a hint written when the record was authored -- it
+  is never trusted on its own.
   `agent_harness.recompute_benchmark_protocol_commit_verification`
   independently recomputes it every time (including in
   `test_every_case_has_exactly_the_two_predeclared_real_captures`, so a
-  regression is caught by CI, not just a one-time manual check): it calls
-  `agent_harness.reconstruct_full_prompt_manifest_at_commit`, which
-  reconstructs the **entire** prompt package -- not just `case.json` -- using
-  only files as committed at that commit (`case.json` and `metadata.json`/
-  `history.fast-import` via `git show`, `SKILL.md` via `git show` against
-  its committed path, and the harness's own `INSTRUCTIONS` constant parsed
-  out of that commit's `agent_harness.py` source with `ast`, never executed),
-  and compares the resulting manifest to the same capture's own recorded
-  `prompt_package_manifest` path-for-path. This is a **stronger, wall-clock-
-  independent proof** that a capture used a given protocol version, not a
-  weaker proxy based on comparing the commit's timestamp against the
-  capture's timestamps, and it is strictly stronger than checking `case.json`
-  alone: an earlier revision of this check did only that, and an independent
-  review correctly flagged it as materially understating what
-  `benchmark_protocol_commit` claims to establish.
+  regression is caught by CI, not just a one-time manual check), and this
+  check now has two independent halves that BOTH must hold:
+  1. **Full prompt-package content-equality**:
+     `agent_harness.reconstruct_full_prompt_manifest_at_commit` reconstructs
+     the **entire** prompt package -- not just `case.json` -- using only
+     files as committed at that commit (`case.json` and `metadata.json`/
+     `history.fast-import` via `git show`, `SKILL.md` via `git show` against
+     its committed path, and the harness's own `INSTRUCTIONS` constant parsed
+     out of that commit's `agent_harness.py` source with `ast`, never
+     executed), and compares the resulting manifest to the same capture's
+     own recorded `prompt_package_manifest` path-for-path.
+  2. **Committed config/registry match**:
+     `agent_harness.reconstruct_protocol_registry_at_commit` loads
+     `protocol_registry.json` as committed at that same commit (never the
+     working tree), confirms it is schema-valid, confirms its
+     `case_revisions` entry for this capture's case matches the `version`
+     actually reconstructed from that commit's `case.json`, confirms its
+     `instructions_sha256`/`skill_sha256` match the reconstructed bytes, and
+     confirms this capture's provider/model/agent-type/tool/invocation-kind
+     match the registry's declared config for this capture's config id
+     (`agent_harness.verify_config_registry_match`).
+
+  This two-part check is **strictly stronger** than checking `case.json`
+  alone (an earlier revision of this check did only that, and an
+  independent review correctly flagged it as materially understating what
+  `benchmark_protocol_commit` claims to establish), and stronger still than
+  content-equality alone: a later, definitive review found that
+  content-equality never actually verified the committed
+  provider/model/config, only prompt bytes -- a commit whose `case.json`
+  happens to match, with no `protocol_registry.json` at all, previously
+  passed; it no longer does (see "Protocol freeze and recapture" below for
+  what this meant in practice for six previously-official captures). This
+  proof is a **wall-clock-independent** proof of *what* protocol a capture
+  used; it does not by itself prove anything about *when* that protocol
+  became fixed relative to the capture -- see
+  `agent_harness.verify_protocol_precommitment` for that separate,
+  complementary, chronological check.
 
 All 12 official captures' `benchmark_protocol_commit.verified` independently
-recomputes to `true`. For `error-swallow-to-raise`, `threshold-value-
-replacement`, and `binary-asset-replacement` (unaffected by any of the
-chronology issues below), the commit is `7b9d99b` -- the earliest commit at
-which both the relevant case content and the capture harness itself are
-simultaneously present in this repository's history. For
-`reordering-guard-clause`, `cross-file-validation-edit`, and
-`context-limited-helper-call`, it is the protocol-freeze commit `5c7289b`
-(see "Protocol freeze and recapture" below).
+recomputes to `true` under both halves of this check, and all 12 reference
+the **same** commit: the protocol-freeze commit `5c7289b`
+(`test_all_official_captures_bind_to_the_frozen_commit_with_unique_handles`
+pins this). This was not always true -- see "Protocol freeze and
+recapture" immediately below for how this benchmark got from "some
+captures bound to an earlier, registry-less commit" to "all 12 bound to
+one shared, precommitted, fully-verified freeze commit".
 
 ### Protocol freeze and recapture
 
@@ -315,12 +357,54 @@ invocations were made against the frozen protocol: one config-a and one
 config-b for each of the three affected cases, no retries, no repair,
 first raw bytes preserved exactly. Two of these six (both
 `gemini-3.7-flash`/config-b) turned out to be genuine structural failures
-unrelated to timing -- see "Real captured-run results" below. The
-remaining six official captures, for `error-swallow-to-raise`,
-`threshold-value-replacement`, and `binary-asset-replacement`, are
-unaffected by any of this: their protocol commit (`7b9d99b`) both matches
-their content by full-manifest reconstruction and precedes their
-ingestion, so they were left untouched.
+unrelated to timing -- see "Real captured-run results" below.
+
+### Strengthening the check found six more captures unprotected
+
+The freeze commit and the six recaptures above satisfied the
+precommitment requirement, but a further, definitive review of this exact
+mechanism found that `recompute_benchmark_protocol_commit_verification`
+still only ever checked full-manifest **content**-equality -- it never
+loaded or verified `protocol_registry.json` at the referenced commit at
+all. This meant `verified: true` proved a capture's prompt **bytes**
+matched a committed protocol, but never that its provider/model/agent-type/
+tool/invocation-kind actually matched a **committed configuration**. The
+six captures for `error-swallow-to-raise`, `threshold-value-replacement`,
+and `binary-asset-replacement`, previously described as "unaffected" and
+left bound to `7b9d99b` (the earliest commit at which both the relevant
+case content and the capture harness are simultaneously present in
+history), were exposed by this: `7b9d99b` predates
+`protocol_registry.json`'s introduction entirely, so no committed registry
+existed there at all. Once `agent_harness.reconstruct_protocol_registry_at_commit`
+and `agent_harness.verify_config_registry_match` were added (see
+"Provenance" above) and folded into the same recompute function, these six
+captures' `benchmark_protocol_commit.verified` claim stopped
+independently recomputing to `true` -- a real regression this benchmark's
+own strengthened check caught in its own history, not a false positive.
+
+These six were archived exactly like the first six (see "Withdrawn
+captures: protocol-not-precommitted" below, `protocol-config-not-precommitted`
+reason code), bringing the total archive count to **14**, and six entirely
+fresh captures were generated for these three cases against the same
+frozen commit `5c7289b` (which does carry a committed
+`protocol_registry.json`, and independently verifies for both content and
+config match). All 12 official captures now reference this single shared
+commit. Of these six new captures, one config-a
+(`error-swallow-to-raise`) and both `binary-asset-replacement` captures
+turned out to also be genuine structural failures with fabricated
+citations -- see "Real captured-run results" below; this benchmark's
+current total is five structural failures out of 12 official captures,
+disclosed in full rather than only reporting the successes.
+
+This round's fresh captures also introduced `orchestrator_agent_handle` (see
+"Provenance" above), replacing a `task_id` field this harness could never
+actually populate for `copilot_task` invocations (it was always `null`).
+The six captures generated immediately after the original freeze were
+retroactively updated with their real, recovered handles (confirmed still
+present in this session's own agent registry at the time); this did not
+change their raw response, explanation, or any other provenance field, and
+was independently re-verified against both the content/registry and
+precommitment checks after the edit.
 
 This proof is deliberately scoped to the **generation-side prompt
 package** (case content, `SKILL.md`, `INSTRUCTIONS.md`) -- it says nothing
@@ -360,31 +444,33 @@ unenforced gap, not papered over as solved.
 Every one of the six cases has two real captures from the two predeclared
 configurations (`gpt-5.3-codex` and `gemini-3.7-flash`, see
 [`benchmarks/agent_quality/README.md`](../benchmarks/agent_quality/README.md)).
-Ten of the 12 currently official captures produced structurally valid,
+Seven of the 12 currently official captures produced structurally valid,
 schema-conformant JSON that also passed the real
-`shiftory.explain.validator.validate_explanation` check; two --
-`reordering-guard-clause`'s and `context-limited-helper-call`'s
-`captured_config_b` -- are genuine structural failures (see below), reported
-honestly rather than omitted or silently repaired. Every valid capture was
-dual-audited (two independent annotation passes plus one adjudication pass);
-the table reports `required_behavior_coverage` (satisfied out of 3 required
-facts), raw `unsupported_claims`/`contradicted_claims` counts,
-`uncertainty_honesty` violations out of claims checked, and the adjudication
-`disagreement_rate` between the two independent passes, exactly as
-regenerated in `docs/benchmarks/agent-quality/<case>/scores-v1.json`:
+`shiftory.explain.validator.validate_explanation` check; five --
+`reordering-guard-clause`/`context-limited-helper-call`'s `captured_config_b`,
+`error-swallow-to-raise`'s `captured_config_b`, and both
+`binary-asset-replacement` captures -- are genuine structural failures (see
+below), reported honestly rather than omitted or silently repaired. Every
+valid capture was dual-audited (two independent annotation passes plus one
+adjudication pass); the table reports `required_behavior_coverage`
+(satisfied out of 3 required facts), raw `unsupported_claims`/
+`contradicted_claims` counts, `uncertainty_honesty` violations out of claims
+checked, and the adjudication `disagreement_rate` between the two
+independent passes, exactly as regenerated in
+`docs/benchmarks/agent-quality/<case>/scores-v1.json`:
 
 | Case | Candidate | Coverage | Unsupported | Contradicted | Uncertainty violations | Disagreement rate |
 |---|---|---:|---:|---:|---:|---:|
 | reordering-guard-clause | captured_config_a | 1/3 | 0 | 0 | 6/9 | 0.11 |
 | reordering-guard-clause | captured_config_b | **structural failure** | -- | -- | -- | -- |
-| error-swallow-to-raise | captured_config_a | 1/3 | 0 | 0 | 0/3 | 0.0 |
-| error-swallow-to-raise | captured_config_b | 1/3 | 0 | 0 | 0/3 | 0.0 |
-| threshold-value-replacement | captured_config_a | 2/3 | 0 | 0 | 4/4 | 0.0 |
-| threshold-value-replacement | captured_config_b | 2/3 | 0 | 0 | 0/7 | 0.0 |
+| error-swallow-to-raise | captured_config_a | 1/3 | 1 | 0 | 1/7 | 0.0 |
+| error-swallow-to-raise | captured_config_b | **structural failure** | -- | -- | -- | -- |
+| threshold-value-replacement | captured_config_a | 2/3 | 0 | 0 | 0/6 | 0.0 |
+| threshold-value-replacement | captured_config_b | 2/3 | 0 | 0 | 0/8 | 0.0 |
 | cross-file-validation-edit | captured_config_a | **3/3** | 0 | 0 | 0/11 | 0.09 |
 | cross-file-validation-edit | captured_config_b | 2/3 | 0 | 0 | 0/8 | 0.25 |
-| binary-asset-replacement | captured_config_a | 2/3 | 0 | 0 | 0/3 | 0.33 |
-| binary-asset-replacement | captured_config_b | 1/3 | 0 | 0 | 0/4 | 0.0 |
+| binary-asset-replacement | captured_config_a | **structural failure** | -- | -- | -- | -- |
+| binary-asset-replacement | captured_config_b | **structural failure** | -- | -- | -- | -- |
 | context-limited-helper-call | captured_config_a | 2/3 | 0 | 0 | 0/7 | 0.0 |
 | context-limited-helper-call | captured_config_b | **structural failure** | -- | -- | -- | -- |
 
@@ -397,62 +483,78 @@ and that the change is a behavior regression, not a benign relocation.
 `captured_config_b` again splits the same change into two unconnected
 removal/addition items and does not connect them to a single "not
 equivalent" claim, so it scores 2/3 -- the same rubric, two genuinely
-different real explanations of the identical diff (this time generated
-completely fresh under the frozen protocol, not the earlier withdrawn
-replacement pair), two genuinely different, independently-audited outcomes,
-reproducing the same 2/3 result the now-archived prior attempt at this
-config/case pairing also reached. `context-limited-helper-call`'s
-`captured_config_a` covers 2/3 required facts with zero uncertainty
-violations. Every other capture correctly identified the single most
-important (highest-importance) required fact, but **omitted at least one
-lower-importance required fact** (most often the genuinely-ambiguous "what
-does this imply, and what can't be known" fact or the "what stayed the
-same" fact) -- captured models otherwise consistently produced a single,
-narrowly-scoped explanation item rather than covering every required
-behavior. `threshold-value-replacement`'s `captured_config_a` run also shows
-several audited claims' `confidence: "extracted"`/`"inferred"` judged mildly
-miscalibrated (`confidence_appropriate: false`) for facts that were, in
-fact, directly extractable from the diff, or that required more
-interpretation than their stated confidence admitted -- independently
-confirmed by two annotator passes each, not an adjudicator override -- a
-real, reproducible finding that both under-hedging directly-visible facts
-and over-stating interpretive synthesis as direct extraction are honesty
-violations in this rubric's model.
+different real explanations of the identical diff, two genuinely
+different, independently-audited outcomes. `context-limited-helper-call`'s
+and `threshold-value-replacement`'s `captured_config_a`/`captured_config_b`
+runs all cover 2/3 required facts with zero unsupported claims and zero
+uncertainty violations -- both `threshold-value-replacement` candidates
+correctly state every raw before/after number but never perform or assert
+the combined worst-case-latency arithmetic the rubric's third fact
+requires, even though `captured_config_b`'s wording states all three raw
+ingredients needed to derive it; both independent annotator passes
+explicitly distinguished "stating the ingredients" from "drawing the
+inference" and withheld credit for the same reason in both cases.
+`error-swallow-to-raise`'s `captured_config_a` covers only the central
+re-raise fact (1/3): both annotator passes independently flagged the same
+single overreach -- a claim asserting the caller's downstream execution
+"continued" as a definite consequence, when the rubric explicitly treats
+caller-side impact as unresolvable from this diff -- as `unsupported` and
+`confidence_appropriate: false`, and the explanation never mentions the
+unchanged success path at all. Every other capture correctly identified
+the single most important (highest-importance) required fact, but
+**omitted at least one lower-importance required fact**, consistent with
+this benchmark's established pattern of captured models producing a
+single, narrowly-scoped explanation item rather than covering every
+required behavior.
 
 ### Structural failures: fabricated citation ids
 
-`reordering-guard-clause`'s and `context-limited-helper-call`'s
-`captured_config_b` (both `gemini-3.7-flash`) are this benchmark's first
-real structural failures. Both raw responses are well-formed
-`shiftory.explanation/v1`-shaped JSON -- they pass `agent_harness
+`reordering-guard-clause`, `context-limited-helper-call`, and
+`error-swallow-to-raise`'s `captured_config_b` (all `gemini-3.7-flash`),
+plus both `binary-asset-replacement` captures (`gpt-5.3-codex` **and**
+`gemini-3.7-flash`), are this benchmark's structural failures -- five out
+of 12 official captures. Every one of these raw responses is well-formed
+`shiftory.explanation/v1`-shaped JSON -- it passes `agent_harness
 .capture_result`'s shallow shape check (schema tag, `items`,
 `coverage_owners` present with the right structure) -- but each cites
-`citations` evidence ids that do not exist anywhere in this case's real,
-deterministically-generated Shiftory evidence: the model fabricated
-plausible-looking `fact_*` identifiers that `shiftory analyze` never
-actually produced for this diff. Running the real
+`citations` evidence ids that do not exist anywhere in this environment's
+real, deterministically-generated Shiftory evidence (Graphora is
+disabled/unavailable in this environment, so `evidence.graph.facts` is
+always empty regardless of which `--graphora` mode is requested): the
+model fabricated plausible-looking `fact_*` identifiers that `shiftory
+analyze` never actually produced for that diff. Running the real
 `shiftory.explain.validator.validate_explanation` (the same validator
-`shiftory verify` uses) against each raw response, as this revision's
-independent review required, catches this; the shallow check inside the
-capture harness deliberately does not, since it is meant only to decide
-whether a raw response is *worth* materializing as `explanation.json`
-before the deeper, evidence-aware check runs. No `explanation.json` was
-written for either candidate (materializing one from citations that fail
-real validation would misrepresent it as a legitimate, scoreable
-explanation); `raw-response.txt` and `agent-run.json` are preserved exactly
-as first received -- this is not a retry or repair, only a corrected
-classification of the same first-attempt bytes. Both candidates' `score-v1`
-records carry `structural_failure` populated and every semantic field
-`null`, per the schema's mutual-exclusion rule (see "Coverage and
-omissions" above); their two independent annotation passes and any
-claim-level adjudication that would have applied to a valid candidate were
-therefore never produced for these two, since there is no `explanation.json`
-to decompose into claims. This is disclosed as a real, reproducible
-finding about this specific model/case combination, not evidence about
-`gemini-3.7-flash` in general -- the same model's `captured_config_b`
-answers for `context-limited-helper-call`'s sibling case and for
-`error-swallow-to-raise`/`threshold-value-replacement`/`binary-asset-
-replacement` are all structurally valid.
+`shiftory verify` uses) against each raw response, as this benchmark's
+independent review rounds have required, catches this; the shallow check
+inside the capture harness deliberately does not, since it is meant only
+to decide whether a raw response is *worth* materializing as
+`explanation.json` before the deeper, evidence-aware check runs. No
+`explanation.json` was written for any of the five (materializing one from
+citations that fail real validation would misrepresent it as a legitimate,
+scoreable explanation); each candidate's `raw-response.txt` and
+`agent-run.json` are preserved exactly as first received -- this is not a
+retry or repair, only a corrected classification of the same first-attempt
+bytes. All five candidates' `score-v1` records carry `structural_failure`
+populated and every semantic field `null`, per the schema's
+mutual-exclusion rule (see "Coverage and omissions" above); their
+annotation/adjudication fields are absent entirely, since there is no
+`explanation.json` to decompose into claims.
+
+Notably, `binary-asset-replacement`'s two captures -- generated by
+different model families (`gpt-5.3-codex` and `gemini-3.7-flash`) in
+completely independent invocations -- cite the exact same two fabricated
+ids verbatim (confirmed by direct inspection of both raw responses, not a
+processing artifact; no shared prompt content or documentation in this
+repository contains these literal strings). This is disclosed as an
+observed, unexplained coincidence, not claimed as understood: the most
+plausible account is that both models pattern-matched a plausible-looking
+`fact_`-prefixed hex identifier from the real, correctly-cited `unit_` id
+and blob hashes they did see in the evidence, rather than copying from a
+common leaked source, but this benchmark does not have a mechanism to
+verify that account and does not overclaim it. This is disclosed as a
+real, reproducible finding about these specific model/case combinations,
+not a general claim about either model family -- the same models' captures
+for the other four cases are structurally valid.
 
 ### Withdrawn captures: the `delete-add-not-a-rename` leak
 
@@ -539,18 +641,18 @@ machine-readable `reason_code`
 `neutral-prompt-not-committed-before-generation` respectively) and the
 original protocol metadata that was in force at generation time. Combined
 with the two pre-existing `invalidated-answer-leak-v1` records for
-`cross-file-validation-edit`'s original captures, this benchmark now
-carries **eight** total archived, non-official captures --
-`test_exactly_eight_archived_captures_with_distinct_reasons` pins this count
-and the exact status/reason_code distribution in CI.
+`cross-file-validation-edit`'s original captures, this brought the total
+to eight archived, non-official captures at the time -- a sixth reason
+code and six more archives followed shortly after (see "A second archival
+round" below); the current, final total of fourteen is what
+`test_exactly_fourteen_archived_captures_with_distinct_reasons` pins in CI.
 
 Six entirely fresh, stateless sub-agent invocations were then made -- one
 config-a and one config-b for each of the three affected cases -- using
 only the prompt package reconstructed from the freeze commit `5c7289b`,
 with no access to any of the six archived captures, their scores, or this
-document. These are the captures reported in the results table above. Two
-of the six new bytes streams are, by coincidence of content, extremely
-similar in structure to their archived predecessors for the same
+document. Two of the six new byte streams are, by coincidence of content,
+extremely similar in structure to their archived predecessors for the same
 case/config pairing (most visibly `cross-file-validation-edit`'s
 `captured_config_b`, which again splits the change into two unconnected
 items) -- but each new capture's own `agent-run.json` records a raw
@@ -560,6 +662,41 @@ copied from the archive; nothing in this benchmark's tooling has the
 ability to read an archived capture and write it back out as if newly
 generated, since the archival and generation code paths do not share any
 raw-response data.
+
+### A second archival round: the config registry was never actually checked
+
+As described under "Strengthening the check found six more captures
+unprotected" above, a later review found that
+`recompute_benchmark_protocol_commit_verification` never actually loaded
+or verified `protocol_registry.json` at a capture's referenced commit --
+only its prompt-package bytes. `error-swallow-to-raise`,
+`threshold-value-replacement`, and `binary-asset-replacement`'s six
+captures, previously bound to `7b9d99b` (which predates
+`protocol_registry.json` entirely), failed this strengthened check even
+though their prompt content still matched `7b9d99b` byte-for-byte. These
+six were withdrawn using the same mechanism, under a fourth distinct
+`reason_code`, `protocol-config-not-precommitted`:
+`invalidated/<case-id>/protocol-not-precommitted/config-{a,b}/`, hash-verified
+identically to the other archives. Combined with the two answer-leak
+withdrawals and the first six protocol-not-precommitted withdrawals, this
+benchmark now carries **fourteen** total archived, non-official captures
+across four distinct reason codes --
+`test_exactly_fourteen_archived_captures_with_distinct_reasons` pins this
+exact count and distribution in CI.
+
+Six more entirely fresh, stateless sub-agent invocations were then made --
+one config-a and one config-b for each of these three cases -- against the
+prompt package reconstructed from the same frozen commit `5c7289b` (now
+independently verified for both content and committed config-registry
+match), each in its own isolated prompt-package directory. (An earlier
+attempt at these six captures materialized only one shared directory per
+case for both configs, so both sub-agents wrote to the same `RAW_RESPONSE`
+path and one silently overwrote the other -- this was caught before either
+byte stream was ever read or scored, and discarded entirely in favor of
+properly isolated directories; no raw bytes from that shared-directory
+attempt were ever ingested as official or archival data.) All 12 official
+captures across all six cases now reference the single shared freeze
+commit `5c7289b`.
 
 ## Limitations
 
@@ -573,13 +710,14 @@ raw-response data.
   candidate -- a genuine self-assessment overlap, disclosed in full in
   [`benchmarks/agent_quality/README.md`](../benchmarks/agent_quality/README.md#dual-audit-annotation-workflow)
   rather than hidden. `captured_config_b` is unaffected.
-- Ten of the 12 currently-official captures succeeded structurally; two
-  (`reordering-guard-clause` and `context-limited-helper-call`'s
-  `captured_config_b`) are real structural failures with fabricated
-  citation ids -- see "Structural failures" above. The harness and schemas'
-  support for recording timeouts/protocol violations/structural failures as
-  `invalid_candidate` records is therefore now exercised by real captures,
-  not only by unit tests.
+- Seven of the 12 currently-official captures succeeded structurally; five
+  (`reordering-guard-clause`, `context-limited-helper-call`, and
+  `error-swallow-to-raise`'s `captured_config_b`, plus both
+  `binary-asset-replacement` captures) are real structural failures with
+  fabricated citation ids -- see "Structural failures" above. The harness
+  and schemas' support for recording timeouts/protocol
+  violations/structural failures as `invalid_candidate` records is
+  therefore now exercised by real captures, not only by unit tests.
 - Answer-key leakage into a case's own `category`/`description` -- the
   defect found and fixed twice now in this benchmark's short history (once
   for `context-limited-helper-call`, once for `delete-add-not-a-rename`) --

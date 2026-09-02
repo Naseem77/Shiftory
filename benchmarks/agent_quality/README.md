@@ -64,6 +64,20 @@ workflow.
   which were, for every capture here, only ever microseconds apart -- proof
   they were bookkeeping time, not generation time. See
   ["Provenance" in the methodology doc](../../docs/agent-quality-benchmark-methodology.md#provenance-engine-identity-and-protocol-commit).
+- **`orchestrator_agent_handle` is a traceability label, never provider
+  attestation.** Every `copilot_task` capture records the caller-supplied
+  name given to the orchestrating session's own sub-agent-launch tool at
+  invocation time (e.g. `freeze-cap-reorder-a`), unique across all 12
+  official captures. Its schema hard-codes `externally_verifiable: false`:
+  this string is chosen by the orchestrator itself before the call, so it
+  helps this benchmark's own bookkeeping distinguish invocations during
+  review, but it is not, and cannot be treated as, a model-provider- or
+  platform-issued proof that a given invocation was distinct or that no
+  retry occurred. That guarantee is instead a **declared protocol
+  attestation** in `protocol_registry.json`'s `invocation_protocol`
+  (`one_attempt_only`/`no_retry`/`no_repair`, etc.) -- a commitment this
+  benchmark's process follows, not something any field cryptographically
+  proves after the fact.
 - **`captured/*` candidates are real, unedited agent output.** A raw response
   is preserved as `raw-response.txt`/`.bin` and only promoted to
   `explanation.json` when it is, byte-for-byte, exactly one valid JSON
@@ -102,9 +116,19 @@ workflow.
   outside `cases/` and `auditor/` specifically so `runner.py`'s
   `case_ids()`/`captured_candidates()` can never accidentally enumerate,
   score, or publish it as an official result. This benchmark currently
-  carries eight such archived captures in total (two answer-leak, six
-  protocol-not-precommitted); `test_exactly_eight_archived_captures_with_distinct_reasons`
-  pins this count in CI.
+  carries fourteen such archived captures in total across four distinct
+  reason codes (two answer-leak; six protocol-not-precommitted for
+  reordering-guard-clause/context-limited-helper-call/cross-file-validation-edit's
+  first replacement pair; six more, under a fourth reason code
+  `protocol-config-not-precommitted`, for error-swallow-to-raise/
+  threshold-value-replacement/binary-asset-replacement once the
+  protocol-commit verifier was strengthened to also check the committed
+  config registry, not just prompt bytes -- see "Protocol freeze and
+  recapture" in the methodology doc);
+  `test_exactly_fourteen_archived_captures_with_distinct_reasons` pins this
+  count and distribution in CI. All 12 currently-official captures now
+  reference the same protocol-freeze commit
+  (`test_all_official_captures_bind_to_the_frozen_commit_with_unique_handles`).
 
 ## Predeclared capture configurations
 

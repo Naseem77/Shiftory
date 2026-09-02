@@ -568,21 +568,29 @@ Notably, `binary-asset-replacement/captured_config_b` fabricates the exact
 same two citation ids (`fact_32314a96f2b283ccc2da5503`,
 `fact_711411314f61102f006d3668`) that this same model
 (`gemini-3.7-flash`) also fabricated for this same case in a genuinely
-separate, independent invocation weeks earlier under the now-archived
-registry_version 2 protocol -- confirmed by direct inspection of both raw
-responses, not a processing artifact; no shared prompt content or
-documentation in this repository contains these literal strings. This
-reproduction across two completely independent invocations (different
-task ids, different prompt-package directories, different protocol
-commits) rules out a one-off coincidence and strongly suggests this model
-deterministically derives these specific strings from some input it can
-see in the real evidence (e.g. the correctly-cited `unit_` id or blob
-hashes), via a transformation this benchmark has not identified and does
-not claim to understand. `binary-asset-replacement/captured_config_a`
-(`gpt-5.3-codex`, a different model family, generated in the same
-registry_version 3 round) does not reproduce these ids and is structurally
-valid, so this is disclosed as a reproducible finding specific to this
-model/case combination, not a general claim about either model family.
+separate, independent invocation under the now-archived registry_version 2
+protocol -- confirmed by direct inspection of both raw responses, not a
+processing artifact; no shared prompt content or documentation in this
+repository contains these literal strings. The two invocations' own
+recorded `capture_ingested_at_utc` timestamps are `2026-09-02T07:12:39.045463+00:00`
+(the withdrawn registry_version 2 capture) and `2026-09-02T08:14:55.835154+00:00`
+(this registry_version 3 capture) -- about 62 minutes apart, later the
+same day, not "weeks apart" as an earlier draft of this document
+incorrectly stated (that overclaimed timespan was itself used, incorrectly,
+as part of an argument that coincidence was ruled out; it is corrected
+here, not silently edited away). This is a reproducible observation across
+two independently recorded invocations (different orchestrator handles,
+different exclusively-claimed prompt-package directories, different
+registry revisions) -- it does **not** by itself rule out coincidence, and
+with only two observations roughly an hour apart, this benchmark cannot
+establish a mechanism or a probability for the reproduction. It is
+disclosed as an observed, reproduced, but genuinely unexplained
+phenomenon. `binary-asset-replacement/captured_config_a` (`gpt-5.3-codex`,
+a different model family, generated in the same registry_version 3 round)
+does not reproduce these ids and is structurally valid, so this remains a
+reproducible finding specific to this model/case combination, not a
+general claim about either model family or evidence that its cause is
+understood.
 
 ### Withdrawn captures: the `delete-add-not-a-rename` leak
 

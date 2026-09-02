@@ -331,3 +331,105 @@ def test_check_file_size_rejects_oversized_file(tmp_path: Path) -> None:
     path.write_bytes(b"x" * 100)
     with pytest.raises(v.AgentQualityError, match="exceeding the"):
         v.check_file_size(path, max_bytes=10, label="fixture history")
+
+
+# -- invalidated-capture archive hash-verification ---------------------------
+
+
+def _write_invalidated_capture_fixture(case_root: Path, config_id: str) -> None:
+    """Build a minimal, internally-consistent invalidated-capture-v1 archive
+    under case_root/{config_id, evaluations, scores}, matching the real
+    directory layout under benchmarks/agent_quality/invalidated/<case>/."""
+    config_dir = case_root / config_id
+    config_dir.mkdir(parents=True)
+    (case_root / "evaluations").mkdir(parents=True, exist_ok=True)
+    (case_root / "scores").mkdir(parents=True, exist_ok=True)
+
+    raw = b'{"schema": "shiftory.explanation/v1"}'
+    (config_dir / "raw-response.txt").write_bytes(raw)
+    (config_dir / "explanation.json").write_bytes(raw)
+
+    agent_run_bytes = (
+        b'{"prompt_package_digest": "'
+        + b"a" * 64
+        + b'", "raw_response_sha256": "'
+        + v.sha256_bytes(raw).encode("ascii")
+        + b'"}'
+    )
+    (config_dir / "agent-run.json").write_bytes(agent_run_bytes)
+
+    evaluation_bytes = b'{"claims": []}'
+    (case_root / "evaluations" / f"{config_id}.json").write_bytes(evaluation_bytes)
+    score_bytes = b'{"gate": null}'
+    (case_root / "scores" / f"{config_id}.json").write_bytes(score_bytes)
+
+    record = {
+        "schema": "shiftory.benchmark-agent-quality-invalidated-capture/v1",
+        "status": "invalidated-answer-leak-v1",
+        "config_id": config_id,
+        "original_case_id": "old-leaked-case",
+        "corrected_case_id": "new-safe-case",
+        "reason": "test fixture",
+        "leaked_prompt_package_fields": {"category": "x", "description": "y"},
+        "leaked_required_fact_ids": ["fact-1"],
+        "discovered_by": {
+            "actor_type": "agent",
+            "actor": "test-reviewer",
+            "method": "manual review",
+            "timestamp": "2024-01-01T00:00:00Z",
+        },
+        "original_prompt_package_digest": "a" * 64,
+        "archived_raw_response_sha256": v.sha256_bytes(raw),
+        "archived_raw_response_bytes": len(raw),
+        "archived_explanation_sha256": v.sha256_bytes(raw),
+        "archived_agent_run_sha256": v.sha256_bytes(agent_run_bytes),
+        "archived_evaluation_sha256": v.sha256_bytes(evaluation_bytes),
+        "archived_score_sha256": v.sha256_bytes(score_bytes),
+        "replacement_capture": {
+            "case_id": "new-safe-case",
+            "config_id": config_id,
+            "path": f"benchmarks/agent_quality/cases/new-safe-case/captured/{config_id}",
+        },
+    }
+    (config_dir / "invalidation.json").write_text(
+        __import__("json").dumps(record), encoding="utf-8"
+    )
+
+
+def test_validate_invalidated_capture_accepts_consistent_archive(tmp_path: Path) -> None:
+    _write_invalidated_capture_fixture(tmp_path, "config-a")
+    record = v.validate_invalidated_capture(tmp_path, "config-a")
+    assert record["status"] == "invalidated-answer-leak-v1"
+
+
+def test_validate_invalidated_capture_rejects_prompt_package_digest_mismatch(
+    tmp_path: Path,
+) -> None:
+    """A copy/paste error between invalidation.json's own
+    original_prompt_package_digest and the archived agent-run.json's
+    prompt_package_digest must be caught, not silently accepted -- this is
+    the only field in the record that check_file_size/sha256 checks on the
+    surrounding files can never verify by construction."""
+    _write_invalidated_capture_fixture(tmp_path, "config-a")
+    record_path = tmp_path / "config-a" / "invalidation.json"
+    record = __import__("json").loads(record_path.read_text())
+    record["original_prompt_package_digest"] = "b" * 64
+    record_path.write_text(__import__("json").dumps(record), encoding="utf-8")
+    with pytest.raises(v.AgentQualityError, match="original_prompt_package_digest"):
+        v.validate_invalidated_capture(tmp_path, "config-a")
+
+
+def test_validate_invalidated_capture_rejects_raw_response_tamper(tmp_path: Path) -> None:
+    _write_invalidated_capture_fixture(tmp_path, "config-a")
+    (tmp_path / "config-a" / "raw-response.txt").write_bytes(b"tampered")
+    with pytest.raises(v.AgentQualityError, match="raw response"):
+        v.validate_invalidated_capture(tmp_path, "config-a")
+
+
+def test_validate_invalidated_capture_rejects_config_id_mismatch(tmp_path: Path) -> None:
+    _write_invalidated_capture_fixture(tmp_path, "config-a")
+    (tmp_path / "config-b").mkdir()
+    for name in ("raw-response.txt", "explanation.json", "agent-run.json", "invalidation.json"):
+        (tmp_path / "config-b" / name).write_bytes((tmp_path / "config-a" / name).read_bytes())
+    with pytest.raises(v.AgentQualityError, match="does not match its directory name"):
+        v.validate_invalidated_capture(tmp_path, "config-b")

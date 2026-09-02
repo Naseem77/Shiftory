@@ -334,10 +334,13 @@ def validate_invalidated_capture(case_root: Path, config_id: str) -> dict[str, A
     artifact it points at (raw response, explanation when one existed,
     agent-run provenance, the withdrawn candidate-evaluation-v1 record, and
     the withdrawn score-v1 record), raising if any recorded digest does not
-    match the actual archived bytes. This proves the archive is an honest,
-    unmodified copy of what was withdrawn -- it does not, and cannot, prove
-    that the replacement capture referenced by ``replacement_capture`` is
-    itself free of the same or a different leak; that remains a manual
+    match the actual archived bytes. Also cross-checks that
+    ``original_prompt_package_digest`` matches the archived ``agent-run.json``'s
+    own ``prompt_package_digest`` -- otherwise this field would be free-text,
+    uncheckable by any other assertion here. This proves the archive is an
+    honest, unmodified copy of what was withdrawn -- it does not, and cannot,
+    prove that the replacement capture referenced by ``replacement_capture``
+    is itself free of the same or a different leak; that remains a manual
     review judgment.
     """
     config_dir = case_root / config_id
@@ -374,8 +377,15 @@ def validate_invalidated_capture(case_root: Path, config_id: str) -> dict[str, A
             raise AgentQualityError(f"{config_dir}: archived explanation.json does not hash-match")
 
     agent_run_path = config_dir / "agent-run.json"
-    if sha256_file(agent_run_path) != record["archived_agent_run_sha256"]:
+    agent_run_bytes = agent_run_path.read_bytes()
+    if sha256_bytes(agent_run_bytes) != record["archived_agent_run_sha256"]:
         raise AgentQualityError(f"{config_dir}: archived agent-run.json does not hash-match")
+    agent_run = parse_json_text(agent_run_bytes.decode("utf-8"))
+    if agent_run.get("prompt_package_digest") != record["original_prompt_package_digest"]:
+        raise AgentQualityError(
+            f"{config_dir}: invalidation.json's original_prompt_package_digest does not match "
+            "the archived agent-run.json's own prompt_package_digest"
+        )
 
     evaluation_path = case_root / "evaluations" / f"{config_id}.json"
     if sha256_file(evaluation_path) != record["archived_evaluation_sha256"]:

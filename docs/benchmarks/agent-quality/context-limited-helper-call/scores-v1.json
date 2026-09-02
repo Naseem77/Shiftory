@@ -151,6 +151,167 @@
         "non_semantic_claims": 0,
         "useful_count": 0
       }
+    },
+    {
+      "accounting": {
+        "citation_count": 2,
+        "hunk_coverage_ratio": 1.0,
+        "hunk_covered": 1,
+        "hunk_total": 1,
+        "line_coverage_ratio": 1.0,
+        "line_owned": 2,
+        "line_total": 2,
+        "span_coverage_ratio": 1.0,
+        "span_owned": 2,
+        "span_total": 2,
+        "unit_coverage_ratio": 1.0,
+        "unit_covered": 1,
+        "unit_total": 1
+      },
+      "audit_status": {
+        "actor_type": "agent",
+        "adjudicator": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+        "disagreement_count": 0,
+        "disagreement_rate": 0.0,
+        "mode": "dual_audit"
+      },
+      "candidate_id": "captured_config_a",
+      "candidate_kind": "captured_real_run",
+      "case_id": "context-limited-helper-call",
+      "claim_factuality": {
+        "assessable_count": 5,
+        "assessable_weight": 21,
+        "ratio": 0.7142857142857143,
+        "supported_count": 3,
+        "supported_weight": 15
+      },
+      "contradicted_claims": {
+        "claim_ids": [],
+        "count": 0,
+        "weight": 0
+      },
+      "explanation_sha256": "f0692da946d1870fe5ab8384595242b3218eaa6aa8695cc02de9990c7ac9f897",
+      "gate": null,
+      "required_behavior_coverage": {
+        "ratio": 0.3333333333333333,
+        "satisfied_count": 1,
+        "satisfied_ids": [
+          "strict-flag-flips-to-true"
+        ],
+        "total_count": 3
+      },
+      "rubric_match_heuristic": null,
+      "schema": "shiftory.benchmark-agent-quality-score/v1",
+      "semantic_omissions": {
+        "missed_count": 2,
+        "missed_ids": [
+          "submit-call-unchanged",
+          "validate-implementation-not-visible"
+        ],
+        "missed_weight": 6
+      },
+      "structural_failure": null,
+      "uncertainty_honesty": {
+        "checked": 5,
+        "violation_ids": [
+          "ca-3",
+          "ca-5"
+        ],
+        "violations": 2
+      },
+      "unsupported_claims": {
+        "claim_ids": [
+          "ca-3",
+          "ca-5"
+        ],
+        "count": 2,
+        "weight": 6
+      },
+      "usefulness_relevance": {
+        "ambiguous_unresolvable_claims": 0,
+        "item_count": 1,
+        "non_semantic_claims": 0,
+        "useful_count": 3
+      }
+    },
+    {
+      "accounting": {
+        "citation_count": 4,
+        "hunk_coverage_ratio": 1.0,
+        "hunk_covered": 1,
+        "hunk_total": 1,
+        "line_coverage_ratio": 1.0,
+        "line_owned": 2,
+        "line_total": 2,
+        "span_coverage_ratio": 1.0,
+        "span_owned": 2,
+        "span_total": 2,
+        "unit_coverage_ratio": 1.0,
+        "unit_covered": 1,
+        "unit_total": 1
+      },
+      "audit_status": {
+        "actor_type": "agent",
+        "adjudicator": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+        "disagreement_count": 2,
+        "disagreement_rate": 0.3333333333333333,
+        "mode": "dual_audit"
+      },
+      "candidate_id": "captured_config_b",
+      "candidate_kind": "captured_real_run",
+      "case_id": "context-limited-helper-call",
+      "claim_factuality": {
+        "assessable_count": 6,
+        "assessable_weight": 25,
+        "ratio": 1.0,
+        "supported_count": 6,
+        "supported_weight": 25
+      },
+      "contradicted_claims": {
+        "claim_ids": [],
+        "count": 0,
+        "weight": 0
+      },
+      "explanation_sha256": "ec6a3f466d08b8bd358049c2f1b68700e1a3b4e842bef1463bb439a09a329eb2",
+      "gate": null,
+      "required_behavior_coverage": {
+        "ratio": 0.6666666666666666,
+        "satisfied_count": 2,
+        "satisfied_ids": [
+          "strict-flag-flips-to-true",
+          "validate-implementation-not-visible"
+        ],
+        "total_count": 3
+      },
+      "rubric_match_heuristic": null,
+      "schema": "shiftory.benchmark-agent-quality-score/v1",
+      "semantic_omissions": {
+        "missed_count": 1,
+        "missed_ids": [
+          "submit-call-unchanged"
+        ],
+        "missed_weight": 2
+      },
+      "structural_failure": null,
+      "uncertainty_honesty": {
+        "checked": 6,
+        "violation_ids": [
+          "cb-2",
+          "cb-3"
+        ],
+        "violations": 2
+      },
+      "unsupported_claims": {
+        "claim_ids": [],
+        "count": 0,
+        "weight": 0
+      },
+      "usefulness_relevance": {
+        "ambiguous_unresolvable_claims": 0,
+        "item_count": 2,
+        "non_semantic_claims": 0,
+        "useful_count": 6
+      }
     }
   ],
   "case_id": "context-limited-helper-call",

@@ -188,6 +188,61 @@ reported -- never turned into a pass/fail bar on Shiftory's correctness.
   buffer the full output before enforcing the cap. Exceeding the timeout or
   byte cap kills the whole process group.
 
+## Real captured-run results (all 12, unfiltered)
+
+Every one of the six cases has two real captures from the two predeclared
+configurations (`gpt-5.3-codex` and `gemini-3.7-flash`, see
+[`benchmarks/agent_quality/README.md`](../benchmarks/agent_quality/README.md)).
+All 12 happened to produce structurally valid, schema-conformant JSON on the
+first attempt -- no timeouts, protocol violations, or structural failures
+occurred in this round, which is itself reported honestly rather than omitted.
+Every capture was dual-audited (two independent annotation passes plus one
+adjudication pass); the table reports `required_behavior_coverage` (satisfied
+out of 3 required facts), raw `unsupported_claims`/`contradicted_claims`
+counts, `uncertainty_honesty` violations out of claims checked, and the
+adjudication `disagreement_rate` between the two independent passes, exactly
+as regenerated in `docs/benchmarks/agent-quality/<case>/scores-v1.json`:
+
+| Case | Candidate | Coverage | Unsupported | Contradicted | Uncertainty violations | Disagreement rate |
+|---|---|---:|---:|---:|---:|---:|
+| reordering-guard-clause | captured_config_a | 1/3 | 1 | 0 | 1/4 | 0.75 |
+| reordering-guard-clause | captured_config_b | 1/3 | 0 | 0 | 0/4 | 0.0 |
+| error-swallow-to-raise | captured_config_a | 1/3 | 0 | 0 | 0/3 | 0.0 |
+| error-swallow-to-raise | captured_config_b | 1/3 | 0 | 0 | 0/3 | 0.0 |
+| threshold-value-replacement | captured_config_a | 2/3 | 0 | 0 | 4/4 | 0.0 |
+| threshold-value-replacement | captured_config_b | 2/3 | 0 | 0 | 0/7 | 0.0 |
+| delete-add-not-a-rename | captured_config_a | 2/3 | 0 | 0 | 4/4 | 0.0 |
+| delete-add-not-a-rename | captured_config_b | 2/3 | 0 | 0 | 5/5 | 1.0 |
+| binary-asset-replacement | captured_config_a | 2/3 | 0 | 0 | 0/3 | 0.33 |
+| binary-asset-replacement | captured_config_b | 1/3 | 0 | 0 | 0/4 | 0.0 |
+| context-limited-helper-call | captured_config_a | 1/3 | 2 | 0 | 2/5 | 0.0 |
+| context-limited-helper-call | captured_config_b | 2/3 | 0 | 0 | 2/6 | 0.33 |
+
+Read honestly, not as a leaderboard: no real capture ever reached 3/3 coverage.
+Every capture correctly identified the single most important (highest-importance)
+required fact, but every single one **omitted at least one lower-importance
+required fact** (most often the genuinely-ambiguous "what does this imply, and
+what can't be known" fact or the "what stayed the same" fact) -- both captured
+models consistently produced a single, narrowly-scoped explanation item rather
+than covering every required behavior. `threshold-value-replacement`'s and
+`delete-add-not-a-rename`'s `captured_config_a` runs also show every
+audited claim's `confidence: "inferred"` judged mildly miscalibrated
+(`confidence_appropriate: false`) for facts that were, in fact, directly
+extractable from the diff -- independently confirmed by two annotator passes
+each, not an adjudicator override -- a real, reproducible finding that
+under-hedging directly-visible facts is itself a mild honesty violation in
+this rubric's model, distinct from over-claiming. The `delete-add-not-a-rename`
+`captured_config_b` disagreement-rate-1.0 case reflects a genuine, documented
+adjudication call (see that case's evaluation record) rather than a hidden
+default. `context-limited-helper-call`'s captures were regenerated after an
+initial `case.json`/`metadata.json` description leaked this case's own
+ambiguity conclusion into the materialized prompt package (found during
+independent review); the fresh, unleaked `captured_config_a` capture
+correctly omits the ambiguity fact entirely (coverage dropped from 2/3 to
+1/3), while `captured_config_b` independently produced an honest ambiguity
+acknowledgment on its own -- a concrete demonstration of why leakage checks
+matter, not just a claim that they were performed.
+
 ## Limitations
 
 - Six cases is a small, deliberately curated set, not a representative
@@ -195,10 +250,16 @@ reported -- never turned into a pass/fail bar on Shiftory's correctness.
 - Every annotation and adjudication pass performed so far is agent-vs-agent;
   none of it is verified human ground truth (see
   [`benchmarks/agent_quality/README.md`](../benchmarks/agent_quality/README.md)).
-- Only one case (`reordering-guard-clause`) currently has real captured
-  agent runs; the other five have only hand-authored synthetic fixtures for
-  scorer-arithmetic testing. Extending real captures to the remaining cases
-  follows the same, now-templated, workflow.
+- For every case's `captured_config_a` candidate, one of its two independent
+  annotation passes uses the same model (`gpt-5.3-codex`) that generated the
+  candidate -- a genuine self-assessment overlap, disclosed in full in
+  [`benchmarks/agent_quality/README.md`](../benchmarks/agent_quality/README.md#dual-audit-annotation-workflow)
+  rather than hidden. `captured_config_b` is unaffected.
+- All 12 captures in this round happened to succeed structurally; the harness
+  and schemas support recording timeouts/protocol violations/structural
+  failures as `invalid_candidate` records, but this benchmark has not yet
+  observed one in practice, so that code path is currently exercised only by
+  unit tests, not a real capture.
 - The literal-alias heuristic is a labeled, non-authoritative aid with real
   false-positive/false-negative rates (see `heuristic.py`'s module
   docstring); it is never a substitute for audited claim verdicts.

@@ -325,13 +325,15 @@ deletion-vs-move confusion, non-text/unsupported changes, and ambiguous/context-
 changes. Correctness/hallucination/omission/uncertainty results come from
 claim-level human- or agent-performed annotation (never from automated text
 matching); a separate, clearly labeled, non-authoritative literal-alias heuristic
-is reported alongside but never feeds those results. One case
-(`reordering-guard-clause`) currently has two real, independently blinded, dual-audited
-agent captures; the rest have only hand-authored synthetic fixtures used to unit-test
-the scorer's arithmetic. A real captured agent's quality score is never a required
-CI gate -- see the
+is reported alongside but never feeds those results. Every one of the six cases
+now has two real, independently blinded, dual-audited agent captures (12 total,
+predeclared configurations `gpt-5.3-codex` and `gemini-3.7-flash`); a
+hand-authored synthetic baseline/adversarial pair per case is kept separately to
+unit-test the scorer's arithmetic and is never presented as agent evidence. A
+real captured agent's quality score is never a required CI gate -- see the
 [agent-quality benchmark methodology](docs/agent-quality-benchmark-methodology.md)
-for exactly what is and is not automated, and for this layer's honest limitations.
+for the full per-case real-capture results table and exactly what is and is not
+automated, and for this layer's honest limitations.
 
 ## Documentation
 

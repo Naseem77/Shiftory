@@ -63,6 +63,69 @@ def _candidate_dirs(case_id: str) -> list[tuple[str, str, Path]]:
     return pairs
 
 
+PREDECLARED_CONFIGS = ("config-a", "config-b")
+PREDECLARED_MODELS = {"config-a": "gpt-5.3-codex", "config-b": "gemini-3.7-flash"}
+
+
+@pytest.mark.parametrize("case_id", CASE_IDS)
+def test_every_case_has_exactly_the_two_predeclared_real_captures(case_id: str) -> None:
+    """Enforces the full-suite invariant: every case must have exactly the two
+    predeclared capture configurations (config-a, config-b) invoked exactly
+    once each, using the two predeclared, distinct models, with a
+    corresponding agent-run.json and either a materialized explanation.json +
+    evaluation, or an invalid_candidate structural-failure evaluation.
+    Prevents a partial-suite state (some cases missing real captures, or a
+    future capture silently reusing/swapping models) from passing again."""
+    captured_root = CASES_DIR / case_id / "captured"
+    assert captured_root.is_dir(), f"{case_id} is missing its captured/ directory entirely"
+
+    present = sorted(path.name for path in captured_root.iterdir() if path.is_dir())
+    assert present == list(PREDECLARED_CONFIGS), (
+        f"{case_id}/captured must contain exactly {PREDECLARED_CONFIGS}, found {present}"
+    )
+
+    for config in PREDECLARED_CONFIGS:
+        directory = captured_root / config
+        agent_run_path = directory / "agent-run.json"
+        raw_response_path = directory / "raw-response.txt"
+        assert agent_run_path.is_file(), f"{case_id}/{config} is missing agent-run.json"
+        assert raw_response_path.is_file() or (directory / "raw-response.bin").is_file(), (
+            f"{case_id}/{config} is missing its raw response bytes"
+        )
+        agent_run = v.load_json_strict(agent_run_path)
+        v.validate_against_schema(agent_run, "agent-run-v1")
+        assert agent_run["model"]["name"] == PREDECLARED_MODELS[config], (
+            f"{case_id}/{config} must use the predeclared model "
+            f"{PREDECLARED_MODELS[config]!r}, found {agent_run['model']['name']!r}"
+        )
+
+        candidate_id = f"captured_{config.replace('-', '_')}"
+        evaluation_path = AUDITOR_DIR / case_id / "evaluations" / f"{candidate_id}.json"
+        assert evaluation_path.is_file(), (
+            f"{case_id}/{candidate_id} is missing its candidate-evaluation-v1 record "
+            "(every predeclared capture needs one, even a structural-failure-only record)"
+        )
+        evaluation = v.load_json_strict(evaluation_path)
+        v.validate_against_schema(evaluation, "candidate-evaluation-v1")
+        has_explanation = (directory / "explanation.json").is_file()
+        has_invalid = evaluation.get("invalid_candidate") is not None
+        assert has_explanation != has_invalid, (
+            f"{case_id}/{candidate_id}: exactly one of explanation.json presence or "
+            "invalid_candidate must hold, never both or neither"
+        )
+        if has_explanation:
+            # Every valid capture must show dual-audit or an explicit
+            # provisional-single-audit status -- never silently unaudited.
+            passes = evaluation.get("annotation_passes") or []
+            assert len(passes) >= 1, f"{case_id}/{candidate_id} has no recorded annotation passes"
+            for entry in passes:
+                assert entry["annotation_provenance"]["actor_type"] in ("agent", "human")
+            if len(passes) >= 2:
+                assert evaluation.get("adjudication") is not None, (
+                    f"{case_id}/{candidate_id} has 2+ annotation passes but no adjudication record"
+                )
+
+
 def _captured_candidate_dirs(case_id: str) -> list[Path]:
     case_dir = CASES_DIR / case_id
     captured_root = case_dir / "captured"

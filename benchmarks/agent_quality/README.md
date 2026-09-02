@@ -103,32 +103,48 @@ workflow.
   for six captures across three cases -- see
   ["Protocol freeze and recapture" in the methodology doc](../../docs/agent-quality-benchmark-methodology.md#protocol-freeze-and-recapture)),
   it is withdrawn for that reason instead, even if its content matches the
-  now-committed protocol byte-for-byte. Either way the withdrawn capture is
-  moved to `invalidated/<case>/` (nested under a distinctly-named
-  subdirectory, e.g. `protocol-not-precommitted/`, whenever a case has more
-  than one withdrawal so the two archive groups can never collide or
-  overwrite each other) as an `invalidated-answer-leak-v1` or
-  `invalidated-protocol-not-precommitted-v1` record (the latter carrying an
-  explicit `reason_code`) with hash-verified pointers to its original raw
-  response, agent-run provenance, evaluation, and score (see
-  `validation.py`'s `validate_invalidated_capture`), and a genuinely fresh
-  capture is made under the corrected/frozen package. `invalidated/` is
-  outside `cases/` and `auditor/` specifically so `runner.py`'s
-  `case_ids()`/`captured_candidates()` can never accidentally enumerate,
-  score, or publish it as an official result. This benchmark currently
-  carries fourteen such archived captures in total across four distinct
-  reason codes (two answer-leak; six protocol-not-precommitted for
+  now-committed protocol byte-for-byte. A capture can also be withdrawn for
+  being a genuine second invocation after its true first attempt was
+  silently lost to a shared-directory `RAW_RESPONSE` collision -- see
+  `invalidated-generation-attempt-v1` below. Either way the withdrawn
+  capture is moved to `invalidated/<case>/` (nested under a
+  distinctly-named subdirectory, e.g. `protocol-not-precommitted/` or
+  `retry-after-collision/`, whenever a case has more than one withdrawal
+  so the archive groups can never collide or overwrite each other) as an
+  `invalidated-answer-leak-v1` or `invalidated-protocol-not-precommitted-v1`
+  record (the latter carrying an explicit `reason_code`) with hash-verified
+  pointers to its original raw response, agent-run provenance, evaluation,
+  and score (see `validation.py`'s `validate_invalidated_capture`), and a
+  genuinely fresh capture is made under the corrected/frozen package.
+  `invalidated/` is outside `cases/` and `auditor/` specifically so
+  `runner.py`'s `case_ids()`/`captured_candidates()` can never accidentally
+  enumerate, score, or publish it as an official result. This benchmark
+  currently carries twenty such archived captures in total across five
+  distinct reason codes (two answer-leak; six protocol-not-precommitted for
   reordering-guard-clause/context-limited-helper-call/cross-file-validation-edit's
-  first replacement pair; six more, under a fourth reason code
-  `protocol-config-not-precommitted`, for error-swallow-to-raise/
-  threshold-value-replacement/binary-asset-replacement once the
+  first replacement pair; six `protocol-config-not-precommitted`, once the
   protocol-commit verifier was strengthened to also check the committed
-  config registry, not just prompt bytes -- see "Protocol freeze and
-  recapture" in the methodology doc);
-  `test_exactly_fourteen_archived_captures_with_distinct_reasons` pins this
-  count and distribution in CI. All 12 currently-official captures now
-  reference the same protocol-freeze commit
-  (`test_all_official_captures_bind_to_the_frozen_commit_with_unique_handles`).
+  config registry; six more `retry-after-unrecoverable-shared-directory-collision`,
+  once those six replacements turned out to themselves be second
+  invocations after a directory-collision defect -- see "Protocol freeze
+  and recapture" in the methodology doc);
+  `test_exactly_twenty_archived_captures_with_distinct_reasons` pins this
+  count and distribution in CI. Six lost first-generation attempts that
+  have no recoverable bytes at all (so cannot be hash-verified archives)
+  are recorded separately as `invalidated-generation-attempt-v1` incidents
+  under `invalidated/<case>/lost-generation-attempts/`, enumerated by
+  `test_exactly_six_lost_generation_attempt_incidents`. All 12
+  currently-official captures independently verify against their
+  referenced commit; the three cases affected by the directory-collision
+  defect reference a different, stricter `registry_version >= 3` commit
+  than the three unaffected cases
+  (`test_all_official_captures_bind_to_a_verified_frozen_commit_with_unique_handles`).
+  `protocol_registry.json`'s `unique_prompt_directory_per_invocation`/
+  `output_directory_must_not_preexist`/`exclusive_directory_creation`
+  invariants, enforced in code by `agent_harness.claim_exclusive_directory`
+  and `capture_result`'s strict output-directory check, are what make this
+  class of defect structurally impossible going forward, not merely
+  disclosed after the fact.
 
 ## Predeclared capture configurations
 

@@ -19,7 +19,6 @@ import hashlib
 import itertools
 import json
 import re
-import subprocess
 from functools import cache
 from pathlib import Path
 from typing import Any, cast
@@ -27,7 +26,6 @@ from typing import Any, cast
 from jsonschema import Draft202012Validator
 
 SCHEMA_DIR = Path(__file__).resolve().parent / "schemas"
-REPO_ROOT = Path(__file__).resolve().parents[2]
 CASE_ID_RE = re.compile(r"^[a-z0-9][a-z0-9-]{0,63}$")
 
 # Bounded caps (Delta 6 / point 6): every JSON document and raw byte stream this
@@ -398,40 +396,3 @@ def validate_invalidated_capture(case_root: Path, config_id: str) -> dict[str, A
         raise AgentQualityError(f"{score_path}: does not hash-match its archived digest")
 
     return cast(dict[str, Any], record)
-
-
-def recompute_benchmark_protocol_commit_verification(agent_run: dict[str, Any]) -> bool:
-    """Independently recompute whether ``agent_run["benchmark_protocol_commit"]``'s
-    ``verified: true`` claim is actually true, rather than trusting the
-    self-reported flag a migration or capture script wrote.
-
-    Runs ``git show <commit>:benchmarks/agent_quality/cases/<case_id>/case.json``
-    against this repository and compares its sha256 to the same agent-run
-    record's own ``prompt_package_manifest`` entry for ``case.json`` (which is
-    itself already anchored to the real materialized prompt package by
-    ``prepare_prompt_package``/``capture_result``). Returns ``True`` only when
-    the commit exists, its committed ``case.json`` exists, and the two hashes
-    match exactly. Never trusts ``agent_run["benchmark_protocol_commit"]
-    ["verified"]`` itself -- that field is data, not proof; this function is
-    the proof.
-    """
-    protocol = agent_run["benchmark_protocol_commit"]
-    commit = protocol.get("commit")
-    if commit is None:
-        return False
-    case_id = agent_run["case_id"]
-    manifest = agent_run["prompt_package_manifest"]
-    case_entries = [entry for entry in manifest if entry["path"] == "case.json"]
-    if len(case_entries) != 1:
-        return False
-    manifest_sha = case_entries[0]["sha256"]
-
-    result = subprocess.run(
-        ["git", "show", f"{commit}:benchmarks/agent_quality/cases/{case_id}/case.json"],
-        cwd=REPO_ROOT,
-        capture_output=True,
-        check=False,
-    )
-    if result.returncode != 0:
-        return False
-    return sha256_bytes(result.stdout) == manifest_sha

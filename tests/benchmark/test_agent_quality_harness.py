@@ -538,3 +538,105 @@ def test_agent_run_v2_schema_rejects_copilot_task_with_missing_timing_reason() -
     }
     with pytest.raises(v.AgentQualityError, match="does not match its schema"):
         v.validate_against_schema(agent_run, "agent-run-v2")
+
+
+# -- full prompt-package reconstruction and protocol-commit verification -----
+
+
+def test_reconstruct_full_prompt_manifest_at_commit_matches_real_capture() -> None:
+    """Reconstructing reordering-guard-clause's ENTIRE prompt package (case.json,
+    SKILL.md, INSTRUCTIONS.md, and the reconstructed repository) using ONLY
+    files committed at its harness-introduction commit must reproduce a
+    manifest byte-identical to what that case's real capture actually
+    recorded -- proving the full committed protocol at that commit, not just
+    case.json, produced this content."""
+    harness_commit = "7b9d99ba6ecfae6dc53620362e87e776655ecb3b"
+    manifest = ah.reconstruct_full_prompt_manifest_at_commit(harness_commit, CASE_ID)
+    assert manifest is not None
+
+    agent_run_path = (
+        Path(__file__).resolve().parents[2]
+        / "benchmarks"
+        / "agent_quality"
+        / "cases"
+        / CASE_ID
+        / "captured"
+        / "config-a"
+        / "agent-run.json"
+    )
+    recorded = sorted(
+        json.loads(agent_run_path.read_text())["prompt_package_manifest"],
+        key=lambda entry: entry["path"],
+    )
+    reconstructed = sorted(manifest, key=lambda entry: entry["path"])
+    assert recorded == reconstructed
+
+
+def test_reconstruct_full_prompt_manifest_at_commit_rejects_missing_commit() -> None:
+    assert ah.reconstruct_full_prompt_manifest_at_commit("f" * 40, CASE_ID) is None
+
+
+def test_reconstruct_full_prompt_manifest_at_commit_rejects_missing_case() -> None:
+    """A real commit that exists, but never had this case at all, must fail
+    reconstruction rather than silently returning an empty/partial manifest."""
+    assert (
+        ah.reconstruct_full_prompt_manifest_at_commit(
+            "0aaeb5c149aaa5a5d3a8e04a1858235c9cafe646", "nonexistent-case-xyz"
+        )
+        is None
+    )
+
+
+def test_recompute_benchmark_protocol_commit_verification_confirms_real_captures() -> None:
+    """Every official capture's benchmark_protocol_commit.verified: true claim
+    must hold up under independent full-manifest recomputation against this
+    repository's real git history, not merely be trusted as self-reported
+    data."""
+    cases_dir = Path(__file__).resolve().parents[2] / "benchmarks" / "agent_quality" / "cases"
+    for case_dir in sorted(p for p in cases_dir.iterdir() if p.is_dir()):
+        for config in ("config-a", "config-b"):
+            agent_run_path = case_dir / "captured" / config / "agent-run.json"
+            if not agent_run_path.is_file():
+                continue
+            agent_run = json.loads(agent_run_path.read_text())
+            assert agent_run["benchmark_protocol_commit"]["verified"] is True
+            assert ah.recompute_benchmark_protocol_commit_verification(agent_run) is True, (
+                f"{case_dir.name}/{config}"
+            )
+
+
+def test_recompute_benchmark_protocol_commit_verification_rejects_wrong_manifest() -> None:
+    """A benchmark_protocol_commit whose recorded manifest no longer matches
+    the referenced commit's reconstructable protocol must fail recomputation
+    -- proving this is a real comparison, not a rubber stamp."""
+    case_dir = Path(__file__).resolve().parents[2] / "benchmarks" / "agent_quality" / "cases"
+    agent_run = json.loads(
+        (case_dir / CASE_ID / "captured" / "config-a" / "agent-run.json").read_text()
+    )
+    manifest = agent_run["prompt_package_manifest"]
+    for entry in manifest:
+        if entry["path"] == "case.json":
+            entry["sha256"] = "0" * 64
+    assert ah.recompute_benchmark_protocol_commit_verification(agent_run) is False
+
+
+def test_recompute_benchmark_protocol_commit_verification_rejects_missing_commit() -> None:
+    case_dir = Path(__file__).resolve().parents[2] / "benchmarks" / "agent_quality" / "cases"
+    agent_run = json.loads(
+        (case_dir / CASE_ID / "captured" / "config-a" / "agent-run.json").read_text()
+    )
+    agent_run["benchmark_protocol_commit"] = dict(
+        agent_run["benchmark_protocol_commit"], commit=None
+    )
+    assert ah.recompute_benchmark_protocol_commit_verification(agent_run) is False
+
+
+def test_recompute_benchmark_protocol_commit_verification_rejects_nonexistent_commit() -> None:
+    case_dir = Path(__file__).resolve().parents[2] / "benchmarks" / "agent_quality" / "cases"
+    agent_run = json.loads(
+        (case_dir / CASE_ID / "captured" / "config-a" / "agent-run.json").read_text()
+    )
+    agent_run["benchmark_protocol_commit"] = dict(
+        agent_run["benchmark_protocol_commit"], commit="f" * 40
+    )
+    assert ah.recompute_benchmark_protocol_commit_verification(agent_run) is False

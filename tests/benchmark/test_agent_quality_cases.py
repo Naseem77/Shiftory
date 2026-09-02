@@ -10,11 +10,14 @@ disclaimers for what remains a provisional, single-pass audit.
 
 from __future__ import annotations
 
+import hashlib
+import json
 import tempfile
 from pathlib import Path
 
 import pytest
 
+from benchmarks.agent_quality import agent_harness as ah
 from benchmarks.agent_quality import aggregate
 from benchmarks.agent_quality import fixtures as fx
 from benchmarks.agent_quality import validation as v
@@ -41,6 +44,53 @@ def test_case_and_rubric_are_schema_valid(case_id: str) -> None:
     case, rubric = _load_case(case_id)
     assert case["id"] == case_id
     assert len(rubric["required_facts"]) >= 1
+
+
+# A reviewed pin of every rubric's ground-truth required_facts, keyed by a
+# stable hash of their sorted-key JSON content (not the whole rubric file, so
+# unrelated provenance/version bumps don't trip this). Any edit to a
+# required_fact -- the actual answer key a real capture is graded against --
+# must update this pin deliberately, which is the trigger for a fresh manual
+# review of whether that edit could have been influenced by an already-seen
+# real capture's output, rather than a silent change nothing here would catch
+# otherwise (benchmark_protocol_commit verification intentionally covers only
+# the generation-side prompt package, never the rubric -- see the
+# methodology doc's "Provenance" section).
+REVIEWED_REQUIRED_FACTS_DIGESTS = {
+    "binary-asset-replacement": (
+        "b1f396c4cac5696e230c9cef4aabac9c4d48c92f4b9e34cb2ca1aa4eb25bc4d1"
+    ),
+    "context-limited-helper-call": (
+        "8b849a7c8ec82665b189fa5998c48909950995e5d1a0b5e18dc6432dbc652d1d"
+    ),
+    "cross-file-validation-edit": (
+        "ce1ac813cc1002d55983c18069c1ae7390c2f880c58f0d595f7dc925464188b8"
+    ),
+    "error-swallow-to-raise": "89c064201e8c81e93d503fe03cc1b3f7c80fa624847b19640bd6968cfc7eeec8",
+    "reordering-guard-clause": ("5af2947a3e1d2563b86c0d3c9a92230842658fc2b32e264c69098cf8a6ca9828"),
+    "threshold-value-replacement": (
+        "07b6bd781c07a792503ea17775d1541cade9261ceb196f75f45f67e10d97b71c"
+    ),
+}
+
+
+def test_required_facts_match_the_reviewed_pin() -> None:
+    """Pins every case's rubric required_facts (the actual ground truth real
+    captures are graded against) to what was last manually reviewed. This is
+    the concrete, code-enforced half of the disclosed rubric-provenance gap:
+    it cannot prove a rubric was never adjusted after seeing a real capture's
+    output in the past, but it does guarantee no case's required_facts can
+    silently change going forward without a deliberate, reviewed pin update."""
+    assert set(CASE_IDS) == set(REVIEWED_REQUIRED_FACTS_DIGESTS)
+    for case_id in CASE_IDS:
+        rubric = v.load_json_strict(AUDITOR_DIR / case_id / "rubric.json")
+        digest = hashlib.sha256(
+            json.dumps(rubric["required_facts"], sort_keys=True).encode("utf-8")
+        ).hexdigest()
+        assert digest == REVIEWED_REQUIRED_FACTS_DIGESTS[case_id], (
+            f"{case_id}: required_facts changed from the last reviewed pin -- "
+            "re-review for retroactive-tampering risk before updating this pin"
+        )
 
 
 @pytest.mark.parametrize("case_id", CASE_IDS)
@@ -113,7 +163,7 @@ def test_every_case_has_exactly_the_two_predeclared_real_captures(case_id: str) 
         # recompute it against this repository's real git history every time,
         # so a future edit to case.json or a hand-set true value can never
         # silently pass.
-        assert v.recompute_benchmark_protocol_commit_verification(agent_run), (
+        assert ah.recompute_benchmark_protocol_commit_verification(agent_run), (
             f"{case_id}/{config}: benchmark_protocol_commit.verified is true, but "
             "independently recomputing git show <commit>:.../case.json's sha256 does "
             "not match this capture's own prompt_package_manifest -- the self-reported "

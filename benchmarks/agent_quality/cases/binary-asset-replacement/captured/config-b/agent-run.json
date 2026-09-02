@@ -47,10 +47,10 @@
     "value": "f4e1a03630bb650be1c6477837a733a4f9f6420e"
   },
   "benchmark_protocol_commit": {
-    "commit": "1ed86cad6fc94e638aa74e818b9e179a9755690e",
+    "commit": "7b9d99ba6ecfae6dc53620362e87e776655ecb3b",
     "verification_method": "prompt_manifest_hash_match",
     "verified": true,
-    "note": "Verified: commit 1ed86cad6fc94e638aa74e818b9e179a9755690e's committed case.json sha256 matches this capture's own prompt_package_manifest case.json entry exactly, proving this capture was generated against the same case.json bytes this commit defines -- independent of any wall-clock ordering between the commit's timestamp and this capture's timestamps."
+    "note": "Verified: commit 7b9d99ba6ecfae6dc53620362e87e776655ecb3b's full committed prompt protocol (case.json, SKILL.md, INSTRUCTIONS.md text, and the reconstructed fixture repository) reconstructs a manifest byte-identical to this capture's own recorded prompt_package_manifest -- proving this capture was generated against the exact protocol this commit defines, independent of any wall-clock ordering between the commit's timestamp and this capture's timestamps. This is the earliest commit at which both this case's content and the capture harness (agent_harness.py) are simultaneously present in history."
   },
   "generator_access_profile": {
     "repository_access": true,

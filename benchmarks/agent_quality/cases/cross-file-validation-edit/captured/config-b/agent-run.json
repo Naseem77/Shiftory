@@ -54,7 +54,7 @@
     "commit": "d1af70bdaf1d151391d50728307b7685bf479a03",
     "verification_method": "prompt_manifest_hash_match",
     "verified": true,
-    "note": "Verified: commit d1af70bdaf1d151391d50728307b7685bf479a03's committed case.json sha256 matches this capture's own prompt_package_manifest case.json entry exactly, proving this capture was generated against the same case.json bytes this commit defines -- independent of any wall-clock ordering between the commit's timestamp and this capture's timestamps."
+    "note": "Verified: commit d1af70bdaf1d151391d50728307b7685bf479a03's full committed prompt protocol (case.json, SKILL.md, INSTRUCTIONS.md text, and the reconstructed fixture repository) reconstructs a manifest byte-identical to this capture's own recorded prompt_package_manifest -- proving this capture was generated against the exact protocol this commit defines, independent of any wall-clock ordering between the commit's timestamp and this capture's timestamps."
   },
   "generator_access_profile": {
     "repository_access": true,

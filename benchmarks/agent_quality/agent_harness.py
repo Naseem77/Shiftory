@@ -35,11 +35,13 @@ capturing a genuinely blind real-agent run reproducible and honestly bounded:
 
 from __future__ import annotations
 
+import ast
 import json
 import os
 import shutil
 import signal
 import subprocess
+import tempfile
 import threading
 from contextlib import suppress
 from datetime import datetime, timezone
@@ -48,6 +50,7 @@ from typing import Any
 
 from benchmarks.agent_quality import fixtures as fx
 from benchmarks.agent_quality import validation as v
+from benchmarks.runner import BenchmarkError
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SKILL_PATH = REPO_ROOT / "src" / "shiftory" / "skills" / "shiftory" / "SKILL.md"
@@ -76,6 +79,25 @@ of this directory. Do not wrap it in Markdown code fences or add commentary.
 """
 
 
+def _manifest_for_dir(out_dir: Path) -> list[dict[str, str]]:
+    """Build a ``{path, sha256}`` manifest for every non-.git file under
+    ``out_dir``, sorted by path. Shared by ``prepare_prompt_package`` and
+    ``reconstruct_full_prompt_manifest_at_commit`` so both compute the
+    manifest identically -- any drift between them would silently weaken
+    the protocol-commit verification this module supports.
+    """
+    manifest = []
+    for path in sorted(out_dir.rglob("*")):
+        if path.is_file() and ".git" not in path.parts:
+            manifest.append(
+                {
+                    "path": str(path.relative_to(out_dir)),
+                    "sha256": v.sha256_file(path),
+                }
+            )
+    return manifest
+
+
 def prepare_prompt_package(case_dir: Path, out_dir: Path, case_id: str) -> dict[str, Any]:
     """Materialize an isolated prompt-package directory for one case.
 
@@ -93,15 +115,7 @@ def prepare_prompt_package(case_dir: Path, out_dir: Path, case_id: str) -> dict[
     shutil.copyfile(SKILL_PATH, out_dir / "SKILL.md")
     (out_dir / "INSTRUCTIONS.md").write_text(INSTRUCTIONS, encoding="utf-8")
 
-    manifest = []
-    for path in sorted(out_dir.rglob("*")):
-        if path.is_file() and ".git" not in path.parts:
-            manifest.append(
-                {
-                    "path": str(path.relative_to(out_dir)),
-                    "sha256": v.sha256_file(path),
-                }
-            )
+    manifest = _manifest_for_dir(out_dir)
     digest_input = json.dumps(manifest, sort_keys=True, separators=(",", ":")).encode("utf-8")
     return {
         "case_id": case_id,
@@ -109,6 +123,137 @@ def prepare_prompt_package(case_dir: Path, out_dir: Path, case_id: str) -> dict[
         "prompt_package_manifest": manifest,
         "prompt_package_digest": v.sha256_bytes(digest_input),
     }
+
+
+def _git_show(commit: str, path: str) -> bytes | None:
+    """``git show <commit>:<path>`` against this repository; ``None`` if the
+    commit or path does not exist rather than raising, so callers can treat
+    an unreconstructable commit as an honest verification failure."""
+    result = subprocess.run(
+        ["git", "show", f"{commit}:{path}"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return None
+    return result.stdout
+
+
+def _extract_instructions_constant(harness_source: bytes) -> str | None:
+    """Parse ``agent_harness.py`` source (as committed at some historical
+    commit) and return the literal string value of its module-level
+    ``INSTRUCTIONS`` assignment, without executing any of that source. Used
+    to reconstruct the prompt package exactly as that commit's harness would
+    have produced it, even though this module's own current ``INSTRUCTIONS``
+    constant is what actually ran (this module is not re-executed
+    per-commit) -- confirming the text is unchanged is part of the proof.
+    """
+    try:
+        tree = ast.parse(harness_source.decode("utf-8"))
+    except (SyntaxError, UnicodeDecodeError):
+        return None
+    for node in ast.walk(tree):
+        is_instructions_assign = isinstance(node, ast.Assign) and any(
+            isinstance(target, ast.Name) and target.id == "INSTRUCTIONS" for target in node.targets
+        )
+        if (
+            is_instructions_assign
+            and isinstance(node.value, ast.Constant)
+            and isinstance(node.value.value, str)
+        ):
+            return node.value.value
+    return None
+
+
+def reconstruct_full_prompt_manifest_at_commit(
+    commit: str, case_id: str
+) -> list[dict[str, str]] | None:
+    """Reconstruct the ENTIRE prompt package -- case.json, SKILL.md,
+    INSTRUCTIONS.md, and the reconstructed fixture repository -- using ONLY
+    files as committed at ``commit`` (never the current working tree), and
+    return its manifest. Returns ``None`` if any required file cannot be
+    extracted from that commit (an honest verification failure, not a
+    fabricated pass).
+
+    This is strictly stronger than checking case.json alone: it proves the
+    full committed protocol at that commit -- case content, the bundled
+    SKILL.md, and the harness's own INSTRUCTIONS text -- reproduces
+    byte-identical prompt-package content, not just that one file matches.
+    """
+    case_json_bytes = _git_show(commit, f"benchmarks/agent_quality/cases/{case_id}/case.json")
+    metadata_bytes = _git_show(commit, f"benchmarks/agent_quality/cases/{case_id}/metadata.json")
+    history_bytes = _git_show(
+        commit, f"benchmarks/agent_quality/cases/{case_id}/history.fast-import"
+    )
+    skill_bytes = _git_show(commit, "src/shiftory/skills/shiftory/SKILL.md")
+    harness_source = _git_show(commit, "benchmarks/agent_quality/agent_harness.py")
+    if None in (case_json_bytes, metadata_bytes, history_bytes, skill_bytes, harness_source):
+        return None
+    assert case_json_bytes is not None
+    assert metadata_bytes is not None
+    assert history_bytes is not None
+    assert skill_bytes is not None
+    assert harness_source is not None
+
+    instructions_text = _extract_instructions_constant(harness_source)
+    if instructions_text is None:
+        return None
+
+    with tempfile.TemporaryDirectory(prefix=f"protocol-verify-{case_id}-") as tmp:
+        tmp_path = Path(tmp)
+        source_case_dir = tmp_path / "source"
+        source_case_dir.mkdir()
+        (source_case_dir / "metadata.json").write_bytes(metadata_bytes)
+        (source_case_dir / "history.fast-import").write_bytes(history_bytes)
+
+        out_dir = tmp_path / "reconstructed"
+        out_dir.mkdir()
+        try:
+            fx.reconstruct_fixture(source_case_dir, out_dir, "repository")
+        except (BenchmarkError, v.AgentQualityError):
+            return None
+
+        try:
+            case = v.parse_json_text(case_json_bytes.decode("utf-8"))
+        except (v.AgentQualityError, UnicodeDecodeError):
+            return None
+        (out_dir / "case.json").write_text(json.dumps(case, indent=2) + "\n", encoding="utf-8")
+        (out_dir / "SKILL.md").write_bytes(skill_bytes)
+        (out_dir / "INSTRUCTIONS.md").write_text(instructions_text, encoding="utf-8")
+
+        return _manifest_for_dir(out_dir)
+
+
+def recompute_benchmark_protocol_commit_verification(agent_run: dict[str, Any]) -> bool:
+    """Independently recompute whether ``agent_run["benchmark_protocol_commit"]``'s
+    ``verified: true`` claim is actually true, rather than trusting the
+    self-reported flag a migration or capture script wrote.
+
+    Reconstructs the ENTIRE prompt package (case.json, SKILL.md,
+    INSTRUCTIONS.md, and the reconstructed fixture repository) from ONLY
+    files as committed at ``benchmark_protocol_commit.commit`` (via
+    ``reconstruct_full_prompt_manifest_at_commit``), and compares the
+    complete resulting manifest, path-for-path, against this same capture's
+    own recorded ``prompt_package_manifest``. Returns ``True`` only on an
+    exact match. This proves the referenced commit's committed protocol --
+    not just its case.json -- reproduces byte-identical prompt-package
+    content; it does not, and cannot, prove anything about the ordering
+    between that commit's timestamp and this capture's own timestamps (see
+    the methodology doc's "Provenance" section for why content-equality,
+    not wall-clock ordering, is what this benchmark treats as the load-bearing
+    integrity property).
+    """
+    protocol = agent_run["benchmark_protocol_commit"]
+    commit = protocol.get("commit")
+    if commit is None:
+        return False
+    manifest = reconstruct_full_prompt_manifest_at_commit(commit, agent_run["case_id"])
+    if manifest is None:
+        return False
+    recorded = sorted(agent_run["prompt_package_manifest"], key=lambda entry: entry["path"])
+    reconstructed = sorted(manifest, key=lambda entry: entry["path"])
+    return recorded == reconstructed
 
 
 def build_allowlisted_env(extra: tuple[str, ...] = ()) -> dict[str, str]:

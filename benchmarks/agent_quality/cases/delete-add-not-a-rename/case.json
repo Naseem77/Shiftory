@@ -1,0 +1,11 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-case/v1",
+  "id": "delete-add-not-a-rename",
+  "version": 1,
+  "category": "deletion-addition-confused-with-move",
+  "description": "A validate_email function is deleted from one file and a similarly named, but behaviorally weaker, function is added to a different file.",
+  "fixture": {
+    "history": "history.fast-import",
+    "metadata": "metadata.json"
+  }
+}

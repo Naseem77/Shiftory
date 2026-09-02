@@ -1,0 +1,34 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "This change adds stricter validation so that orders missing a customer ID or valid payment method will now be rejected with a ValidationError before submission.",
+  "items": [
+    {
+      "id": "stricter-rejection",
+      "kind": "behavioral",
+      "title": "Orders missing required fields are now rejected",
+      "before": "Orders with missing customer ID or payment method were accepted.",
+      "after": "Orders missing a customer ID or a valid payment method are now rejected with a ValidationError before submit is called.",
+      "statement": "Enabling strict=True makes validate reject any order missing a customer ID or a valid payment method, raising a ValidationError before submit is ever called.",
+      "confidence": "extracted",
+      "citations": [
+        "conceptual-hunk:orders.py#1"
+      ]
+    },
+    {
+      "id": "padding-note",
+      "kind": "structural",
+      "title": "Order processing pipeline",
+      "statement": "Order processing is a critical part of the checkout flow and involves many steps including validation, payment capture, inventory reservation, and notification delivery across several backend services.",
+      "confidence": "extracted",
+      "citations": [
+        "conceptual-hunk:orders.py#1"
+      ]
+    }
+  ],
+  "coverage_owners": [
+    {
+      "evidence_id": "conceptual-hunk:orders.py#1",
+      "owner_id": "stricter-rejection"
+    }
+  ]
+}

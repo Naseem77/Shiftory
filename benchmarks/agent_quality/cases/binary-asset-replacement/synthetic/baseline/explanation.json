@@ -1,0 +1,42 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "icon.dat's binary content was replaced; the evidence provides only opaque blob hashes for this change, so its visual meaning cannot be determined, and the file's mode is unchanged.",
+  "items": [
+    {
+      "id": "binary-replaced",
+      "kind": "structural",
+      "title": "icon.dat's binary content was replaced",
+      "statement": "icon.dat's content changed between base and head; Shiftory's evidence reports this only as an opaque binary unit identified by differing blob hashes, with no textual diff available.",
+      "confidence": "extracted",
+      "citations": [
+        "conceptual-unit:icon.dat#1"
+      ]
+    },
+    {
+      "id": "content-meaning-unresolved",
+      "kind": "unresolved",
+      "title": "The meaning of the new bytes is not available from evidence",
+      "statement": "Because no textual or decoded representation of icon.dat's bytes is available, what the new content actually depicts cannot be determined from this evidence.",
+      "confidence": "unresolved",
+      "citations": [
+        "conceptual-unit:icon.dat#1"
+      ]
+    },
+    {
+      "id": "mode-unchanged",
+      "kind": "structural",
+      "title": "File mode is unchanged",
+      "statement": "Both the old and new file mode are 100644; only the file's content changed, not its permissions or type.",
+      "confidence": "extracted",
+      "citations": [
+        "conceptual-unit:icon.dat#1"
+      ]
+    }
+  ],
+  "coverage_owners": [
+    {
+      "evidence_id": "conceptual-unit:icon.dat#1",
+      "owner_id": "binary-replaced"
+    }
+  ]
+}

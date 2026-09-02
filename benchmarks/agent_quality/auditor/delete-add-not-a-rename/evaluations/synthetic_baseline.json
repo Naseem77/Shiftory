@@ -1,0 +1,172 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-candidate-evaluation/v1",
+  "case_id": "delete-add-not-a-rename",
+  "rubric_version": 1,
+  "candidate_id": "synthetic_baseline",
+  "candidate_kind": "synthetic_baseline",
+  "explanation_sha256": "91efb1b9e38e57e14c0f80df26d5c14fd3183cba60b70c2c59dc83c76fd5623f",
+  "claims": [
+    {
+      "overlaps_with": [],
+      "evidence_anchor_cited": [
+        "conceptual-hunk:validators.py#1"
+      ],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Manual single-pass authoring while implementing this benchmark layer; provisional until independently re-reviewed.",
+        "timestamp": "2026-09-02T00:00:00Z"
+      },
+      "claim_id": "c-email-check-removed",
+      "source_item_id": "email-check-removed",
+      "field": "/items/0/statement",
+      "maps_to_required_fact_id": "validate-email-removed-from-validators",
+      "verdict": "supported_correct",
+      "materiality": 4,
+      "confidence_expressed": "extracted",
+      "confidence_appropriate": true,
+      "rationale": "validators.py's diff shows the function and regex assignment fully deleted, leaving only the import.",
+      "start": 0,
+      "end": 77,
+      "excerpt_sha256": "d3a637d1cebbfb8712773704dcd6e692e36b4b227beb1501f85fb56a4673098a"
+    },
+    {
+      "overlaps_with": [],
+      "evidence_anchor_cited": [
+        "conceptual-hunk:utils.py#1"
+      ],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Manual single-pass authoring while implementing this benchmark layer; provisional until independently re-reviewed.",
+        "timestamp": "2026-09-02T00:00:00Z"
+      },
+      "claim_id": "c-weaker-email-check-added",
+      "source_item_id": "weaker-email-check-added",
+      "field": "/items/1/statement",
+      "maps_to_required_fact_id": "weaker-validate-email-added-to-utils",
+      "verdict": "supported_correct",
+      "materiality": 5,
+      "confidence_expressed": "extracted",
+      "confidence_appropriate": true,
+      "rationale": "utils.py's diff adds exactly 'def validate_email(value): return \"@\" in value'.",
+      "start": 56,
+      "end": 174,
+      "excerpt_sha256": "12e981182f8f735723621478fff16c70b403bc051ffea0408dba9a70a47b69a4"
+    },
+    {
+      "overlaps_with": [],
+      "evidence_anchor_cited": [
+        "conceptual-hunk:validators.py#1",
+        "conceptual-hunk:utils.py#1"
+      ],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Manual single-pass authoring while implementing this benchmark layer; provisional until independently re-reviewed.",
+        "timestamp": "2026-09-02T00:00:00Z"
+      },
+      "claim_id": "c-not-a-real-move",
+      "source_item_id": "not-a-real-move",
+      "field": "/items/2/statement",
+      "maps_to_required_fact_id": "not-a-behavior-preserving-move",
+      "verdict": "supported_correct",
+      "materiality": 5,
+      "confidence_expressed": "extracted",
+      "confidence_appropriate": true,
+      "rationale": "Comparing the two implementations directly: anchored full-match regex vs. bare substring containment is a strictly weaker check.",
+      "start": 64,
+      "end": 200,
+      "excerpt_sha256": "9ed9264eb1cd1ed5e6a920c57b89ede89ba43b13fbcf03cd0bd026b6464e9888"
+    }
+  ],
+  "audit_coverage": [
+    {
+      "field": "/summary",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates or labels a material claim already recorded elsewhere for this item; not an independently material assertion."
+    },
+    {
+      "field": "/items/0/title",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates or labels a material claim already recorded elsewhere for this item; not an independently material assertion."
+    },
+    {
+      "field": "/items/0/before",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates or labels a material claim already recorded elsewhere for this item; not an independently material assertion."
+    },
+    {
+      "field": "/items/0/statement",
+      "claim_ids": [
+        "c-email-check-removed"
+      ],
+      "decomposition_complete": true
+    },
+    {
+      "field": "/items/1/title",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates or labels a material claim already recorded elsewhere for this item; not an independently material assertion."
+    },
+    {
+      "field": "/items/1/after",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates or labels a material claim already recorded elsewhere for this item; not an independently material assertion."
+    },
+    {
+      "field": "/items/1/statement",
+      "claim_ids": [
+        "c-weaker-email-check-added"
+      ],
+      "decomposition_complete": true
+    },
+    {
+      "field": "/items/2/title",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates or labels a material claim already recorded elsewhere for this item; not an independently material assertion."
+    },
+    {
+      "field": "/items/2/before",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates or labels a material claim already recorded elsewhere for this item; not an independently material assertion."
+    },
+    {
+      "field": "/items/2/after",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates or labels a material claim already recorded elsewhere for this item; not an independently material assertion."
+    },
+    {
+      "field": "/items/2/statement",
+      "claim_ids": [
+        "c-not-a-real-move"
+      ],
+      "decomposition_complete": true
+    }
+  ]
+}

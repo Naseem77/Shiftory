@@ -1,0 +1,11 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-case/v1",
+  "id": "context-limited-helper-call",
+  "version": 1,
+  "category": "ambiguous-context-limited",
+  "description": "A call to an externally-defined validate() helper changes its strict keyword argument from False to True; validate's own implementation is not shown anywhere in this fixture.",
+  "fixture": {
+    "history": "history.fast-import",
+    "metadata": "metadata.json"
+  }
+}

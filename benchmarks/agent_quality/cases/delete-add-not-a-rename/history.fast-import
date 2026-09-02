@@ -1,0 +1,46 @@
+commit refs/heads/main
+mark :1
+author Shiftory Fixture <fixture@shiftory.invalid> 1707264000 +0000
+committer Shiftory Fixture <fixture@shiftory.invalid> 1707264000 +0000
+data <<BASE_MESSAGE
+delete-add-not-a-rename base
+BASE_MESSAGE
+M 100644 inline validators.py
+data <<BASE_VALIDATORS
+import re
+
+EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+
+def validate_email(value):
+    return bool(EMAIL_RE.match(value))
+BASE_VALIDATORS
+M 100644 inline utils.py
+data <<BASE_UTILS
+def slugify(value):
+    return value.strip().lower().replace(" ", "-")
+BASE_UTILS
+
+commit refs/heads/main
+mark :2
+author Shiftory Fixture <fixture@shiftory.invalid> 1707350400 +0000
+committer Shiftory Fixture <fixture@shiftory.invalid> 1707350400 +0000
+data <<HEAD_MESSAGE
+delete-add-not-a-rename head
+HEAD_MESSAGE
+from :1
+M 100644 inline validators.py
+data <<HEAD_VALIDATORS
+import re
+HEAD_VALIDATORS
+M 100644 inline utils.py
+data <<HEAD_UTILS
+def slugify(value):
+    return value.strip().lower().replace(" ", "-")
+
+
+def validate_email(value):
+    return "@" in value
+HEAD_UTILS
+
+done

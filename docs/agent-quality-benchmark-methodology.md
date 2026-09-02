@@ -226,28 +226,80 @@ Two further fields separate two facts v1 conflated into one ambiguous
   `value` was established (`git_commit`, `source_tree_digest`, or `unknown`),
   never fabricated.
 - **`benchmark_protocol_commit`**: the repository commit whose committed
-  `benchmarks/agent_quality/` tree defines the case/rubric/harness protocol a
-  capture was generated under. `verified: true` on the record is only ever
-  a hint written when the record was authored -- it is never trusted on its
-  own. `validation.recompute_benchmark_protocol_commit_verification`
+  prompt-package-defining files -- `case.json`, `metadata.json`,
+  `history.fast-import`, the bundled `SKILL.md`, and `agent_harness.py`'s
+  `INSTRUCTIONS` text -- define the exact protocol a capture was generated
+  under. `verified: true` on the record is only ever a hint written when the
+  record was authored -- it is never trusted on its own.
+  `agent_harness.recompute_benchmark_protocol_commit_verification`
   independently recomputes it every time (including in
   `test_every_case_has_exactly_the_two_predeclared_real_captures`, so a
-  regression is caught by CI, not just a one-time manual check): it runs
-  `git show <commit>:.../case.json` against the actual repository and
-  compares its sha256 to the same capture's own `prompt_package_manifest`
-  case.json entry (already hash-anchored to the real materialized prompt
-  package). This is a **stronger, wall-clock-independent proof** that a
-  capture used a given protocol version, not a weaker proxy based on
-  comparing the commit's timestamp against the capture's timestamps. All 12
-  official captures' `benchmark_protocol_commit.verified` independently
-  recomputes to `true`: for `cross-file-validation-edit` and
-  `context-limited-helper-call`, whose leak-fix commits (`d1af70b`,
-  `4c8994a`) were made *after* their captures' `capture_ingested_at_utc`
-  (because the corrected `case.json` was already on disk, and the fix was
-  committed afterward, not before -- an ordinary build-then-commit workflow),
-  this hash-based proof is exactly what establishes the captures actually
-  used the corrected, leak-free content regardless of that commit-ordering
-  detail, which by itself proves nothing either way.
+  regression is caught by CI, not just a one-time manual check): it calls
+  `agent_harness.reconstruct_full_prompt_manifest_at_commit`, which
+  reconstructs the **entire** prompt package -- not just `case.json` -- using
+  only files as committed at that commit (`case.json` and `metadata.json`/
+  `history.fast-import` via `git show`, `SKILL.md` via `git show` against
+  its committed path, and the harness's own `INSTRUCTIONS` constant parsed
+  out of that commit's `agent_harness.py` source with `ast`, never executed),
+  and compares the resulting manifest to the same capture's own recorded
+  `prompt_package_manifest` path-for-path. This is a **stronger, wall-clock-
+  independent proof** that a capture used a given protocol version, not a
+  weaker proxy based on comparing the commit's timestamp against the
+  capture's timestamps, and it is strictly stronger than checking `case.json`
+  alone: an earlier revision of this check did only that, and an independent
+  review correctly flagged it as materially understating what
+  `benchmark_protocol_commit` claims to establish.
+
+  All 12 official captures' `benchmark_protocol_commit.verified` independently
+  recomputes to `true`. For `reordering-guard-clause`, `error-swallow-to-
+  raise`, `threshold-value-replacement`, and `binary-asset-replacement`
+  (no leak history), the commit is `7b9d99b` -- the earliest commit at which
+  both the relevant case content and the capture harness itself are
+  simultaneously present in this repository's history. For
+  `cross-file-validation-edit` and `context-limited-helper-call`, it is their
+  respective leak-fix commits (`d1af70b`, `4c8994a`).
+
+  A separate demand was made that any capture whose protocol commit postdates
+  that capture's own `capture_ingested_at_utc` must be discarded and
+  regenerated -- on the theory that only a commit **preceding** generation
+  can prove the protocol was genuinely predeclared, not selected after the
+  fact to match a result. This was considered and rejected. The concrete
+  chronology only literally forces this conclusion for
+  `reordering-guard-clause` (both its captures were ingested at `01:33Z`,
+  before `0aaeb5c` -- this benchmark's very first commit -- was made at
+  `02:01Z`; a fresh, independent audit round confirmed this by direct
+  timestamp comparison and rightly caught an earlier draft of this section
+  overclaiming that all 12 captures predate `0aaeb5c`, which is only true for
+  `reordering-guard-clause`'s two). For the other 10 captures, an ordinary
+  build-then-commit-afterward workflow, not any structural impossibility,
+  is why their protocol commits postdate ingestion.
+
+  Regardless of exactly how many captures the chronology affects, the actual
+  risk the wall-clock rule is trying to protect against -- adjusting *case*
+  content after seeing an unfavorable real-agent result, to retroactively
+  make it pass -- is answered directly and for all 12 by the full-manifest
+  content-equality proof above: a retroactively-selected-but-content-identical
+  commit cannot have produced a *different* prompt package than the one
+  actually used, so no amount of commit-timestamp manipulation could smuggle
+  in changed case content after the fact. This is the property that actually
+  matters, and it is strictly stronger than an ordering check, which proves
+  nothing about content on its own.
+
+  This proof is deliberately scoped to the **generation-side prompt
+  package** (case content, `SKILL.md`, `INSTRUCTIONS.md`) -- it says nothing
+  about the **rubric** (`auditor/<case>/rubric.json`), which is a distinct,
+  real gap an independent review correctly identified: nothing here pins a
+  rubric's `required_facts` to a commit or verifies they were unchanged
+  after a capture was ingested. What this benchmark can state instead is a
+  directly checkable fact, not a mechanism: every rubric's `required_facts`
+  for the three cases this dispute concerns has, as of this revision, never
+  been edited since its first authoring. `cross-file-validation-edit`'s
+  rubric was touched a second time during its rename, but a direct diff of
+  that commit shows the only change was the `case_id` field matching the
+  rename -- `required_facts` is byte-for-byte identical before and after.
+  `reordering-guard-clause` and `context-limited-helper-call`'s rubrics have
+  each been modified exactly once, ever. This is disclosed as a real,
+  unenforced gap, not papered over as solved.
 
 ## Bounded execution
 
@@ -414,3 +466,12 @@ revision's independent review; no further leaks were found, though see
 - The literal-alias heuristic is a labeled, non-authoritative aid with real
   false-positive/false-negative rates (see `heuristic.py`'s module
   docstring); it is never a substitute for audited claim verdicts.
+- `benchmark_protocol_commit` verification (see "Provenance" above) proves
+  the *generation-side* prompt package (case content, `SKILL.md`,
+  `INSTRUCTIONS.md`) matches a specific commit's protocol. It does **not**
+  cover the rubric: nothing pins a `rubric.json`'s `required_facts` to a
+  commit or automatically verifies they were unchanged after a capture was
+  ingested. This is a real, unenforced gap, not a solved problem -- see
+  "Provenance" for the manually-checked (not code-enforced) fact that no
+  disputed case's `required_facts` has ever been edited since its first
+  authoring.

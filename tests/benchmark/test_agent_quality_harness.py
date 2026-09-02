@@ -161,6 +161,48 @@ def test_capture_result_records_missing_response_as_invalid(tmp_path: Path) -> N
     assert result["protocol_violation"] is not None
 
 
+def test_capture_result_caps_an_oversized_raw_response_file_without_full_read(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """A RAW_RESPONSE file larger than max_output_bytes must never be fully
+    read into memory before the cap is enforced -- this is the untrusted
+    input a real capture actually produces, unlike the harness's own
+    subprocess stdout/stderr streams."""
+    prompt_dir = tmp_path / "prompt"
+    prompt_dir.mkdir()
+    out_dir = tmp_path / "out"
+
+    read_sizes: list[int] = []
+    real_open = Path.open
+
+    def _tracking_open(self, *args, **kwargs):  # type: ignore[no-untyped-def]
+        handle = real_open(self, *args, **kwargs)
+        if self.name == "RAW_RESPONSE":
+            original_read = handle.read
+
+            def _tracked_read(size=-1):  # type: ignore[no-untyped-def]
+                read_sizes.append(size)
+                return original_read(size)
+
+            handle.read = _tracked_read
+        return handle
+
+    monkeypatch.setattr(Path, "open", _tracking_open)
+
+    oversized = b"x" * (v.MAX_RAW_RESPONSE_BYTES * 4)
+    (prompt_dir / "RAW_RESPONSE").write_bytes(oversized)
+
+    kwargs = _base_capture_kwargs(prompt_dir, out_dir)
+    kwargs["max_output_bytes"] = 100
+    result = ah.capture_result(**kwargs)
+
+    assert result["agent_run"]["truncated"] is True
+    assert result["agent_run"]["raw_response_bytes"] == 100
+    # The read call requested at most max_output_bytes + 1 bytes; it never
+    # asked for the file's full (400x larger) size.
+    assert read_sizes == [101]
+
+
 def test_build_allowlisted_env_only_includes_allowed_names(monkeypatch) -> None:
     monkeypatch.setenv("PATH", "/usr/bin")
     monkeypatch.setenv("SUPER_SECRET_TOKEN", "do-not-leak")

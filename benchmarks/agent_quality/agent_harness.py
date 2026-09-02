@@ -195,6 +195,17 @@ def run_capped_subprocess(
     }
 
 
+def _read_capped_file(path: Path, max_bytes: int) -> tuple[bytes, bool]:
+    """Read at most ``max_bytes`` from ``path`` without ever loading a larger
+    file fully into memory first. Returns ``(data, truncated)``."""
+    with path.open("rb") as handle:
+        data = handle.read(max_bytes + 1)
+    truncated = len(data) > max_bytes
+    if truncated:
+        data = data[:max_bytes]
+    return data, truncated
+
+
 def _looks_like_explanation(value: Any) -> bool:
     return (
         isinstance(value, dict)
@@ -256,9 +267,12 @@ def capture_result(
     finished_at = datetime.now(timezone.utc).isoformat()
 
     response_path = prompt_dir / "RAW_RESPONSE"
-    raw = response_path.read_bytes() if response_path.is_file() else stdout
+    if response_path.is_file():
+        raw, response_truncated = _read_capped_file(response_path, max_output_bytes)
+    else:
+        raw, response_truncated = stdout, False
 
-    raw_truncated = truncated
+    raw_truncated = truncated or response_truncated
     if len(raw) > max_output_bytes:
         raw = raw[:max_output_bytes]
         raw_truncated = True

@@ -609,14 +609,16 @@ def capture_result(
     only if the raw response is strictly valid per the protocol above.
     Returns the written ``agent-run-v2`` record.
 
-    ``out_dir`` must not already exist unless the caller explicitly passes
-    ``allow_existing_out_dir=True`` -- a deliberate, visible opt-in for
-    legitimate maintenance (e.g. correcting a previously-recorded capture),
-    never for silently retrying or overwriting a fresh generation attempt.
-    The default strict behavior is what prevents two invocations for the
-    same case/config from silently overwriting each other's recorded
-    output, matching ``protocol_registry.json``'s
-    ``output_directory_must_not_preexist`` invariant.
+    ``out_dir`` must not already contain a prior invocation's output (an
+    empty or not-yet-existing directory is fine) unless the caller
+    explicitly passes ``allow_existing_out_dir=True`` -- a deliberate,
+    visible opt-in for legitimate maintenance (e.g. correcting a
+    previously-recorded capture), never for silently retrying or
+    overwriting a fresh generation attempt. The default strict behavior is
+    what prevents two invocations for the same case/config from silently
+    overwriting each other's recorded output, matching
+    ``protocol_registry.json``'s ``output_directory_must_not_preexist``
+    invariant.
 
     Exactly one of two invocation shapes applies:
 
@@ -641,10 +643,10 @@ def capture_result(
             "capture_result requires copilot_task_info when command_argv is not given"
         )
 
-    if out_dir.exists() and not allow_existing_out_dir:
+    if out_dir.is_dir() and any(out_dir.iterdir()) and not allow_existing_out_dir:
         raise v.AgentQualityError(
-            f"{out_dir} already exists -- refusing to reuse or overwrite an existing "
-            "output directory (output_directory_must_not_preexist invariant); pass "
+            f"{out_dir} already contains prior invocation output -- refusing to reuse or "
+            "overwrite it (output_directory_must_not_preexist invariant); pass "
             "allow_existing_out_dir=True only for a deliberate, visible correction, "
             "never to silently retry or overwrite a fresh generation attempt"
         )

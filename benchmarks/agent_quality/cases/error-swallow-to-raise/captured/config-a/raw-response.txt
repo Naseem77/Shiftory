@@ -1,0 +1,32 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "The config loader changed from swallowing load errors to surfacing them to callers.",
+  "items": [
+    {
+      "id": "item_error_propagates_to_caller",
+      "kind": "behavioral",
+      "title": "Config load failures are re-raised",
+      "confidence": "inferred",
+      "before": "When an exception occurred while loading configuration, load_config returned an empty dictionary instead of propagating the failure.",
+      "after": "When an exception occurs while loading configuration, load_config re-raises the exception so callers observe the original failure.",
+      "citations": [
+        {
+          "id": "source_ee7cb38bbed948a647aba5aa"
+        },
+        {
+          "id": "source_5cb3053b457d61a9c9068ba7"
+        }
+      ]
+    }
+  ],
+  "coverage_owners": [
+    {
+      "evidence_id": "line_d94bfbaf4c43679f1686eea4",
+      "owner_id": "item_error_propagates_to_caller"
+    },
+    {
+      "evidence_id": "line_0786ea28854b2ac24f35bfd0",
+      "owner_id": "item_error_propagates_to_caller"
+    }
+  ]
+}

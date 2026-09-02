@@ -1,0 +1,37 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "The change replaces the repository's single binary asset, icon.dat, with a different binary payload, so any consumer of that file now receives different bytes while the exact semantic intent of the new payload is not derivable from the bounded evidence.",
+  "items": [
+    {
+      "id": "icon-dat-binary-replaced",
+      "kind": "structural",
+      "title": "The binary file icon.dat was replaced",
+      "confidence": "extracted",
+      "statement": "Across d7468c1..f66dfed, icon.dat remains at the same path and mode (100644) but its blob changed from 85025d98693fe77b700bcf818dfd8fcd13c4e961 to 4bf941a61efbd197352e63126c8b27701fe8ff3c, indicating a direct binary content replacement.",
+      "citations": []
+    },
+    {
+      "id": "icon-dat-observed-bytes-changed",
+      "kind": "behavioral",
+      "title": "Reads of icon.dat now return a different binary payload",
+      "confidence": "inferred",
+      "before": "Any process reading icon.dat obtained the prior payload identified by blob 85025d98693fe77b700bcf818dfd8fcd13c4e961.",
+      "after": "The same read now yields the replacement payload identified by blob 4bf941a61efbd197352e63126c8b27701fe8ff3c.",
+      "citations": []
+    },
+    {
+      "id": "icon-dat-semantic-meaning-unresolved",
+      "kind": "unresolved",
+      "title": "The functional meaning of the new binary payload is not derivable from bounded evidence",
+      "confidence": "unresolved",
+      "statement": "Because the changed unit is binary and the evidence includes no decoded or source-level semantics, the specific visual or runtime meaning of the replacement content cannot be determined from this evidence set alone.",
+      "citations": []
+    }
+  ],
+  "coverage_owners": [
+    {
+      "evidence_id": "unit_522aa1f2f4bedd75c4d3005e",
+      "owner_id": "icon-dat-binary-replaced"
+    }
+  ]
+}

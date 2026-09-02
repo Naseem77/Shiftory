@@ -705,7 +705,7 @@ def test_capture_result_refuses_a_preexisting_out_dir(tmp_path: Path) -> None:
     (prompt_dir / "RAW_RESPONSE").write_bytes(json.dumps(document).encode("utf-8"))
     ah.capture_result(**_base_capture_kwargs(prompt_dir, out_dir))
 
-    with pytest.raises(v.AgentQualityError, match="already exists"):
+    with pytest.raises(v.AgentQualityError, match="already contains prior invocation output"):
         ah.capture_result(**_base_capture_kwargs(prompt_dir, out_dir))
 
     # An explicit, visible opt-in still works for deliberate corrections.

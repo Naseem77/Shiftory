@@ -179,18 +179,18 @@
       "candidate_kind": "captured_real_run",
       "case_id": "threshold-value-replacement",
       "claim_factuality": {
-        "assessable_count": 6,
-        "assessable_weight": 27,
+        "assessable_count": 3,
+        "assessable_weight": 11,
         "ratio": 1.0,
-        "supported_count": 6,
-        "supported_weight": 27
+        "supported_count": 3,
+        "supported_weight": 11
       },
       "contradicted_claims": {
         "claim_ids": [],
         "count": 0,
         "weight": 0
       },
-      "explanation_sha256": "77b60f7438b6dddab638e899b13d6777db86deb72fc7288815c4f4769034cf96",
+      "explanation_sha256": "5d9bfc488de65c831ac1c4eaa689d797ff34d6e23e4cfb52c03f155a09e9e109",
       "gate": null,
       "required_behavior_coverage": {
         "ratio": 0.6666666666666666,
@@ -212,9 +212,12 @@
       },
       "structural_failure": null,
       "uncertainty_honesty": {
-        "checked": 6,
-        "violation_ids": [],
-        "violations": 0
+        "checked": 3,
+        "violation_ids": [
+          "ca-2",
+          "ca-3"
+        ],
+        "violations": 2
       },
       "unsupported_claims": {
         "claim_ids": [],
@@ -225,7 +228,7 @@
         "ambiguous_unresolvable_claims": 0,
         "item_count": 1,
         "non_semantic_claims": 0,
-        "useful_count": 6
+        "useful_count": 2
       }
     },
     {
@@ -255,18 +258,18 @@
       "candidate_kind": "captured_real_run",
       "case_id": "threshold-value-replacement",
       "claim_factuality": {
-        "assessable_count": 8,
-        "assessable_weight": 32,
+        "assessable_count": 3,
+        "assessable_weight": 13,
         "ratio": 1.0,
-        "supported_count": 8,
-        "supported_weight": 32
+        "supported_count": 3,
+        "supported_weight": 13
       },
       "contradicted_claims": {
         "claim_ids": [],
         "count": 0,
         "weight": 0
       },
-      "explanation_sha256": "ff45da5e740877b72ed335385e89d53e6c3b09eb41de0c6dbea9e16c86e14b5c",
+      "explanation_sha256": "f7ad373ff5750e66b6d384d2c6abd0f6f3090262699e1c9c2bd450960deb093c",
       "gate": null,
       "required_behavior_coverage": {
         "ratio": 0.6666666666666666,
@@ -288,7 +291,7 @@
       },
       "structural_failure": null,
       "uncertainty_honesty": {
-        "checked": 8,
+        "checked": 3,
         "violation_ids": [],
         "violations": 0
       },
@@ -301,7 +304,7 @@
         "ambiguous_unresolvable_claims": 0,
         "item_count": 1,
         "non_semantic_claims": 0,
-        "useful_count": 7
+        "useful_count": 3
       }
     }
   ],

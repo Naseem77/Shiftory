@@ -171,26 +171,26 @@
       "audit_status": {
         "actor_type": "agent",
         "adjudicator": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
-        "disagreement_count": 0,
-        "disagreement_rate": 0.0,
+        "disagreement_count": 1,
+        "disagreement_rate": 0.2,
         "mode": "dual_audit"
       },
       "candidate_id": "captured_config_a",
       "candidate_kind": "captured_real_run",
       "case_id": "error-swallow-to-raise",
       "claim_factuality": {
-        "assessable_count": 7,
-        "assessable_weight": 27,
-        "ratio": 0.8888888888888888,
-        "supported_count": 6,
-        "supported_weight": 24
+        "assessable_count": 5,
+        "assessable_weight": 23,
+        "ratio": 0.8260869565217391,
+        "supported_count": 4,
+        "supported_weight": 19
       },
       "contradicted_claims": {
         "claim_ids": [],
         "count": 0,
         "weight": 0
       },
-      "explanation_sha256": "bf1555a74bdd3c7063fbf8b64cf4dff0c363018f1868b449c17e2eaa882467c7",
+      "explanation_sha256": "a3020bf664ff4eff09f845b45df79d9c7e515449ab1141bb0b316cb46ba43b81",
       "gate": null,
       "required_behavior_coverage": {
         "ratio": 0.3333333333333333,
@@ -212,7 +212,7 @@
       },
       "structural_failure": null,
       "uncertainty_honesty": {
-        "checked": 7,
+        "checked": 5,
         "violation_ids": [
           "ca-5"
         ],
@@ -223,37 +223,90 @@
           "ca-5"
         ],
         "count": 1,
-        "weight": 3
+        "weight": 4
       },
       "usefulness_relevance": {
         "ambiguous_unresolvable_claims": 0,
         "item_count": 1,
         "non_semantic_claims": 0,
-        "useful_count": 6
+        "useful_count": 4
       }
     },
     {
-      "accounting": null,
-      "audit_status": null,
+      "accounting": {
+        "citation_count": 2,
+        "hunk_coverage_ratio": 1.0,
+        "hunk_covered": 1,
+        "hunk_total": 1,
+        "line_coverage_ratio": 1.0,
+        "line_owned": 2,
+        "line_total": 2,
+        "span_coverage_ratio": 1.0,
+        "span_owned": 2,
+        "span_total": 2,
+        "unit_coverage_ratio": 1.0,
+        "unit_covered": 1,
+        "unit_total": 1
+      },
+      "audit_status": {
+        "actor_type": "agent",
+        "adjudicator": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+        "disagreement_count": 1,
+        "disagreement_rate": 0.3333333333333333,
+        "mode": "dual_audit"
+      },
       "candidate_id": "captured_config_b",
       "candidate_kind": "captured_real_run",
       "case_id": "error-swallow-to-raise",
-      "claim_factuality": null,
-      "contradicted_claims": null,
-      "explanation_sha256": null,
+      "claim_factuality": {
+        "assessable_count": 3,
+        "assessable_weight": 14,
+        "ratio": 1.0,
+        "supported_count": 3,
+        "supported_weight": 14
+      },
+      "contradicted_claims": {
+        "claim_ids": [],
+        "count": 0,
+        "weight": 0
+      },
+      "explanation_sha256": "af19890e82b29a87d56076bb938430d588e02395e8b853d3a51385e36795c208",
       "gate": null,
-      "required_behavior_coverage": null,
+      "required_behavior_coverage": {
+        "ratio": 0.3333333333333333,
+        "satisfied_count": 1,
+        "satisfied_ids": [
+          "malformed-config-now-raises"
+        ],
+        "total_count": 3
+      },
       "rubric_match_heuristic": null,
       "schema": "shiftory.benchmark-agent-quality-score/v1",
-      "semantic_omissions": null,
-      "structural_failure": {
-        "protocol_violation": "raw response cites evidence ids that do not exist in the real evidence for this diff",
-        "raw_response_sha256": "d70bceb897d439bb3c82aca7e99a22a3ced64c68e052e2d41479b9c29317b16b",
-        "reason": "The raw response is valid shiftory.explanation/v1-shaped JSON (passes the shallow schema check agent_harness.capture_result performs), but fails the real shiftory.explain.validator.validate_explanation structural check: it cites `fact_7262a897cc31675ed9fdf30b` and `fact_9f5943ca0425a304e0fba1f6`, which do not exist anywhere in this case's real, deterministically-generated evidence (graphora is disabled/unavailable in this environment, so evidence.graph.facts is always empty) -- the model fabricated citation ids that look plausible but were never actually produced by shiftory analyze for this diff. This is a genuine accounting-level structural failure discovered by running the real validator, not a repair-worthy formatting issue; per protocol, the raw response and agent-run provenance are preserved exactly as first received, and no semantic score is synthesized for this candidate."
+      "semantic_omissions": {
+        "missed_count": 2,
+        "missed_ids": [
+          "callers-impact-unclear",
+          "success-path-unchanged"
+        ],
+        "missed_weight": 6
       },
-      "uncertainty_honesty": null,
-      "unsupported_claims": null,
-      "usefulness_relevance": null
+      "structural_failure": null,
+      "uncertainty_honesty": {
+        "checked": 3,
+        "violation_ids": [],
+        "violations": 0
+      },
+      "unsupported_claims": {
+        "claim_ids": [],
+        "count": 0,
+        "weight": 0
+      },
+      "usefulness_relevance": {
+        "ambiguous_unresolvable_claims": 0,
+        "item_count": 1,
+        "non_semantic_claims": 0,
+        "useful_count": 3
+      }
     }
   ],
   "case_id": "error-swallow-to-raise",

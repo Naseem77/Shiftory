@@ -1,0 +1,173 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-candidate-evaluation/v1",
+  "case_id": "error-swallow-to-raise",
+  "candidate_id": "captured_config_b",
+  "candidate_kind": "captured_real_run",
+  "rubric_version": 1,
+  "explanation_sha256": "af19890e82b29a87d56076bb938430d588e02395e8b853d3a51385e36795c208",
+  "claims": [
+    {
+      "claim_id": "cb-1",
+      "field": "/summary",
+      "start": 0,
+      "end": 147,
+      "source_item_id": "item_load_config_error_handling",
+      "excerpt_sha256": "f088cec20be831991e76162a412f25972c596a5ac28fc34460d8e731192b0dbc",
+      "verdict": "supported_correct",
+      "rationale": "Directly matches the required fact. Both passes agreed.",
+      "confidence_expressed": "extracted",
+      "confidence_appropriate": true,
+      "maps_to_required_fact_id": "malformed-config-now-raises",
+      "materiality": 5,
+      "evidence_anchor_cited": [],
+      "overlaps_with": [],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T11:20:00Z"
+      }
+    },
+    {
+      "claim_id": "cb-2",
+      "field": "/items/0/before",
+      "start": 0,
+      "end": 134,
+      "source_item_id": "item_load_config_error_handling",
+      "excerpt_sha256": "4e65c03d7a20b120ecdeb5313e2b2bea785cb55d16c06a808375d6ddd145287b",
+      "verdict": "supported_correct",
+      "rationale": "Matches the 'before' state. Both passes agreed the return-{} portion is accurate.",
+      "confidence_expressed": "extracted",
+      "confidence_appropriate": true,
+      "maps_to_required_fact_id": "malformed-config-now-raises",
+      "materiality": 4,
+      "evidence_anchor_cited": [],
+      "overlaps_with": [],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T11:20:00Z"
+      }
+    },
+    {
+      "claim_id": "cb-3",
+      "field": "/items/0/after",
+      "start": 0,
+      "end": 130,
+      "source_item_id": "item_load_config_error_handling",
+      "excerpt_sha256": "975a7cc1e92d9997bb331acd024bf9084cc65c5e35fe9920850d22a900175d60",
+      "verdict": "supported_correct",
+      "rationale": "Both passes were skeptical of the 'catches the exception' clause here -- pass1 called it 'contradicted' (reasoning the rubric's 'instead of being caught' implies no except block survives at all), pass2 called it 'unsupported' (the rubric doesn't confirm implementation mechanism). Adjudicated as supported_correct after directly reconstructing this case's real fixture source: the actual code is `except ValueError: raise` both before and after this change (only the body changes from `return {}` to `raise`), so 'catches the exception and re-raises it' is a byte-for-byte accurate description of the real diff, not an overreach or contradiction. This is a case where the adjudicator's access to real ground truth corrects both blind annotation passes' understandable but incorrect caution.",
+      "confidence_expressed": "extracted",
+      "confidence_appropriate": true,
+      "maps_to_required_fact_id": "malformed-config-now-raises",
+      "materiality": 5,
+      "evidence_anchor_cited": [],
+      "overlaps_with": [],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T11:20:00Z"
+      }
+    }
+  ],
+  "audit_coverage": [
+    {
+      "field": "/summary",
+      "claim_ids": [
+        "cb-1"
+      ],
+      "decomposition_complete": true
+    },
+    {
+      "field": "/items/0/before",
+      "claim_ids": [
+        "cb-2"
+      ],
+      "decomposition_complete": true
+    },
+    {
+      "field": "/items/0/after",
+      "claim_ids": [
+        "cb-3"
+      ],
+      "decomposition_complete": true
+    },
+    {
+      "field": "/items/0/title",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Title restates the same propagation fact already decomposed and graded via /summary and /items/0/before,after; it introduces no new factual content to separately audit."
+    }
+  ],
+  "annotation_passes": [
+    {
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "Independent annotator pass",
+          "organization": null,
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli task sub-agent",
+          "version": "1.0.80"
+        },
+        "method": "Fresh sub-agent given only the rubric and the exact captured candidate text; no access to any other pass's output.",
+        "timestamp": "2026-09-02T11:20:00Z"
+      },
+      "notes": "See adjudication rationale for reconciliation."
+    },
+    {
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "Independent annotator pass",
+          "organization": null,
+          "model": "gpt-5.3-codex",
+          "tool": "copilot-cli task sub-agent",
+          "version": "1.0.80"
+        },
+        "method": "Fresh sub-agent given only the rubric and the exact captured candidate text; no access to any other pass's output.",
+        "timestamp": "2026-09-02T11:20:00Z"
+      },
+      "notes": "See adjudication rationale for reconciliation."
+    }
+  ],
+  "adjudication": {
+    "annotation_provenance": {
+      "actor_type": "agent",
+      "actor": {
+        "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+        "organization": "GitHub",
+        "model": "claude-sonnet-5",
+        "tool": "copilot-cli",
+        "version": "1.0.80"
+      },
+      "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+      "timestamp": "2026-09-02T11:20:00Z"
+    },
+    "overridden_claim_ids": [
+      "cb-3"
+    ],
+    "rationale": "1 of 3 adjudicated claims involved a genuine disagreement (disagreement_rate 1/3 = 0.33): both passes independently doubted whether cb-3's 'catches the exception and re-raises it' clause was accurate (pass1: contradicted; pass2: unsupported), since neither had direct access to this case's real source code, only the rubric's prose description. The adjudicator reconstructed the actual fixture (benchmarks.agent_quality.fixtures.reconstruct_fixture) and confirmed the real diff is exactly `except ValueError: return {}` -> `except ValueError: raise`, so the candidate's mechanism description is byte-for-byte accurate -- this overrides both blind passes' caution with direct ground truth. Coverage is 1/3: only malformed-config-now-raises is satisfied; callers-impact-unclear and success-path-unchanged are both missed entirely."
+  }
+}

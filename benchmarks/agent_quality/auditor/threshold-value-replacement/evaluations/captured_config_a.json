@@ -1,0 +1,171 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-candidate-evaluation/v1",
+  "case_id": "threshold-value-replacement",
+  "candidate_id": "captured_config_a",
+  "candidate_kind": "captured_real_run",
+  "rubric_version": 1,
+  "explanation_sha256": "5d9bfc488de65c831ac1c4eaa689d797ff34d6e23e4cfb52c03f155a09e9e109",
+  "claims": [
+    {
+      "claim_id": "ca-1",
+      "field": "/summary",
+      "start": 0,
+      "end": 105,
+      "source_item_id": "retry-policy-rebalanced",
+      "excerpt_sha256": "0436d867348a592511925f2c5bcb1b15b94666a70a5f5dffb1606406b04a6cdd",
+      "verdict": "supported_correct",
+      "rationale": "Both passes agreed this is an accurate qualitative characterization consistent with the numeric change; pass2's suggestion this is 'ambiguous_unresolvable' is not adopted since 'rebalanced' is a reasonable summary term, not a claim requiring external validation.",
+      "confidence_expressed": "inferred",
+      "confidence_appropriate": true,
+      "maps_to_required_fact_id": null,
+      "materiality": 2,
+      "evidence_anchor_cited": [],
+      "overlaps_with": [],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T11:20:00Z"
+      }
+    },
+    {
+      "claim_id": "ca-2",
+      "field": "/items/0/before",
+      "start": 0,
+      "end": 68,
+      "source_item_id": "retry-policy-rebalanced",
+      "excerpt_sha256": "0f284ad4c59449dbe9cda82fe691ee76b9da103f3fe511be092fc6955b2618db",
+      "verdict": "supported_correct",
+      "rationale": "Directly matches the extractable prior state. Both passes agreed.",
+      "confidence_expressed": "inferred",
+      "confidence_appropriate": false,
+      "maps_to_required_fact_id": "attempts-increased",
+      "materiality": 4,
+      "evidence_anchor_cited": [],
+      "overlaps_with": [],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T11:20:00Z"
+      }
+    },
+    {
+      "claim_id": "ca-3",
+      "field": "/items/0/after",
+      "start": 0,
+      "end": 78,
+      "source_item_id": "retry-policy-rebalanced",
+      "excerpt_sha256": "616cc0591c70c5baab609cc9fb1e4f99079e2bde0fc3329e945812c130ce89f4",
+      "verdict": "supported_correct",
+      "rationale": "Directly matches the extractable new state. Both passes agreed.",
+      "confidence_expressed": "inferred",
+      "confidence_appropriate": false,
+      "maps_to_required_fact_id": "timeout-shortened",
+      "materiality": 5,
+      "evidence_anchor_cited": [],
+      "overlaps_with": [],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T11:20:00Z"
+      }
+    }
+  ],
+  "audit_coverage": [
+    {
+      "field": "/summary",
+      "claim_ids": [
+        "ca-1"
+      ],
+      "decomposition_complete": true
+    },
+    {
+      "field": "/items/0/before",
+      "claim_ids": [
+        "ca-2"
+      ],
+      "decomposition_complete": true
+    },
+    {
+      "field": "/items/0/after",
+      "claim_ids": [
+        "ca-3"
+      ],
+      "decomposition_complete": true
+    },
+    {
+      "field": "/items/0/title",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Title restates the same timeout/attempts facts already decomposed and graded via /summary and /items/0/before,after; it introduces no new factual content to separately audit."
+    }
+  ],
+  "annotation_passes": [
+    {
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "Independent annotator pass",
+          "organization": null,
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli task sub-agent",
+          "version": "1.0.80"
+        },
+        "method": "Fresh sub-agent given only the rubric and the exact captured candidate text; no access to any other pass's output.",
+        "timestamp": "2026-09-02T11:20:00Z"
+      },
+      "notes": "See adjudication rationale for reconciliation."
+    },
+    {
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "Independent annotator pass",
+          "organization": null,
+          "model": "gpt-5.3-codex",
+          "tool": "copilot-cli task sub-agent",
+          "version": "1.0.80"
+        },
+        "method": "Fresh sub-agent given only the rubric and the exact captured candidate text; no access to any other pass's output.",
+        "timestamp": "2026-09-02T11:20:00Z"
+      },
+      "notes": "See adjudication rationale for reconciliation."
+    }
+  ],
+  "adjudication": {
+    "annotation_provenance": {
+      "actor_type": "agent",
+      "actor": {
+        "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+        "organization": "GitHub",
+        "model": "claude-sonnet-5",
+        "tool": "copilot-cli",
+        "version": "1.0.80"
+      },
+      "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+      "timestamp": "2026-09-02T11:20:00Z"
+    },
+    "overridden_claim_ids": [],
+    "rationale": "0 of 3 adjudicated claims involved a substantive verdict disagreement (disagreement_rate 0/3 = 0.0): both passes agreed every claim is supported_correct and both agreed the single item's uniform 'inferred' confidence undersells the before/after claims, which are directly extractable raw diff values, not genuine inferences (confidence_appropriate=false for both). Both passes independently found the same single gap: 'rebalanced'/'multiple shorter attempts' is qualitative framing that never computes or asserts the required worst-case-latency-implication (~30s before vs ~23s now). Coverage is 2/3."
+  }
+}

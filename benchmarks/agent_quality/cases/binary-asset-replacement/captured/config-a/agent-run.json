@@ -1,5 +1,5 @@
 {
-  "schema": "shiftory.benchmark-agent-quality-agent-run/v1",
+  "schema": "shiftory.benchmark-agent-quality-agent-run/v2",
   "case_id": "binary-asset-replacement",
   "candidate_id": "captured_config_a",
   "provider": "openai (via GitHub Copilot CLI sub-agent)",
@@ -9,6 +9,18 @@
   },
   "agent_tool_version": "copilot-cli-1.0.80",
   "evaluation_protocol": "Fresh, stateless GitHub Copilot CLI sub-agent (task tool, agent_type=general-purpose) given only this materialized prompt package directory and instructed to run shiftory explain --graphora off against the fixture repository, follow SKILL.md, and write its final verified explanation verbatim to RAW_RESPONSE.",
+  "invocation": {
+    "kind": "copilot_task",
+    "agent_type": "general-purpose",
+    "configured_model": "gpt-5.3-codex",
+    "tool": "copilot-cli",
+    "tool_version": "1.0.80",
+    "task_id": null,
+    "generation_started_at_utc": null,
+    "generation_finished_at_utc": null,
+    "generation_timing_unavailable_reason": "Migrated from an agent-run-v1 record. v1's started_at_utc/finished_at_utc were only ever the microsecond-apart bookkeeping time of reading an already-completed RAW_RESPONSE file, never the real generation time, which occurred in a separate Copilot CLI task sub-agent conversation this harness did not observe or control. Recorded honestly as unknown rather than propagating the misleading v1 values."
+  },
+  "capture_ingested_at_utc": "2026-09-02T02:28:29.515636+00:00",
   "prompt_package_manifest": [
     {
       "path": "INSTRUCTIONS.md",
@@ -29,9 +41,17 @@
   ],
   "prompt_package_digest": "24e885ea889c12cf78c1d5c761e78fe33378eef46e08931f201ad503c35ccad2",
   "evidence_sha256": "12b65f73af72a7bd15fb63336685ea8720e4021e20805067ff171eba3d95ee25",
-  "shiftory_commit": "f4e1a03630bb650be1c6477837a733a4f9f6420e",
-  "command_argv": [],
-  "env_allowlist": [],
+  "engine_identity": {
+    "component": "shiftory",
+    "verification_method": "git_commit",
+    "value": "f4e1a03630bb650be1c6477837a733a4f9f6420e"
+  },
+  "benchmark_protocol_commit": {
+    "commit": "1ed86cad6fc94e638aa74e818b9e179a9755690e",
+    "verification_method": "prompt_manifest_hash_match",
+    "verified": true,
+    "note": "Verified: commit 1ed86cad6fc94e638aa74e818b9e179a9755690e's committed case.json sha256 matches this capture's own prompt_package_manifest case.json entry exactly, proving this capture was generated against the same case.json bytes this commit defines -- independent of any wall-clock ordering between the commit's timestamp and this capture's timestamps."
+  },
   "generator_access_profile": {
     "repository_access": true,
     "filesystem_scope": "Runs in the same Copilot CLI environment as the orchestrating session; has general bash/file-system tool access and was instructed, but not sandboxed, to stay within the prompt package directory.",
@@ -47,11 +67,6 @@
   "isolation_method": "protocol",
   "raw_response_sha256": "0b36dfefc2a5a920c5b420aa5cc0546e7fbecd04821f8940591da0ac7f66a7e5",
   "raw_response_bytes": 1875,
-  "stdout_sha256": null,
-  "stderr_sha256": null,
   "truncated": false,
-  "timed_out": false,
-  "exit_status": null,
-  "started_at_utc": "2026-09-02T02:28:29.515636+00:00",
-  "finished_at_utc": "2026-09-02T02:28:29.515646+00:00"
+  "migrated_from_v1_sha256": "24b1bba5d472bcf62205caa55ed4933942cf6d2c8e12a7bcd5b402f4c581aa9b"
 }

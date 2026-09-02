@@ -1,0 +1,24 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "Replaced binary asset icon.dat.",
+  "items": [
+    {
+      "id": "item-icon-dat",
+      "title": "Binary asset icon.dat replaced",
+      "kind": "unresolved",
+      "confidence": "unresolved",
+      "statement": "The raw bytes of binary file icon.dat were modified between base and head; there is no textual diff or resolved behavioral semantics for the change.",
+      "citations": [
+        "unit_522aa1f2f4bedd75c4d3005e",
+        "fact_32314a96f2b283ccc2da5503",
+        "fact_711411314f61102f006d3668"
+      ]
+    }
+  ],
+  "coverage_owners": [
+    {
+      "evidence_id": "unit_522aa1f2f4bedd75c4d3005e",
+      "owner_id": "item-icon-dat"
+    }
+  ]
+}

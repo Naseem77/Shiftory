@@ -1,0 +1,38 @@
+commit refs/heads/main
+mark :1
+author Shiftory Fixture <fixture@shiftory.invalid> 1706745600 +0000
+committer Shiftory Fixture <fixture@shiftory.invalid> 1706745600 +0000
+data <<BASE_MESSAGE
+reordering-guard-clause base
+BASE_MESSAGE
+M 100644 inline app.py
+data <<BASE_FILE
+def get_active_user(user_id):
+    if user_id is None:
+        return None
+    record = lookup(user_id)
+    if record is None or not record.active:
+        return None
+    return record
+BASE_FILE
+
+commit refs/heads/main
+mark :2
+author Shiftory Fixture <fixture@shiftory.invalid> 1706832000 +0000
+committer Shiftory Fixture <fixture@shiftory.invalid> 1706832000 +0000
+data <<HEAD_MESSAGE
+reordering-guard-clause head
+HEAD_MESSAGE
+from :1
+M 100644 inline app.py
+data <<HEAD_FILE
+def get_active_user(user_id):
+    record = lookup(user_id)
+    if user_id is None:
+        return None
+    if record is None or not record.active:
+        return None
+    return record
+HEAD_FILE
+
+done

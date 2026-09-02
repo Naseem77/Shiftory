@@ -1,0 +1,23 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "Binary asset icon.dat was replaced with new binary content.",
+  "items": [
+    {
+      "id": "item_binary_icon_replacement",
+      "kind": "unresolved",
+      "title": "Binary asset icon.dat replaced",
+      "confidence": "unresolved",
+      "statement": "The binary asset icon.dat was replaced, but its internal binary changes cannot be resolved textually.",
+      "citations": [
+        "fact_32314a96f2b283ccc2da5503",
+        "fact_711411314f61102f006d3668"
+      ]
+    }
+  ],
+  "coverage_owners": [
+    {
+      "evidence_id": "unit_522aa1f2f4bedd75c4d3005e",
+      "owner_id": "item_binary_icon_replacement"
+    }
+  ]
+}

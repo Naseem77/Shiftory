@@ -1,0 +1,46 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "process_order now calls validate with strict=True instead of strict=False; validate's own implementation is not shown here, so the concrete effect of that flag cannot be confirmed from this diff alone.",
+  "items": [
+    {
+      "id": "strict-flipped",
+      "kind": "behavioral",
+      "before": "validate(order, strict=False) was called.",
+      "after": "validate(order, strict=True) is called.",
+      "statement": "The call to validate(order, ...) changes its strict keyword argument from False to True.",
+      "confidence": "extracted",
+      "title": "strict argument flips from False to True",
+      "citations": [
+        "conceptual-hunk:orders.py#1"
+      ]
+    },
+    {
+      "id": "validate-behavior-unresolved",
+      "kind": "unresolved",
+      "title": "validate's own behavior is not shown in this fixture",
+      "statement": "validate's implementation is not defined anywhere in this fixture, so the concrete effect of enabling strict=True cannot be determined from the evidence alone.",
+      "confidence": "unresolved",
+      "citations": [
+        "conceptual-hunk:orders.py#1"
+      ]
+    },
+    {
+      "id": "submit-unchanged",
+      "kind": "behavioral",
+      "before": "submit(order) was called and returned after validate.",
+      "after": "submit(order) is still called and returned after validate, unchanged.",
+      "statement": "The call to submit(order) is unchanged; only the preceding validate call's strict argument changed.",
+      "confidence": "extracted",
+      "title": "submit call is unchanged",
+      "citations": [
+        "conceptual-hunk:orders.py#1"
+      ]
+    }
+  ],
+  "coverage_owners": [
+    {
+      "evidence_id": "conceptual-hunk:orders.py#1",
+      "owner_id": "strict-flipped"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "Order processing switches from non-strict to strict validation when validating an order.",
+  "items": [
+    {
+      "id": "item_validate_strict_switch",
+      "kind": "behavioral",
+      "title": "process_order now uses strict validation",
+      "confidence": "inferred",
+      "before": "`process_order` called `validate(order, strict=False)`, so validation ran in non-strict mode.",
+      "after": "`process_order` now calls `validate(order, strict=True)`, so validation runs in strict mode.",
+      "citations": [
+        "source_971437523f603da69aad4ba2",
+        "source_476edeb5af7e94fc7f4f28ec"
+      ]
+    }
+  ],
+  "coverage_owners": [
+    {
+      "evidence_id": "line_64f66366b63e75ecfb5c4355",
+      "owner_id": "item_validate_strict_switch"
+    },
+    {
+      "evidence_id": "line_e632edd98ca6bad6e0e380f1",
+      "owner_id": "item_validate_strict_switch"
+    }
+  ]
+}

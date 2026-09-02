@@ -1,0 +1,25 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "In one Python function, the None guard and lookup call were reordered so lookup now runs before the guard.",
+  "items": [
+    {
+      "id": "item-1",
+      "kind": "behavioral",
+      "title": "Lookup now runs before None guard",
+      "confidence": "inferred",
+      "before": "The function checked for None first and returned early, which prevented the lookup call from running when the input was None.",
+      "after": "The function calls lookup before checking for None, so lookup executes even when the input is None before any early return.",
+      "citations": []
+    }
+  ],
+  "coverage_owners": [
+    {
+      "evidence_id": "line_7f36f904827cbea0090230d5",
+      "owner_id": "item-1"
+    },
+    {
+      "evidence_id": "line_c8df1ee0c532a1578df4aaaa",
+      "owner_id": "item-1"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-invalidated-capture/v1",
+  "status": "invalidated-protocol-not-precommitted-v1",
+  "reason_code": "retry-after-unrecoverable-shared-directory-collision",
+  "config_id": "config-a",
+  "original_case_id": "error-swallow-to-raise",
+  "corrected_case_id": "error-swallow-to-raise",
+  "reason": "This capture (recap2-esr-a) was recorded as an official, first-attempt registry_version 2 capture, but it was in fact a SECOND invocation for this case/config: the first invocation's output was silently lost to a shared-prompt-directory collision (see invalidated/error-swallow-to-raise/lost-generation-attempts/config-a.json for the honest incident record of that lost first attempt). registry_version 2's own invocation_protocol already declared one_attempt_only/no_retry, so generating and recording a second invocation after the first was silently overwritten -- however unintentional -- violates that declared invariant for this capture, independent of whether its content or protocol-commit verification otherwise holds (both do). Withdrawn and replaced with a genuinely first, one-shot invocation generated after registry_version 3 was committed, which adds unique_prompt_directory_per_invocation, output_directory_must_not_preexist, and exclusive_directory_creation specifically to make this class of defect structurally impossible.",
+  "discovered_by": {
+    "actor_type": "agent",
+    "actor": "GitHub Copilot CLI (parent coordinating session)",
+    "method": "Integrity review of the registry_version 2 recapture round identified that the surviving captures for these three cases were second invocations under a protocol that already declared one_attempt_only, because the true first invocations were lost to a directory collision rather than genuinely absent.",
+    "timestamp": "2026-09-02T10:56:00Z"
+  },
+  "original_prompt_package_digest": "93a9aa99855052aeac5a2c5a120185732f48b280b5cfddd231704d5394ecba8f",
+  "archived_raw_response_sha256": "bf1555a74bdd3c7063fbf8b64cf4dff0c363018f1868b449c17e2eaa882467c7",
+  "archived_raw_response_bytes": 1136,
+  "archived_explanation_sha256": "bf1555a74bdd3c7063fbf8b64cf4dff0c363018f1868b449c17e2eaa882467c7",
+  "archived_agent_run_sha256": "3cfd21d5abc333070a2fce82da220dce33a5ec84a4d73412cf7218ecaf96a91f",
+  "archived_evaluation_sha256": "10b5257c991a9573eba0a20fd40bda98756dd6c9a001a18dac5984ae5265c692",
+  "archived_score_sha256": "0b74012452327ec6cbe7f9b9ca8ff2c696e6de6c5bcc5150b5d446b4eb156aca",
+  "replacement_capture": {
+    "case_id": "error-swallow-to-raise",
+    "config_id": "config-a",
+    "path": "benchmarks/agent_quality/cases/error-swallow-to-raise/captured/config-a"
+  }
+}

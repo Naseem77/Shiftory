@@ -1,0 +1,20 @@
+{
+  "schema": "shiftory.offline-git-fixture/v1",
+  "id": "cross-file-validation-edit",
+  "description": "The function validate_email is removed from validators.py. A different file, utils.py, gains a new function definition also named validate_email.",
+  "history": "history.fast-import",
+  "import_ref": "refs/heads/main",
+  "marks": {
+    "base": 1,
+    "head": 2
+  },
+  "expected_commits": {
+    "base": "d31befaaf949e107edb48be26f0912bbfb298754",
+    "head": "3b0f5bb0479c7c3b16dc2e08d8518c3cb4922119"
+  },
+  "expected_inventory": {
+    "files": 2,
+    "hunks": 2
+  },
+  "network_required": false
+}

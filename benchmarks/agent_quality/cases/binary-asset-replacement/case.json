@@ -1,0 +1,11 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-case/v1",
+  "id": "binary-asset-replacement",
+  "version": 2,
+  "category": "non-text-unsupported",
+  "description": "A small binary asset file's raw bytes are replaced between base and head; there is no textual diff to describe what changed within the file.",
+  "fixture": {
+    "history": "history.fast-import",
+    "metadata": "metadata.json"
+  }
+}

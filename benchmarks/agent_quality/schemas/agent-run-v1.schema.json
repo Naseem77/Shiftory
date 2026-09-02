@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shiftory.dev/schemas/benchmark-agent-quality-agent-run-v1.json",
+  "title": "Shiftory agent-quality captured agent run provenance",
+  "description": "Full provenance for one real agent capture, including an honest access-profile statement. isolation_method='protocol' means the generating agent's blindness to the rubric relies on the prompt package's contents and instructions, not on a sandbox that prevents reading the repository -- this schema forces that statement to be recorded explicitly rather than implied.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "case_id", "candidate_id", "provider", "model", "agent_tool_version",
+    "evaluation_protocol", "prompt_package_manifest", "prompt_package_digest",
+    "evidence_sha256", "shiftory_commit", "command_argv", "env_allowlist",
+    "generator_access_profile", "isolation_method", "raw_response_sha256",
+    "raw_response_bytes", "truncated", "timed_out", "started_at_utc", "finished_at_utc"
+  ],
+  "properties": {
+    "schema": {"const": "shiftory.benchmark-agent-quality-agent-run/v1"},
+    "case_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"},
+    "candidate_id": {"type": "string", "minLength": 1, "maxLength": 80},
+    "provider": {"type": "string", "minLength": 1},
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1}
+      }
+    },
+    "agent_tool_version": {"type": "string", "minLength": 1},
+    "evaluation_protocol": {"type": "string", "minLength": 1, "maxLength": 4000},
+    "prompt_package_manifest": {
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "sha256"],
+        "properties": {
+          "path": {"type": "string", "minLength": 1},
+          "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+        }
+      }
+    },
+    "prompt_package_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "evidence_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "shiftory_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "command_argv": {"type": "array", "items": {"type": "string"}, "maxItems": 64},
+    "env_allowlist": {"type": "array", "items": {"type": "string"}, "maxItems": 64},
+    "generator_access_profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository_access", "filesystem_scope", "network_access", "tool_access"],
+      "properties": {
+        "repository_access": {"type": "boolean"},
+        "filesystem_scope": {"type": "string", "minLength": 1},
+        "network_access": {"type": "boolean"},
+        "tool_access": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "isolation_method": {"enum": ["protocol", "sandboxed"]},
+    "raw_response_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "raw_response_bytes": {"type": "integer", "minimum": 0, "maximum": 262144},
+    "stdout_sha256": {"type": ["string", "null"], "pattern": "^([0-9a-f]{64})?$"},
+    "stderr_sha256": {"type": ["string", "null"], "pattern": "^([0-9a-f]{64})?$"},
+    "truncated": {"type": "boolean"},
+    "timed_out": {"type": "boolean"},
+    "exit_status": {"type": ["integer", "null"]},
+    "started_at_utc": {"type": "string", "format": "date-time"},
+    "finished_at_utc": {"type": "string", "format": "date-time"}
+  }
+}

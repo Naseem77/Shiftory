@@ -1,0 +1,200 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-candidate-evaluation/v1",
+  "case_id": "threshold-value-replacement",
+  "rubric_version": 1,
+  "candidate_id": "captured_config_a",
+  "candidate_kind": "captured_real_run",
+  "explanation_sha256": "6f21534b33ecce21fe07fad31ef8da58ff603171c4d39203f0afbc88e2953557",
+  "claims": [
+    {
+      "overlaps_with": [],
+      "evidence_anchor_cited": [],
+      "claim_id": "ca-1",
+      "source_item_id": "item-retry-config-change",
+      "field": "/items/0/before",
+      "maps_to_required_fact_id": "timeout-shortened",
+      "verdict": "supported_correct",
+      "materiality": 4,
+      "confidence_expressed": "inferred",
+      "confidence_appropriate": false,
+      "rationale": "Both passes agreed 'inferred' mildly under-claims a directly extractable, verbatim-visible constant; correct but sub-optimally hedged.",
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T04:15:00Z"
+      },
+      "start": 33,
+      "end": 53,
+      "excerpt_sha256": "2bef59b4e149e52ec9e64bf1563c7930041761b5e6b027b2653b9ff0ea74a163"
+    },
+    {
+      "overlaps_with": [],
+      "evidence_anchor_cited": [],
+      "claim_id": "ca-2",
+      "source_item_id": "item-retry-config-change",
+      "field": "/items/0/before",
+      "maps_to_required_fact_id": "attempts-increased",
+      "verdict": "supported_correct",
+      "materiality": 5,
+      "confidence_expressed": "inferred",
+      "confidence_appropriate": false,
+      "rationale": "Both passes agreed: same under-claiming pattern as ca-1.",
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T04:15:00Z"
+      },
+      "start": 58,
+      "end": 74,
+      "excerpt_sha256": "dfc4ff81185464361cea65dcd39ae4eceee1b2177dc4b26d948482592b60fdd7"
+    },
+    {
+      "overlaps_with": [],
+      "evidence_anchor_cited": [],
+      "claim_id": "ca-3",
+      "source_item_id": "item-retry-config-change",
+      "field": "/items/0/after",
+      "maps_to_required_fact_id": "timeout-shortened",
+      "verdict": "supported_correct",
+      "materiality": 4,
+      "confidence_expressed": "inferred",
+      "confidence_appropriate": false,
+      "rationale": "Both passes agreed: same under-claiming pattern.",
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T04:15:00Z"
+      },
+      "start": 37,
+      "end": 56,
+      "excerpt_sha256": "a63b1cfdd00912617df68cb49ce746f615dceda5173e695e289d13bccb79e1c9"
+    },
+    {
+      "overlaps_with": [],
+      "evidence_anchor_cited": [],
+      "claim_id": "ca-4",
+      "source_item_id": "item-retry-config-change",
+      "field": "/items/0/after",
+      "maps_to_required_fact_id": "attempts-increased",
+      "verdict": "supported_correct",
+      "materiality": 5,
+      "confidence_expressed": "inferred",
+      "confidence_appropriate": false,
+      "rationale": "Both passes agreed: same under-claiming pattern.",
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T04:15:00Z"
+      },
+      "start": 61,
+      "end": 77,
+      "excerpt_sha256": "d12df5d409127038940f5face7f7b8797ecb3af2352b6de3177c232a67f710dc"
+    }
+  ],
+  "audit_coverage": [
+    {
+      "field": "/summary",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates the item's claims; not independently material."
+    },
+    {
+      "field": "/items/0/title",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Generic 'Retry loop parameters changed' label with no independent numeric content."
+    },
+    {
+      "field": "/items/0/before",
+      "claim_ids": [
+        "ca-1",
+        "ca-2"
+      ],
+      "decomposition_complete": true
+    },
+    {
+      "field": "/items/0/after",
+      "claim_ids": [
+        "ca-3",
+        "ca-4"
+      ],
+      "decomposition_complete": true
+    }
+  ],
+  "annotation_passes": [
+    {
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "Independent annotator pass 1",
+          "organization": null,
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli task sub-agent",
+          "version": "1.0.80"
+        },
+        "method": "Fresh sub-agent given only the rubric and the exact captured candidate text; no access to any other pass's output.",
+        "timestamp": "2026-09-02T04:00:00Z"
+      },
+      "notes": "4 numeric claims + non-semantic title; all confidence_appropriate=false (inferred under-claims extractable facts); missed worst-case-latency-implication (no numeric implication computed)."
+    },
+    {
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "Independent annotator pass 2",
+          "organization": null,
+          "model": "gpt-5.3-codex",
+          "tool": "copilot-cli task sub-agent",
+          "version": "1.0.80"
+        },
+        "method": "Fresh sub-agent given only the rubric and the exact captured candidate text; no access to any other pass's output.",
+        "timestamp": "2026-09-02T04:00:00Z"
+      },
+      "notes": "Same 4 numeric claims and same confidence_appropriate=false judgment; same missed fact."
+    }
+  ],
+  "adjudication": {
+    "rationale": "Both passes agreed on every claim, verdict, and fact mapping, and independently converged on confidence_appropriate=false for 'inferred' applied to directly-extractable numeric constants -- an interesting, consistent finding that mild under-hedging of directly-visible facts is itself flagged as a mis-calibration by auditors, distinct from over-claiming. Disagreement_rate = 0.",
+    "annotation_provenance": {
+      "actor_type": "agent",
+      "actor": {
+        "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+        "organization": "GitHub",
+        "model": "claude-sonnet-5",
+        "tool": "copilot-cli",
+        "version": "1.0.80"
+      },
+      "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+      "timestamp": "2026-09-02T04:15:00Z"
+    },
+    "overridden_claim_ids": []
+  }
+}

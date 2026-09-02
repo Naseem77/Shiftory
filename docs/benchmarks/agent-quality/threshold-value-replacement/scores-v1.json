@@ -1,0 +1,313 @@
+{
+  "candidates": [
+    {
+      "accounting": {
+        "citation_count": 3,
+        "hunk_coverage_ratio": 1.0,
+        "hunk_covered": 1,
+        "hunk_total": 1,
+        "line_coverage_ratio": 1.0,
+        "line_owned": 4,
+        "line_total": 4,
+        "span_coverage_ratio": 1.0,
+        "span_owned": 2,
+        "span_total": 2,
+        "unit_coverage_ratio": 1.0,
+        "unit_covered": 1,
+        "unit_total": 1
+      },
+      "audit_status": null,
+      "candidate_id": "synthetic_baseline",
+      "candidate_kind": "synthetic_baseline",
+      "case_id": "threshold-value-replacement",
+      "claim_factuality": {
+        "assessable_count": 3,
+        "assessable_weight": 12,
+        "ratio": 1.0,
+        "supported_count": 3,
+        "supported_weight": 12
+      },
+      "contradicted_claims": {
+        "claim_ids": [],
+        "count": 0,
+        "weight": 0
+      },
+      "explanation_sha256": "7a2f8e3da1a7aa6602d2f35f3a03859ab36d30d60da2ae917435bde7f8621972",
+      "gate": {
+        "pass": true,
+        "reasons": []
+      },
+      "required_behavior_coverage": {
+        "ratio": 1.0,
+        "satisfied_count": 3,
+        "satisfied_ids": [
+          "attempts-increased",
+          "timeout-shortened",
+          "worst-case-latency-implication"
+        ],
+        "total_count": 3
+      },
+      "rubric_match_heuristic": null,
+      "schema": "shiftory.benchmark-agent-quality-score/v1",
+      "semantic_omissions": {
+        "missed_count": 0,
+        "missed_ids": [],
+        "missed_weight": 0
+      },
+      "structural_failure": null,
+      "uncertainty_honesty": {
+        "checked": 3,
+        "violation_ids": [],
+        "violations": 0
+      },
+      "unsupported_claims": {
+        "claim_ids": [],
+        "count": 0,
+        "weight": 0
+      },
+      "usefulness_relevance": {
+        "ambiguous_unresolvable_claims": 0,
+        "item_count": 3,
+        "non_semantic_claims": 0,
+        "useful_count": 3
+      }
+    },
+    {
+      "accounting": {
+        "citation_count": 2,
+        "hunk_coverage_ratio": 1.0,
+        "hunk_covered": 1,
+        "hunk_total": 1,
+        "line_coverage_ratio": 1.0,
+        "line_owned": 4,
+        "line_total": 4,
+        "span_coverage_ratio": 1.0,
+        "span_owned": 2,
+        "span_total": 2,
+        "unit_coverage_ratio": 1.0,
+        "unit_covered": 1,
+        "unit_total": 1
+      },
+      "audit_status": null,
+      "candidate_id": "synthetic_adversarial",
+      "candidate_kind": "synthetic_adversarial",
+      "case_id": "threshold-value-replacement",
+      "claim_factuality": {
+        "assessable_count": 1,
+        "assessable_weight": 4,
+        "ratio": 0.0,
+        "supported_count": 0,
+        "supported_weight": 0
+      },
+      "contradicted_claims": {
+        "claim_ids": [
+          "c-more-time-given"
+        ],
+        "count": 1,
+        "weight": 4
+      },
+      "explanation_sha256": "0bf6b710fd163cbfed93284a70113a3a331f7002c1d6ba173462229f7129e6fa",
+      "gate": {
+        "pass": false,
+        "reasons": [
+          "1 contradicted claim(s)",
+          "3 missed required fact(s)",
+          "1 uncertainty-honesty violation(s)"
+        ]
+      },
+      "required_behavior_coverage": {
+        "ratio": 0.0,
+        "satisfied_count": 0,
+        "satisfied_ids": [],
+        "total_count": 3
+      },
+      "rubric_match_heuristic": null,
+      "schema": "shiftory.benchmark-agent-quality-score/v1",
+      "semantic_omissions": {
+        "missed_count": 3,
+        "missed_ids": [
+          "attempts-increased",
+          "timeout-shortened",
+          "worst-case-latency-implication"
+        ],
+        "missed_weight": 12
+      },
+      "structural_failure": null,
+      "uncertainty_honesty": {
+        "checked": 1,
+        "violation_ids": [
+          "c-more-time-given"
+        ],
+        "violations": 1
+      },
+      "unsupported_claims": {
+        "claim_ids": [],
+        "count": 0,
+        "weight": 0
+      },
+      "usefulness_relevance": {
+        "ambiguous_unresolvable_claims": 0,
+        "item_count": 2,
+        "non_semantic_claims": 0,
+        "useful_count": 0
+      }
+    },
+    {
+      "accounting": {
+        "citation_count": 2,
+        "hunk_coverage_ratio": 1.0,
+        "hunk_covered": 1,
+        "hunk_total": 1,
+        "line_coverage_ratio": 1.0,
+        "line_owned": 4,
+        "line_total": 4,
+        "span_coverage_ratio": 1.0,
+        "span_owned": 2,
+        "span_total": 2,
+        "unit_coverage_ratio": 1.0,
+        "unit_covered": 1,
+        "unit_total": 1
+      },
+      "audit_status": {
+        "actor_type": "agent",
+        "adjudicator": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+        "disagreement_count": 0,
+        "disagreement_rate": 0.0,
+        "mode": "dual_audit"
+      },
+      "candidate_id": "captured_config_a",
+      "candidate_kind": "captured_real_run",
+      "case_id": "threshold-value-replacement",
+      "claim_factuality": {
+        "assessable_count": 3,
+        "assessable_weight": 11,
+        "ratio": 1.0,
+        "supported_count": 3,
+        "supported_weight": 11
+      },
+      "contradicted_claims": {
+        "claim_ids": [],
+        "count": 0,
+        "weight": 0
+      },
+      "explanation_sha256": "5d9bfc488de65c831ac1c4eaa689d797ff34d6e23e4cfb52c03f155a09e9e109",
+      "gate": null,
+      "required_behavior_coverage": {
+        "ratio": 0.6666666666666666,
+        "satisfied_count": 2,
+        "satisfied_ids": [
+          "attempts-increased",
+          "timeout-shortened"
+        ],
+        "total_count": 3
+      },
+      "rubric_match_heuristic": null,
+      "schema": "shiftory.benchmark-agent-quality-score/v1",
+      "semantic_omissions": {
+        "missed_count": 1,
+        "missed_ids": [
+          "worst-case-latency-implication"
+        ],
+        "missed_weight": 3
+      },
+      "structural_failure": null,
+      "uncertainty_honesty": {
+        "checked": 3,
+        "violation_ids": [
+          "ca-2",
+          "ca-3"
+        ],
+        "violations": 2
+      },
+      "unsupported_claims": {
+        "claim_ids": [],
+        "count": 0,
+        "weight": 0
+      },
+      "usefulness_relevance": {
+        "ambiguous_unresolvable_claims": 0,
+        "item_count": 1,
+        "non_semantic_claims": 0,
+        "useful_count": 2
+      }
+    },
+    {
+      "accounting": {
+        "citation_count": 2,
+        "hunk_coverage_ratio": 1.0,
+        "hunk_covered": 1,
+        "hunk_total": 1,
+        "line_coverage_ratio": 1.0,
+        "line_owned": 4,
+        "line_total": 4,
+        "span_coverage_ratio": 1.0,
+        "span_owned": 2,
+        "span_total": 2,
+        "unit_coverage_ratio": 1.0,
+        "unit_covered": 1,
+        "unit_total": 1
+      },
+      "audit_status": {
+        "actor_type": "agent",
+        "adjudicator": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+        "disagreement_count": 0,
+        "disagreement_rate": 0.0,
+        "mode": "dual_audit"
+      },
+      "candidate_id": "captured_config_b",
+      "candidate_kind": "captured_real_run",
+      "case_id": "threshold-value-replacement",
+      "claim_factuality": {
+        "assessable_count": 3,
+        "assessable_weight": 13,
+        "ratio": 1.0,
+        "supported_count": 3,
+        "supported_weight": 13
+      },
+      "contradicted_claims": {
+        "claim_ids": [],
+        "count": 0,
+        "weight": 0
+      },
+      "explanation_sha256": "f7ad373ff5750e66b6d384d2c6abd0f6f3090262699e1c9c2bd450960deb093c",
+      "gate": null,
+      "required_behavior_coverage": {
+        "ratio": 0.6666666666666666,
+        "satisfied_count": 2,
+        "satisfied_ids": [
+          "attempts-increased",
+          "timeout-shortened"
+        ],
+        "total_count": 3
+      },
+      "rubric_match_heuristic": null,
+      "schema": "shiftory.benchmark-agent-quality-score/v1",
+      "semantic_omissions": {
+        "missed_count": 1,
+        "missed_ids": [
+          "worst-case-latency-implication"
+        ],
+        "missed_weight": 3
+      },
+      "structural_failure": null,
+      "uncertainty_honesty": {
+        "checked": 3,
+        "violation_ids": [],
+        "violations": 0
+      },
+      "unsupported_claims": {
+        "claim_ids": [],
+        "count": 0,
+        "weight": 0
+      },
+      "usefulness_relevance": {
+        "ambiguous_unresolvable_claims": 0,
+        "item_count": 1,
+        "non_semantic_claims": 0,
+        "useful_count": 3
+      }
+    }
+  ],
+  "case_id": "threshold-value-replacement",
+  "schema": "shiftory.benchmark-agent-quality-scores/v1"
+}

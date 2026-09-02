@@ -1,0 +1,32 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "This change updates the company logo to the new 2024 brand colors, improving visual consistency across the app.",
+  "items": [
+    {
+      "id": "logo-updated",
+      "kind": "structural",
+      "title": "Logo updated to new brand colors",
+      "statement": "icon.dat was updated to reflect the new 2024 brand color palette, giving the application a more modern and consistent look across all screens.",
+      "confidence": "extracted",
+      "citations": [
+        "conceptual-unit:icon.dat#1"
+      ]
+    },
+    {
+      "id": "padding-note",
+      "kind": "structural",
+      "title": "Asset pipeline context",
+      "statement": "Visual assets like icons and logos are an important part of the overall product experience and are typically reviewed carefully by the design team before being shipped to production users.",
+      "confidence": "extracted",
+      "citations": [
+        "conceptual-unit:icon.dat#1"
+      ]
+    }
+  ],
+  "coverage_owners": [
+    {
+      "evidence_id": "conceptual-unit:icon.dat#1",
+      "owner_id": "logo-updated"
+    }
+  ]
+}

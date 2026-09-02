@@ -1,0 +1,30 @@
+commit refs/heads/main
+mark :1
+author Shiftory Fixture <fixture@shiftory.invalid> 1707609600 +0000
+committer Shiftory Fixture <fixture@shiftory.invalid> 1707609600 +0000
+data <<BASE_MESSAGE
+context-limited-helper-call base
+BASE_MESSAGE
+M 100644 inline orders.py
+data <<BASE_FILE
+def process_order(order):
+    validate(order, strict=False)
+    return submit(order)
+BASE_FILE
+
+commit refs/heads/main
+mark :2
+author Shiftory Fixture <fixture@shiftory.invalid> 1707696000 +0000
+committer Shiftory Fixture <fixture@shiftory.invalid> 1707696000 +0000
+data <<HEAD_MESSAGE
+context-limited-helper-call head
+HEAD_MESSAGE
+from :1
+M 100644 inline orders.py
+data <<HEAD_FILE
+def process_order(order):
+    validate(order, strict=True)
+    return submit(order)
+HEAD_FILE
+
+done

@@ -1,0 +1,40 @@
+commit refs/heads/main
+mark :1
+author Shiftory Fixture <fixture@shiftory.invalid> 1706918400 +0000
+committer Shiftory Fixture <fixture@shiftory.invalid> 1706918400 +0000
+data <<BASE_MESSAGE
+error-swallow-to-raise base
+BASE_MESSAGE
+M 100644 inline config.py
+data <<BASE_FILE
+import json
+
+
+def load_config(path):
+    try:
+        return json.loads(read_file(path))
+    except ValueError:
+        return {}
+BASE_FILE
+
+commit refs/heads/main
+mark :2
+author Shiftory Fixture <fixture@shiftory.invalid> 1707004800 +0000
+committer Shiftory Fixture <fixture@shiftory.invalid> 1707004800 +0000
+data <<HEAD_MESSAGE
+error-swallow-to-raise head
+HEAD_MESSAGE
+from :1
+M 100644 inline config.py
+data <<HEAD_FILE
+import json
+
+
+def load_config(path):
+    try:
+        return json.loads(read_file(path))
+    except ValueError:
+        raise
+HEAD_FILE
+
+done

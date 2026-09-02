@@ -1,0 +1,27 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-invalidated-capture/v1",
+  "status": "invalidated-protocol-not-precommitted-v1",
+  "reason_code": "prompt-fix-not-committed-before-generation",
+  "config_id": "config-b",
+  "original_case_id": "context-limited-helper-call",
+  "corrected_case_id": "context-limited-helper-call",
+  "reason": "This case's captures were generated after its case.json description leak was fixed on disk, but before that fix (4c8994a) was committed to this repository's git history -- an ordinary build-then-commit workflow, not a structural defect, but the coordinating reviewer's requirement is that the corrected prompt content itself be committed strictly before generation. Withdrawn and replaced with a fresh capture generated after the protocol-freeze commit that added benchmarks/agent_quality/protocol_registry.json and bumped this case's case.json to version 2.",
+  "discovered_by": {
+    "actor_type": "agent",
+    "actor": "GitHub Copilot CLI (parent coordinating session)",
+    "method": "Chronology audit comparing each capture's capture_ingested_at_utc against the git committer date of the commit that first established or corrected its prompt-package content.",
+    "timestamp": "2026-09-02T05:30:00Z"
+  },
+  "original_prompt_package_digest": "8704c87091b479ba8ca36a841f0c697e120c96b70354b9b54af8359f5c238071",
+  "archived_raw_response_sha256": "ec6a3f466d08b8bd358049c2f1b68700e1a3b4e842bef1463bb439a09a329eb2",
+  "archived_raw_response_bytes": 1496,
+  "archived_explanation_sha256": "ec6a3f466d08b8bd358049c2f1b68700e1a3b4e842bef1463bb439a09a329eb2",
+  "archived_agent_run_sha256": "ef1853065c6f7ea6e244190593d0d71ab2b82565472941804d7383f87aa4cb67",
+  "archived_evaluation_sha256": "2530c192b928e50dbc6849c55b0a174628d3769b40f1e0e00ef05c51c7cf3d65",
+  "archived_score_sha256": "d3316bd6e4ccbc49b3780c67961702159346e071ead1b35cb5d842fc1ad9bd9b",
+  "replacement_capture": {
+    "case_id": "context-limited-helper-call",
+    "config_id": "config-b",
+    "path": "benchmarks/agent_quality/cases/context-limited-helper-call/captured/config-b"
+  }
+}

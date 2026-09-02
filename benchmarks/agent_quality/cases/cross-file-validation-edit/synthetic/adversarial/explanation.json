@@ -1,0 +1,39 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "validate_email was moved from validators.py to utils.py as part of a module reorganization, with its behavior preserved.",
+  "items": [
+    {
+      "id": "email-check-moved",
+      "kind": "structural",
+      "title": "validate_email relocated to utils.py",
+      "before": "validate_email lived in validators.py.",
+      "after": "validate_email lives in utils.py.",
+      "statement": "validate_email was relocated from validators.py to utils.py as part of a module reorganization; its validation behavior is unchanged.",
+      "confidence": "extracted",
+      "citations": [
+        "conceptual-hunk:validators.py#1",
+        "conceptual-hunk:utils.py#1"
+      ]
+    },
+    {
+      "id": "padding-note",
+      "kind": "structural",
+      "title": "Project organization",
+      "statement": "Keeping related helper functions grouped together in well-named modules like utils.py and validators.py is a widely recommended practice that improves discoverability and long-term maintainability for the whole team.",
+      "confidence": "extracted",
+      "citations": [
+        "conceptual-hunk:utils.py#1"
+      ]
+    }
+  ],
+  "coverage_owners": [
+    {
+      "evidence_id": "conceptual-hunk:validators.py#1",
+      "owner_id": "email-check-moved"
+    },
+    {
+      "evidence_id": "conceptual-hunk:utils.py#1",
+      "owner_id": "email-check-moved"
+    }
+  ]
+}

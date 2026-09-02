@@ -1,0 +1,36 @@
+{
+  "coverage_owners": [
+    {
+      "evidence_id": "line_bb015cfee40312bfd8fb5b55",
+      "owner_id": "retry-thresholds"
+    },
+    {
+      "evidence_id": "line_46fd66b2be752ae32924a636",
+      "owner_id": "retry-thresholds"
+    },
+    {
+      "evidence_id": "line_ef3a2e79e8b24ae75a615833",
+      "owner_id": "retry-thresholds"
+    },
+    {
+      "evidence_id": "line_cb5e9cae2000dffb76b88172",
+      "owner_id": "retry-thresholds"
+    }
+  ],
+  "items": [
+    {
+      "after": "fetch_with_retry performs up to 4 request attempts with a 5-second timeout per attempt, retrying with a 1-second delay between failed attempts on TimeoutError.",
+      "before": "fetch_with_retry performs a single request attempt with a 30-second timeout, raising TimeoutError without retrying if the attempt times out.",
+      "citations": [
+        "source_a14ea6cf1eeef1573ed8855d",
+        "source_80d49b9bcd5c7145d90c4a38"
+      ],
+      "confidence": "extracted",
+      "id": "retry-thresholds",
+      "kind": "behavioral",
+      "title": "Request timeout decreased from 30s to 5s and maximum attempts increased from 1 to 4"
+    }
+  ],
+  "schema": "shiftory.explanation/v1",
+  "summary": "In fetch_with_retry, the request timeout is reduced from 30 seconds to 5 seconds per attempt and the maximum attempt count is increased from 1 to 4 attempts."
+}

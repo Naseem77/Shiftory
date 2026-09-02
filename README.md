@@ -316,6 +316,25 @@ result. The separate [manual quality rubric](benchmarks/quality-rubric.schema.js
 is optional. See the exact
 [benchmark methodology](docs/benchmark-methodology.md).
 
+## Agent explanation quality benchmarks
+
+A separate benchmark layer under [`benchmarks/agent_quality/`](benchmarks/agent_quality/README.md)
+scores **real, agent-authored** explanations against six small, hand-audited
+fixtures spanning ordering/control-flow, state/error-handling, value-replacement,
+deletion-vs-move confusion, non-text/unsupported changes, and ambiguous/context-limited
+changes. Correctness/hallucination/omission/uncertainty results come from
+claim-level human- or agent-performed annotation (never from automated text
+matching); a separate, clearly labeled, non-authoritative literal-alias heuristic
+is reported alongside but never feeds those results. Every one of the six cases
+now has two real, independently blinded, dual-audited agent captures (12 total,
+predeclared configurations `gpt-5.3-codex` and `gemini-3.7-flash`); a
+hand-authored synthetic baseline/adversarial pair per case is kept separately to
+unit-test the scorer's arithmetic and is never presented as agent evidence. A
+real captured agent's quality score is never a required CI gate -- see the
+[agent-quality benchmark methodology](docs/agent-quality-benchmark-methodology.md)
+for the full per-case real-capture results table and exactly what is and is not
+automated, and for this layer's honest limitations.
+
 ## Documentation
 
 - [Architecture and data flow](docs/architecture.md)

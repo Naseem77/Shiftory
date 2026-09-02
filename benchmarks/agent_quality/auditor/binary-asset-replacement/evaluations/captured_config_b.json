@@ -1,0 +1,12 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-candidate-evaluation/v1",
+  "case_id": "binary-asset-replacement",
+  "candidate_id": "captured_config_b",
+  "candidate_kind": "captured_real_run",
+  "rubric_version": 1,
+  "invalid_candidate": {
+    "protocol_violation": "raw response cites evidence ids that do not exist in the real evidence for this diff",
+    "raw_response_sha256": "dd027ece21c10eecc1ae26f497dc5665b22e7495b9235ecc4bbc7282c307a970",
+    "reason": "The raw response is valid shiftory.explanation/v1-shaped JSON (passes the shallow schema check agent_harness.capture_result performs), but fails the real shiftory.explain.validator.validate_explanation structural check: it cites `fact_32314a96f2b283ccc2da5503` and `fact_711411314f61102f006d3668`, which do not exist anywhere in this case's real, deterministically-generated evidence (graphora is disabled/unavailable in this environment, so evidence.graph.facts is always empty). This is a genuine accounting-level structural failure discovered by running the real validator, not a repair-worthy formatting issue; per protocol, the raw response and agent-run provenance are preserved exactly as first received, and no semantic score is synthesized for this candidate. Notably, this is a completely fresh, independently-generated invocation (v3-bar-b, generated after the registry_version 3 protocol freeze, in its own exclusively-claimed directory) -- yet it cites the EXACT SAME two fabricated ids that the prior, now-archived registry_version 2 gemini-3.7-flash invocation for this same case/config also fabricated (recorded capture_ingested_at_utc: withdrawn v2 capture at 2026-09-02T07:12:39.045463+00:00, this v3 capture at 2026-09-02T08:14:55.835154+00:00 -- about 62 minutes apart, later the same day, not weeks apart as an earlier draft of this record incorrectly stated). This is a reproducible observation across two independently recorded invocations (different task handles, different exclusively-claimed prompt-package directories, different registry revisions) -- it does not by itself rule out coincidence, and with only two observations roughly an hour apart this benchmark cannot establish a mechanism or probability for the reproduction. It is disclosed as an observed, reproduced, but unexplained phenomenon, not evidence of anything beyond this specific model/case combination."
+  }
+}

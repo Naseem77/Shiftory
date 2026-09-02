@@ -1,0 +1,51 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-rubric/v1",
+  "case_id": "context-limited-helper-call",
+  "version": 1,
+  "rubric_provenance": {
+    "actor_type": "agent",
+    "actor": {
+      "name": "GitHub Copilot CLI (Claude Sonnet 5)",
+      "organization": "GitHub",
+      "model": "claude-sonnet-5",
+      "tool": "copilot-cli",
+      "version": "1.0.80"
+    },
+    "method": "Manual single-pass authoring while implementing this benchmark layer; provisional until independently re-reviewed.",
+    "timestamp": "2026-09-02T00:00:00Z"
+  },
+  "required_facts": [
+    {
+      "id": "strict-flag-flips-to-true",
+      "description": "The call to validate(order, ...) changes its strict keyword argument from False to True.",
+      "importance": 5,
+      "evidence_anchors": [
+        "conceptual-hunk:orders.py#1"
+      ],
+      "truth_status": "extractable",
+      "heuristic_aliases": [
+        "strict=True",
+        "strict=False",
+        "flips"
+      ]
+    },
+    {
+      "id": "validate-implementation-not-visible",
+      "description": "validate's implementation is not defined anywhere in this fixture (neither base nor head), so the concrete effect of enabling strict=True -- e.g. which additional checks it performs or what it raises -- cannot be determined from the evidence alone.",
+      "importance": 4,
+      "evidence_anchors": [
+        "conceptual-hunk:orders.py#1"
+      ],
+      "truth_status": "ambiguous_unresolvable"
+    },
+    {
+      "id": "submit-call-unchanged",
+      "description": "The call to submit(order) is unchanged; only the preceding validate call's strict argument changed.",
+      "importance": 2,
+      "evidence_anchors": [
+        "conceptual-hunk:orders.py#1"
+      ],
+      "truth_status": "extractable"
+    }
+  ]
+}

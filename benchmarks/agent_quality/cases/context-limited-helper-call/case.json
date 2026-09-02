@@ -1,0 +1,11 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-case/v1",
+  "id": "context-limited-helper-call",
+  "version": 2,
+  "category": "ambiguous-context-limited",
+  "description": "A call to a helper function named validate() changes one of its keyword arguments from False to True.",
+  "fixture": {
+    "history": "history.fast-import",
+    "metadata": "metadata.json"
+  }
+}

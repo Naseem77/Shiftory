@@ -1,0 +1,23 @@
+{
+  "accounting": null,
+  "audit_status": null,
+  "candidate_id": "captured_config_b",
+  "candidate_kind": "captured_real_run",
+  "case_id": "error-swallow-to-raise",
+  "claim_factuality": null,
+  "contradicted_claims": null,
+  "explanation_sha256": null,
+  "gate": null,
+  "required_behavior_coverage": null,
+  "rubric_match_heuristic": null,
+  "schema": "shiftory.benchmark-agent-quality-score/v1",
+  "semantic_omissions": null,
+  "structural_failure": {
+    "protocol_violation": "raw response cites evidence ids that do not exist in the real evidence for this diff",
+    "raw_response_sha256": "d70bceb897d439bb3c82aca7e99a22a3ced64c68e052e2d41479b9c29317b16b",
+    "reason": "The raw response is valid shiftory.explanation/v1-shaped JSON (passes the shallow schema check agent_harness.capture_result performs), but fails the real shiftory.explain.validator.validate_explanation structural check: it cites `fact_7262a897cc31675ed9fdf30b` and `fact_9f5943ca0425a304e0fba1f6`, which do not exist anywhere in this case's real, deterministically-generated evidence (graphora is disabled/unavailable in this environment, so evidence.graph.facts is always empty) -- the model fabricated citation ids that look plausible but were never actually produced by shiftory analyze for this diff. This is a genuine accounting-level structural failure discovered by running the real validator, not a repair-worthy formatting issue; per protocol, the raw response and agent-run provenance are preserved exactly as first received, and no semantic score is synthesized for this candidate."
+  },
+  "uncertainty_honesty": null,
+  "unsupported_claims": null,
+  "usefulness_relevance": null
+}

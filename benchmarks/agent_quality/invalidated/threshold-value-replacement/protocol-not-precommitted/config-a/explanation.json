@@ -1,0 +1,36 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "The retry configuration was tightened by lowering timeout duration while increasing how many retry attempts are allowed.",
+  "items": [
+    {
+      "id": "item-retry-config-change",
+      "kind": "behavioral",
+      "title": "Retry loop parameters changed",
+      "confidence": "inferred",
+      "before": "The code configured retries with timeout_seconds = 30 and max_attempts = 1.",
+      "after": "The code now configures retries with timeout_seconds = 5 and max_attempts = 4.",
+      "citations": [
+        "source_a14ea6cf1eeef1573ed8855d",
+        "source_80d49b9bcd5c7145d90c4a38"
+      ]
+    }
+  ],
+  "coverage_owners": [
+    {
+      "evidence_id": "line_bb015cfee40312bfd8fb5b55",
+      "owner_id": "item-retry-config-change"
+    },
+    {
+      "evidence_id": "line_46fd66b2be752ae32924a636",
+      "owner_id": "item-retry-config-change"
+    },
+    {
+      "evidence_id": "line_ef3a2e79e8b24ae75a615833",
+      "owner_id": "item-retry-config-change"
+    },
+    {
+      "evidence_id": "line_cb5e9cae2000dffb76b88172",
+      "owner_id": "item-retry-config-change"
+    }
+  ]
+}

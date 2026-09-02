@@ -1,0 +1,147 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-candidate-evaluation/v1",
+  "case_id": "binary-asset-replacement",
+  "rubric_version": 1,
+  "candidate_id": "synthetic_baseline",
+  "candidate_kind": "synthetic_baseline",
+  "explanation_sha256": "a86a1379ddf77f21c242a98febbe276946ef84f4f5c4829d5322cfb7c3c50374",
+  "claims": [
+    {
+      "overlaps_with": [],
+      "evidence_anchor_cited": [
+        "conceptual-unit:icon.dat#1"
+      ],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Manual single-pass authoring while implementing this benchmark layer; provisional until independently re-reviewed.",
+        "timestamp": "2026-09-02T00:00:00Z"
+      },
+      "claim_id": "c-binary-replaced",
+      "source_item_id": "binary-replaced",
+      "field": "/items/0/statement",
+      "maps_to_required_fact_id": "binary-content-replaced",
+      "verdict": "supported_correct",
+      "materiality": 5,
+      "confidence_expressed": "extracted",
+      "confidence_appropriate": true,
+      "rationale": "Matches the actual evidence: one binary-kind unit with differing old_blob/new_blob and no hunks.",
+      "start": 50,
+      "end": 180,
+      "excerpt_sha256": "2e85c52f46e87e24733e53ecb08eaf4d8da9a81ba2cb7fe55cd4979551ad4ab7"
+    },
+    {
+      "overlaps_with": [],
+      "evidence_anchor_cited": [
+        "conceptual-unit:icon.dat#1"
+      ],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Manual single-pass authoring while implementing this benchmark layer; provisional until independently re-reviewed.",
+        "timestamp": "2026-09-02T00:00:00Z"
+      },
+      "claim_id": "c-content-meaning-unresolved",
+      "source_item_id": "content-meaning-unresolved",
+      "field": "/items/1/statement",
+      "maps_to_required_fact_id": "content-meaning-not-available",
+      "verdict": "supported_correct",
+      "materiality": 5,
+      "confidence_expressed": "unresolved",
+      "confidence_appropriate": true,
+      "rationale": "Correctly declines to speculate about the binary content's meaning; the evidence has no decoded representation to support such a claim.",
+      "start": 79,
+      "end": 156,
+      "excerpt_sha256": "cab53fc2b9dc92a5bf868211666ba7c7d3cec6ec627b1a002661b092fcca4fbe"
+    },
+    {
+      "overlaps_with": [],
+      "evidence_anchor_cited": [
+        "conceptual-unit:icon.dat#1"
+      ],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Manual single-pass authoring while implementing this benchmark layer; provisional until independently re-reviewed.",
+        "timestamp": "2026-09-02T00:00:00Z"
+      },
+      "claim_id": "c-mode-unchanged",
+      "source_item_id": "mode-unchanged",
+      "field": "/items/2/statement",
+      "maps_to_required_fact_id": "mode-unchanged",
+      "verdict": "supported_correct",
+      "materiality": 2,
+      "confidence_expressed": "extracted",
+      "confidence_appropriate": true,
+      "rationale": "old_mode and new_mode are both 100644 in the evidence.",
+      "start": 43,
+      "end": 103,
+      "excerpt_sha256": "d9e2a889a1b4102ff31b1aae2213f60188e749c744485ea8092334e6a1b4f774"
+    }
+  ],
+  "audit_coverage": [
+    {
+      "field": "/summary",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates or labels a material claim already recorded elsewhere for this item; not an independently material assertion."
+    },
+    {
+      "field": "/items/0/title",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates or labels a material claim already recorded elsewhere for this item; not an independently material assertion."
+    },
+    {
+      "field": "/items/0/statement",
+      "claim_ids": [
+        "c-binary-replaced"
+      ],
+      "decomposition_complete": true
+    },
+    {
+      "field": "/items/1/title",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates or labels a material claim already recorded elsewhere for this item; not an independently material assertion."
+    },
+    {
+      "field": "/items/1/statement",
+      "claim_ids": [
+        "c-content-meaning-unresolved"
+      ],
+      "decomposition_complete": true
+    },
+    {
+      "field": "/items/2/title",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates or labels a material claim already recorded elsewhere for this item; not an independently material assertion."
+    },
+    {
+      "field": "/items/2/statement",
+      "claim_ids": [
+        "c-mode-unchanged"
+      ],
+      "decomposition_complete": true
+    }
+  ]
+}

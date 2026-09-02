@@ -1,0 +1,12 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-candidate-evaluation/v1",
+  "case_id": "binary-asset-replacement",
+  "candidate_id": "captured_config_a",
+  "candidate_kind": "captured_real_run",
+  "rubric_version": 1,
+  "invalid_candidate": {
+    "protocol_violation": "raw response cites evidence ids that do not exist in the real evidence for this diff",
+    "raw_response_sha256": "a8226e6d6b4a2edab0350208cb16a9d4d1e8d2381ff76697ebc848c6904433b1",
+    "reason": "The raw response is valid shiftory.explanation/v1-shaped JSON (passes the shallow schema check agent_harness.capture_result performs), but fails the real shiftory.explain.validator.validate_explanation structural check: it cites `fact_32314a96f2b283ccc2da5503` and `fact_711411314f61102f006d3668`, which do not exist anywhere in this case's real, deterministically-generated evidence (graphora is disabled/unavailable in this environment, so evidence.graph.facts is always empty) -- the model fabricated citation ids that look plausible but were never actually produced by shiftory analyze for this diff. This is a genuine accounting-level structural failure discovered by running the real validator, not a repair-worthy formatting issue; per protocol, the raw response and agent-run provenance are preserved exactly as first received, and no semantic score is synthesized for this candidate. Notably, this case's config-a and config-b captures (different model families, gpt-5.3-codex and gemini-3.7-flash) independently cite the exact same two fabricated ids -- confirmed by direct inspection of both raw responses, not a processing artifact; no shared prompt content or documentation in this repository contains these literal strings, so this is most likely both models pattern-matching a plausible-looking `fact_`-prefixed hex id from the real, correctly-cited `unit_` id and blob hashes they did see, rather than copying from a common leaked source. This is disclosed as an observed, unexplained coincidence, not claimed as understood."
+  }
+}

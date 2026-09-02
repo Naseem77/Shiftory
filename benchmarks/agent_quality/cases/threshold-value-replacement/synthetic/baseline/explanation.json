@@ -1,0 +1,48 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "fetch_with_retry's per-attempt timeout drops from 30s to 5s while its attempt count rises from 1 to 4, changing both individual request timing and the overall retry behavior.",
+  "items": [
+    {
+      "id": "timeout-shortened",
+      "kind": "behavioral",
+      "title": "Per-attempt timeout drops from 30s to 5s",
+      "before": "timeout_seconds was 30.",
+      "after": "timeout_seconds is 5.",
+      "statement": "The per-attempt timeout passed to session.get drops from 30 seconds to 5 seconds.",
+      "confidence": "extracted",
+      "citations": [
+        "conceptual-hunk:client.py#1"
+      ]
+    },
+    {
+      "id": "attempts-increased",
+      "kind": "behavioral",
+      "title": "The loop now retries instead of trying once",
+      "before": "max_attempts was 1, so the for loop ran the request exactly once with no retry.",
+      "after": "max_attempts is 4, so the loop retries the request up to three more times after a TimeoutError before giving up.",
+      "statement": "max_attempts changes from 1 to 4, so a request that times out is now retried instead of immediately raising.",
+      "confidence": "extracted",
+      "citations": [
+        "conceptual-hunk:client.py#1"
+      ]
+    },
+    {
+      "id": "worst-case-latency-changed",
+      "kind": "behavioral",
+      "title": "Worst-case time before giving up changes",
+      "before": "With one 30s attempt and no retries, the worst case before raising TimeoutError was about 30 seconds.",
+      "after": "With four 5s attempts and a 1s sleep between each, the worst case before raising TimeoutError is about 5*4 + 1*3 = 23 seconds.",
+      "statement": "Combining the shorter timeout with more attempts changes the worst-case time before fetch_with_retry gives up from about 30 seconds to about 23 seconds, since the loop and sleep structure are otherwise unchanged.",
+      "confidence": "inferred",
+      "citations": [
+        "conceptual-hunk:client.py#1"
+      ]
+    }
+  ],
+  "coverage_owners": [
+    {
+      "evidence_id": "conceptual-hunk:client.py#1",
+      "owner_id": "timeout-shortened"
+    }
+  ]
+}

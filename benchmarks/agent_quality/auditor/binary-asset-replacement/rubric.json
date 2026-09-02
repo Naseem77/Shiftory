@@ -1,0 +1,51 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-rubric/v1",
+  "case_id": "binary-asset-replacement",
+  "version": 1,
+  "rubric_provenance": {
+    "actor_type": "agent",
+    "actor": {
+      "name": "GitHub Copilot CLI (Claude Sonnet 5)",
+      "organization": "GitHub",
+      "model": "claude-sonnet-5",
+      "tool": "copilot-cli",
+      "version": "1.0.80"
+    },
+    "method": "Manual single-pass authoring while implementing this benchmark layer; provisional until independently re-reviewed.",
+    "timestamp": "2026-09-02T00:00:00Z"
+  },
+  "required_facts": [
+    {
+      "id": "binary-content-replaced",
+      "description": "icon.dat's content changed between base and head; Shiftory's evidence reports this only as an opaque binary unit identified by differing blob hashes, with no textual diff content available.",
+      "importance": 5,
+      "evidence_anchors": [
+        "conceptual-unit:icon.dat#1"
+      ],
+      "truth_status": "extractable",
+      "heuristic_aliases": [
+        "binary",
+        "no textual diff",
+        "opaque"
+      ]
+    },
+    {
+      "id": "content-meaning-not-available",
+      "description": "Because no textual or decoded representation of icon.dat's bytes is available in the evidence, what the new bytes actually depict or represent cannot be determined; any specific claim about the file's visual/semantic meaning is not supported by the available evidence.",
+      "importance": 5,
+      "evidence_anchors": [
+        "conceptual-unit:icon.dat#1"
+      ],
+      "truth_status": "ambiguous_unresolvable"
+    },
+    {
+      "id": "mode-unchanged",
+      "description": "The file mode is 100644 on both sides; only the file's content changed, not its permissions or type.",
+      "importance": 2,
+      "evidence_anchors": [
+        "conceptual-unit:icon.dat#1"
+      ],
+      "truth_status": "extractable"
+    }
+  ]
+}

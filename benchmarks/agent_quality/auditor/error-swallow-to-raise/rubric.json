@@ -1,0 +1,51 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-rubric/v1",
+  "case_id": "error-swallow-to-raise",
+  "version": 1,
+  "rubric_provenance": {
+    "actor_type": "agent",
+    "actor": {
+      "name": "GitHub Copilot CLI (Claude Sonnet 5)",
+      "organization": "GitHub",
+      "model": "claude-sonnet-5",
+      "tool": "copilot-cli",
+      "version": "1.0.80"
+    },
+    "method": "Manual single-pass authoring while implementing this benchmark layer; provisional until independently re-reviewed.",
+    "timestamp": "2026-09-02T00:00:00Z"
+  },
+  "required_facts": [
+    {
+      "id": "malformed-config-now-raises",
+      "description": "A ValueError from parsing the config file's JSON now propagates to the caller instead of being caught and replaced with an empty dict.",
+      "importance": 5,
+      "evidence_anchors": [
+        "conceptual-hunk:config.py#1"
+      ],
+      "truth_status": "extractable",
+      "heuristic_aliases": [
+        "re-raise",
+        "no longer returns",
+        "propagates"
+      ]
+    },
+    {
+      "id": "callers-impact-unclear",
+      "description": "Whether any caller of load_config currently depends on receiving {} for malformed config, and how such a caller would behave if a ValueError now propagates instead, is not shown anywhere in this diff.",
+      "importance": 4,
+      "evidence_anchors": [
+        "conceptual-hunk:config.py#1"
+      ],
+      "truth_status": "ambiguous_unresolvable"
+    },
+    {
+      "id": "success-path-unchanged",
+      "description": "When the file's contents parse successfully as JSON, load_config still returns the parsed value directly, exactly as before; only the exception-handling path changed.",
+      "importance": 2,
+      "evidence_anchors": [
+        "conceptual-hunk:config.py#1"
+      ],
+      "truth_status": "extractable"
+    }
+  ]
+}

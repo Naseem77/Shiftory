@@ -1,0 +1,36 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "The retry policy in fetch_with_retry was rebalanced from a single long wait to multiple shorter attempts.",
+  "items": [
+    {
+      "id": "retry-policy-rebalanced",
+      "kind": "behavioral",
+      "title": "fetch_with_retry uses shorter timeout with more retries",
+      "confidence": "inferred",
+      "before": "The function configured one attempt with a 30-second timeout window.",
+      "after": "The function now configures four attempts with a 5-second timeout window each.",
+      "citations": [
+        "source_a14ea6cf1eeef1573ed8855d",
+        "source_80d49b9bcd5c7145d90c4a38"
+      ]
+    }
+  ],
+  "coverage_owners": [
+    {
+      "evidence_id": "line_bb015cfee40312bfd8fb5b55",
+      "owner_id": "retry-policy-rebalanced"
+    },
+    {
+      "evidence_id": "line_46fd66b2be752ae32924a636",
+      "owner_id": "retry-policy-rebalanced"
+    },
+    {
+      "evidence_id": "line_ef3a2e79e8b24ae75a615833",
+      "owner_id": "retry-policy-rebalanced"
+    },
+    {
+      "evidence_id": "line_cb5e9cae2000dffb76b88172",
+      "owner_id": "retry-policy-rebalanced"
+    }
+  ]
+}

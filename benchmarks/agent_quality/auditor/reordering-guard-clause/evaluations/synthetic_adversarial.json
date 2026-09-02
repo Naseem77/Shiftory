@@ -1,0 +1,140 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-candidate-evaluation/v1",
+  "case_id": "reordering-guard-clause",
+  "rubric_version": 1,
+  "candidate_id": "synthetic_adversarial",
+  "candidate_kind": "synthetic_adversarial",
+  "explanation_sha256": "f305c4bb6dd4d3c1a70c1468172a359b54a7927c1c84e4b83636ef7a64f012b0",
+  "claims": [
+    {
+      "claim_id": "c-guard-still-first",
+      "source_item_id": "item-0",
+      "field": "/items/0/statement",
+      "start": 0,
+      "end": 122,
+      "excerpt_sha256": "1ee7741a115d8aa0125c69cb19e477cba9e6535c0bd8a68113684baf864248f2",
+      "overlaps_with": [],
+      "maps_to_required_fact_id": "guard-moved-after-lookup",
+      "verdict": "contradicted",
+      "materiality": 5,
+      "evidence_anchor_cited": [
+        "conceptual-hunk:app.py#1"
+      ],
+      "confidence_expressed": "extracted",
+      "confidence_appropriate": false,
+      "rationale": "Directly contradicts the fixture diff: lookup(user_id) is called BEFORE the None-check at head, not after.",
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Manual single-pass authoring while implementing this benchmark layer; provisional until independently re-reviewed.",
+        "timestamp": "2026-09-02T00:00:00Z"
+      }
+    },
+    {
+      "claim_id": "c-lookup-safe-for-none",
+      "source_item_id": "item-1",
+      "field": "/items/1/statement",
+      "start": 0,
+      "end": 126,
+      "excerpt_sha256": "59a8eda831b551668b59a98206d66355abaaddc32adb371aae58b033e7aa2937",
+      "overlaps_with": [],
+      "maps_to_required_fact_id": "lookup-none-implication-uncertain",
+      "verdict": "unsupported",
+      "materiality": 4,
+      "evidence_anchor_cited": [
+        "conceptual-hunk:app.py#1"
+      ],
+      "confidence_expressed": "extracted",
+      "confidence_appropriate": false,
+      "rationale": "lookup's implementation is not shown anywhere in this fixture; asserting it is 'safe' and 'returns an empty record' with full confidence is not grounded in the evidence -- this is the genuinely unresolvable fact confidently (and wrongly) resolved.",
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Manual single-pass authoring while implementing this benchmark layer; provisional until independently re-reviewed.",
+        "timestamp": "2026-09-02T00:00:00Z"
+      }
+    }
+  ],
+  "audit_coverage": [
+    {
+      "field": "/summary",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates or labels the material claim already recorded for this item; not an independently material assertion."
+    },
+    {
+      "field": "/items/0/title",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates or labels the material claim already recorded for this item; not an independently material assertion."
+    },
+    {
+      "field": "/items/0/before",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates or labels the material claim already recorded for this item; not an independently material assertion."
+    },
+    {
+      "field": "/items/0/after",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates or labels the material claim already recorded for this item; not an independently material assertion."
+    },
+    {
+      "field": "/items/0/statement",
+      "claim_ids": [
+        "c-guard-still-first"
+      ],
+      "decomposition_complete": true
+    },
+    {
+      "field": "/items/1/title",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates or labels the material claim already recorded for this item; not an independently material assertion."
+    },
+    {
+      "field": "/items/1/before",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates or labels the material claim already recorded for this item; not an independently material assertion."
+    },
+    {
+      "field": "/items/1/after",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates or labels the material claim already recorded for this item; not an independently material assertion."
+    },
+    {
+      "field": "/items/1/statement",
+      "claim_ids": [
+        "c-lookup-safe-for-none"
+      ],
+      "decomposition_complete": true
+    },
+    {
+      "field": "/items/2/title",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates or labels the material claim already recorded for this item; not an independently material assertion."
+    },
+    {
+      "field": "/items/2/statement",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Generic filler about the surrounding module with no material, checkable behavioral assertion; correctly not decomposed into a claim."
+    }
+  ]
+}

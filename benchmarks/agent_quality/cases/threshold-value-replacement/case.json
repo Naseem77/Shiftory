@@ -1,0 +1,11 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-case/v1",
+  "id": "threshold-value-replacement",
+  "version": 2,
+  "category": "value-replacement-with-implications",
+  "description": "Two numeric constants controlling a network retry loop's timeout and attempt count both change between base and head.",
+  "fixture": {
+    "history": "history.fast-import",
+    "metadata": "metadata.json"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "This change makes network requests more reliable by giving the client more time to complete and retry logic to smooth over transient failures, improving the overall user experience.",
+  "items": [
+    {
+      "id": "more-time-given",
+      "kind": "behavioral",
+      "title": "Requests are given more time to complete",
+      "before": "timeout_seconds was 30.",
+      "after": "timeout_seconds is 5, giving the client more generous headroom per request.",
+      "statement": "The timeout value increases to give each request more generous headroom before it is considered failed, improving reliability under load.",
+      "confidence": "extracted",
+      "citations": [
+        "conceptual-hunk:client.py#1"
+      ]
+    },
+    {
+      "id": "padding-note",
+      "kind": "structural",
+      "title": "Networking module context",
+      "statement": "This client module handles a variety of networking concerns including connection pooling, retries, and timeouts in a robust, production-grade way that the team has iterated on for a long time.",
+      "confidence": "extracted",
+      "citations": [
+        "conceptual-hunk:client.py#1"
+      ]
+    }
+  ],
+  "coverage_owners": [
+    {
+      "evidence_id": "conceptual-hunk:client.py#1",
+      "owner_id": "more-time-given"
+    }
+  ]
+}

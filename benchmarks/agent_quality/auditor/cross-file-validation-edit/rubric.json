@@ -1,0 +1,56 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-rubric/v1",
+  "case_id": "cross-file-validation-edit",
+  "version": 1,
+  "rubric_provenance": {
+    "actor_type": "agent",
+    "actor": {
+      "name": "GitHub Copilot CLI (Claude Sonnet 5)",
+      "organization": "GitHub",
+      "model": "claude-sonnet-5",
+      "tool": "copilot-cli",
+      "version": "1.0.80"
+    },
+    "method": "Manual single-pass authoring while implementing this benchmark layer; provisional until independently re-reviewed.",
+    "timestamp": "2026-09-02T00:00:00Z"
+  },
+  "required_facts": [
+    {
+      "id": "validate-email-removed-from-validators",
+      "description": "The validate_email function and its EMAIL_RE regex are removed entirely from validators.py; validators.py no longer performs any email validation.",
+      "importance": 4,
+      "evidence_anchors": [
+        "conceptual-hunk:validators.py#1"
+      ],
+      "truth_status": "extractable",
+      "heuristic_aliases": [
+        "removed",
+        "no longer defines"
+      ]
+    },
+    {
+      "id": "weaker-validate-email-added-to-utils",
+      "description": "A new function also named validate_email is added to utils.py, but it only checks for the presence of an '@' character rather than the anchored regex pattern the old validators.py function used.",
+      "importance": 5,
+      "evidence_anchors": [
+        "conceptual-hunk:utils.py#1"
+      ],
+      "truth_status": "extractable",
+      "heuristic_aliases": [
+        "added",
+        "@ in value",
+        "utils.py"
+      ]
+    },
+    {
+      "id": "not-a-behavior-preserving-move",
+      "description": "Despite the same function name reappearing in a different file, this is not a behavior-preserving move or rename: the validation logic materially weakens from an anchored full-string regex match to a simple '@' substring check, so many invalid strings (e.g. 'a@' or '@@@') that the old function rejected are now accepted.",
+      "importance": 5,
+      "evidence_anchors": [
+        "conceptual-hunk:validators.py#1",
+        "conceptual-hunk:utils.py#1"
+      ],
+      "truth_status": "extractable"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "Updates process_order to validate orders with strict=True instead of strict=False, while specific strict validation rules remain undefined in the local context.",
+  "items": [
+    {
+      "id": "item-validate-strict",
+      "kind": "behavioral",
+      "title": "Enable strict validation during order processing",
+      "confidence": "inferred",
+      "citations": [
+        "source_971437523f603da69aad4ba2",
+        "source_476edeb5af7e94fc7f4f28ec"
+      ],
+      "before": "process_order calls validate(order, strict=False) before submitting the order.",
+      "after": "process_order calls validate(order, strict=True) before submitting the order."
+    },
+    {
+      "id": "item-validate-impl-ambiguity",
+      "kind": "ambiguity",
+      "title": "Specific validation behavior with strict=True is undefined in context",
+      "confidence": "ambiguous",
+      "citations": [
+        "source_971437523f603da69aad4ba2",
+        "source_476edeb5af7e94fc7f4f28ec"
+      ],
+      "statement": "The implementation of validate() is not defined in this repository, so the exact validation rules or failure modes triggered by setting strict=True cannot be determined from available context."
+    }
+  ],
+  "coverage_owners": [
+    {
+      "evidence_id": "line_64f66366b63e75ecfb5c4355",
+      "owner_id": "item-validate-strict"
+    },
+    {
+      "evidence_id": "line_e632edd98ca6bad6e0e380f1",
+      "owner_id": "item-validate-strict"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "The function now performs the lookup before the None guard, changing what happens when user_id is None.",
+  "items": [
+    {
+      "id": "item_lookup_moved_before_none_guard",
+      "kind": "behavioral",
+      "title": "Lookup is executed earlier",
+      "confidence": "inferred",
+      "before": "When user_id was None, the function returned None before calling lookup.",
+      "after": "The function now calls lookup(user_id) first, then checks user_id is None and returns None.",
+      "citations": [
+        {
+          "id": "source_47367c0a1408b9af64026e06"
+        },
+        {
+          "id": "source_3f8b438b4293abc650f2981e"
+        }
+      ]
+    }
+  ],
+  "coverage_owners": [
+    {
+      "evidence_id": "line_c8df1ee0c532a1578df4aaaa",
+      "owner_id": "item_lookup_moved_before_none_guard"
+    },
+    {
+      "evidence_id": "line_7f36f904827cbea0090230d5",
+      "owner_id": "item_lookup_moved_before_none_guard"
+    }
+  ]
+}

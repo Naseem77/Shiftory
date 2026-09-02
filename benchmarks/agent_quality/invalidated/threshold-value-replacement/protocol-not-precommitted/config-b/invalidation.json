@@ -1,0 +1,27 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-invalidated-capture/v1",
+  "status": "invalidated-protocol-not-precommitted-v1",
+  "reason_code": "protocol-config-not-precommitted",
+  "config_id": "config-b",
+  "original_case_id": "threshold-value-replacement",
+  "corrected_case_id": "threshold-value-replacement",
+  "reason": "This capture's benchmark_protocol_commit references 7b9d99ba6ecfae6dc53620362e87e776655ecb3b, the earliest commit at which both this case's content and the capture harness (agent_harness.py) were simultaneously present in this repository's history. A later, stricter independent review found that agent_harness.recompute_benchmark_protocol_commit_verification only ever checked full prompt-package content-equality, never whether the referenced commit also carried benchmarks/agent_quality/protocol_registry.json (the predeclared config-a/config-b registry) -- so a capture's provider/model/agent-type/tool/invocation-kind was never actually cross-checked against a committed configuration, only its prompt bytes. protocol_registry.json did not exist at all until the protocol-freeze commit 5c7289b, strictly after this capture was generated and ingested. Content-equality with the currently-committed protocol still holds (verified independently), but the registry/config was not itself committed before this capture, so it fails the strengthened verification. Withdrawn and replaced with a fresh capture generated after 5c7289b, which does carry a committed protocol_registry.json.",
+  "discovered_by": {
+    "actor_type": "agent",
+    "actor": "GitHub Copilot CLI (parent coordinating session)",
+    "method": "Review of recompute_benchmark_protocol_commit_verification's implementation found it never loaded or checked protocol_registry.json at the referenced commit, only the prompt-package manifest; re-running the strengthened check against this capture's referenced commit confirmed no registry existed there.",
+    "timestamp": "2026-09-02T07:00:00Z"
+  },
+  "original_prompt_package_digest": "b786f75c4a5eb8676db072240849a509574ba0011023ced06618015086fc1247",
+  "archived_raw_response_sha256": "34bf100d9c84fc0aa799c502a67f0a733357d6c1181247acbf5cdc1b1cfd5db1",
+  "archived_raw_response_bytes": 1370,
+  "archived_explanation_sha256": "34bf100d9c84fc0aa799c502a67f0a733357d6c1181247acbf5cdc1b1cfd5db1",
+  "archived_agent_run_sha256": "223d4e8452b58d0189454d1d2f35362a8869ffc6ac7911d1083cd98747663d4f",
+  "archived_evaluation_sha256": "098180c417903e33ddd2c12faaa43f7af49a85a50ef9f39ac3065c4ad66dd12d",
+  "archived_score_sha256": "7026ef537635515191fa06fccefa684e9306119ca2f6804a0b8c3a77d58e00cf",
+  "replacement_capture": {
+    "case_id": "threshold-value-replacement",
+    "config_id": "config-b",
+    "path": "benchmarks/agent_quality/cases/threshold-value-replacement/captured/config-b"
+  }
+}

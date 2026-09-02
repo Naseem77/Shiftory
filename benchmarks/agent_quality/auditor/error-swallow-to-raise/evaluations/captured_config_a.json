@@ -1,0 +1,231 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-candidate-evaluation/v1",
+  "case_id": "error-swallow-to-raise",
+  "candidate_id": "captured_config_a",
+  "candidate_kind": "captured_real_run",
+  "rubric_version": 1,
+  "explanation_sha256": "a3020bf664ff4eff09f845b45df79d9c7e515449ab1141bb0b316cb46ba43b81",
+  "claims": [
+    {
+      "claim_id": "ca-1",
+      "field": "/summary",
+      "start": 0,
+      "end": 83,
+      "source_item_id": "item_error_propagates_to_caller",
+      "excerpt_sha256": "8da92ed45968024dfaebc75a64655c442348182d49a962515a825023953b30c6",
+      "verdict": "supported_correct",
+      "rationale": "Both passes agreed this is an accurate high-level paraphrase of the core change; 'load errors' is a domain-appropriate synonym for the JSON-parsing ValueError this function's except clause catches, not an unsupported broadening.",
+      "confidence_expressed": "inferred",
+      "confidence_appropriate": true,
+      "maps_to_required_fact_id": "malformed-config-now-raises",
+      "materiality": 5,
+      "evidence_anchor_cited": [],
+      "overlaps_with": [],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T11:20:00Z"
+      }
+    },
+    {
+      "claim_id": "ca-2",
+      "field": "/items/0/before",
+      "start": 0,
+      "end": 96,
+      "source_item_id": "item_error_propagates_to_caller",
+      "excerpt_sha256": "124b7a752538836484dbdf3833df3cfd312b747f7fd42cd9736a45c9ca374f00",
+      "verdict": "supported_correct",
+      "rationale": "Matches the 'before' half of the required fact. Both passes agreed on the substance, differing only on whether 'an exception' (vs 'a ValueError') is over-broad; ground-truth source confirms the actual code catches exactly ValueError, and describing it generically as 'an exception' is an accurate, not misleading, abstraction.",
+      "confidence_expressed": "inferred",
+      "confidence_appropriate": true,
+      "maps_to_required_fact_id": "malformed-config-now-raises",
+      "materiality": 5,
+      "evidence_anchor_cited": [],
+      "overlaps_with": [],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T11:20:00Z"
+      }
+    },
+    {
+      "claim_id": "ca-3",
+      "field": "/items/0/before",
+      "start": 97,
+      "end": 131,
+      "source_item_id": "item_error_propagates_to_caller",
+      "excerpt_sha256": "b25b53e8d582b75b2c088e158511245fb27aa84162ef65346758133d57b153a2",
+      "verdict": "supported_correct",
+      "rationale": "Correctly frames the old behavior as suppressing propagation. Both passes agreed.",
+      "confidence_expressed": "inferred",
+      "confidence_appropriate": true,
+      "maps_to_required_fact_id": "malformed-config-now-raises",
+      "materiality": 4,
+      "evidence_anchor_cited": [],
+      "overlaps_with": [],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T11:20:00Z"
+      }
+    },
+    {
+      "claim_id": "ca-4",
+      "field": "/items/0/after",
+      "start": 0,
+      "end": 89,
+      "source_item_id": "item_error_propagates_to_caller",
+      "excerpt_sha256": "76261d476653fc428249f7e04265a39e88a38ec288966c74c396f2432190b380",
+      "verdict": "supported_correct",
+      "rationale": "Matches the required fact's 'after' state precisely. Both passes agreed.",
+      "confidence_expressed": "inferred",
+      "confidence_appropriate": true,
+      "maps_to_required_fact_id": "malformed-config-now-raises",
+      "materiality": 5,
+      "evidence_anchor_cited": [],
+      "overlaps_with": [],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T11:20:00Z"
+      }
+    },
+    {
+      "claim_id": "ca-5",
+      "field": "/items/0/after",
+      "start": 90,
+      "end": 129,
+      "source_item_id": "item_error_propagates_to_caller",
+      "excerpt_sha256": "f904713ca09cd6b0f34066598317645a11712b8b0212def676335cbf82c24627",
+      "verdict": "unsupported",
+      "rationale": "The two passes disagreed here (pass1: unsupported; pass2: supported_correct). Adjudicated as unsupported for consistency with this benchmark's established standard: the rubric explicitly treats caller-side impact as unresolvable from this diff (callers-impact-unclear) -- no caller code is shown, so asserting that callers definitely 'observe' the failure states a specific downstream consequence beyond what the diff establishes, exactly the overreach this benchmark has flagged identically for the same case/config pairing in an earlier round.",
+      "confidence_expressed": "inferred",
+      "confidence_appropriate": false,
+      "maps_to_required_fact_id": "callers-impact-unclear",
+      "materiality": 4,
+      "evidence_anchor_cited": [],
+      "overlaps_with": [],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T11:20:00Z"
+      }
+    }
+  ],
+  "audit_coverage": [
+    {
+      "field": "/summary",
+      "claim_ids": [
+        "ca-1"
+      ],
+      "decomposition_complete": true
+    },
+    {
+      "field": "/items/0/before",
+      "claim_ids": [
+        "ca-2",
+        "ca-3"
+      ],
+      "decomposition_complete": true
+    },
+    {
+      "field": "/items/0/after",
+      "claim_ids": [
+        "ca-4",
+        "ca-5"
+      ],
+      "decomposition_complete": true
+    },
+    {
+      "field": "/items/0/title",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Title restates the same propagation fact already decomposed and graded via /summary and /items/0/before,after; it introduces no new factual content to separately audit."
+    }
+  ],
+  "annotation_passes": [
+    {
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "Independent annotator pass",
+          "organization": null,
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli task sub-agent",
+          "version": "1.0.80"
+        },
+        "method": "Fresh sub-agent given only the rubric and the exact captured candidate text; no access to any other pass's output.",
+        "timestamp": "2026-09-02T11:20:00Z"
+      },
+      "notes": "See adjudication rationale for reconciliation."
+    },
+    {
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "Independent annotator pass",
+          "organization": null,
+          "model": "gpt-5.3-codex",
+          "tool": "copilot-cli task sub-agent",
+          "version": "1.0.80"
+        },
+        "method": "Fresh sub-agent given only the rubric and the exact captured candidate text; no access to any other pass's output.",
+        "timestamp": "2026-09-02T11:20:00Z"
+      },
+      "notes": "See adjudication rationale for reconciliation."
+    }
+  ],
+  "adjudication": {
+    "annotation_provenance": {
+      "actor_type": "agent",
+      "actor": {
+        "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+        "organization": "GitHub",
+        "model": "claude-sonnet-5",
+        "tool": "copilot-cli",
+        "version": "1.0.80"
+      },
+      "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+      "timestamp": "2026-09-02T11:20:00Z"
+    },
+    "overridden_claim_ids": [
+      "ca-5"
+    ],
+    "rationale": "1 of 5 adjudicated claims involved a genuine disagreement (disagreement_rate 1/5 = 0.2): pass1 flagged ca-5 ('so callers observe the original failure') as unsupported, an overreach into the rubric's explicitly-unresolvable callers-impact-unclear territory; pass2 judged it supported_correct as a natural corollary of propagation. Adjudicated in favor of pass1, consistent with the identical standard this benchmark applied to the same claim type for this exact case/config pairing in an earlier capture round. Coverage is 1/3: only malformed-config-now-raises is satisfied; the explanation never addresses the unresolvable caller-impact question honestly (it asserts a definite consequence instead) and never mentions the unchanged success path at all."
+  }
+}

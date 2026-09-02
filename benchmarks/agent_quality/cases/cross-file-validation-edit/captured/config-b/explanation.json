@@ -1,0 +1,72 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "Removes regex-based email validation from validators.py and defines a new substring-based validate_email function in utils.py.",
+  "items": [
+    {
+      "id": "item-remove-validators-email",
+      "kind": "behavioral",
+      "title": "Remove email validation from validators.py",
+      "confidence": "extracted",
+      "absence": "after",
+      "before": "validators.py defines EMAIL_RE and validate_email(value), validating email addresses using a regular expression pattern.",
+      "after": null,
+      "citations": [
+        "source_81f13c7533f4e927fdf81ce9"
+      ]
+    },
+    {
+      "id": "item-add-utils-email",
+      "kind": "behavioral",
+      "title": "Add validate_email function to utils.py",
+      "confidence": "extracted",
+      "absence": "before",
+      "before": null,
+      "after": "utils.py defines validate_email(value), returning True if '@' is present in the value.",
+      "citations": [
+        "source_3c2a01bc85a8eea0eccf3f2a"
+      ]
+    }
+  ],
+  "coverage_owners": [
+    {
+      "evidence_id": "line_4579b3edeb1eb6e1b8e6b064",
+      "owner_id": "item-remove-validators-email"
+    },
+    {
+      "evidence_id": "line_da03d3caaa71908ec97e4cfd",
+      "owner_id": "item-remove-validators-email"
+    },
+    {
+      "evidence_id": "line_7b4602e55ffd4b12ad595d67",
+      "owner_id": "item-remove-validators-email"
+    },
+    {
+      "evidence_id": "line_13072f4b3d47a51c87aa3458",
+      "owner_id": "item-remove-validators-email"
+    },
+    {
+      "evidence_id": "line_b0dd9157dfad77ee29519708",
+      "owner_id": "item-remove-validators-email"
+    },
+    {
+      "evidence_id": "line_adf3b5448baa5d63f946312f",
+      "owner_id": "item-remove-validators-email"
+    },
+    {
+      "evidence_id": "line_3d28e5c6ce7e3ed65c09ac9e",
+      "owner_id": "item-add-utils-email"
+    },
+    {
+      "evidence_id": "line_1c51808635779198aa73d32c",
+      "owner_id": "item-add-utils-email"
+    },
+    {
+      "evidence_id": "line_7d36ca8a0961de176ecb84f2",
+      "owner_id": "item-add-utils-email"
+    },
+    {
+      "evidence_id": "line_f4f9bb3553a8a40591a52b03",
+      "owner_id": "item-add-utils-email"
+    }
+  ]
+}

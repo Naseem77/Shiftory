@@ -1,0 +1,76 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-agent-run/v2",
+  "case_id": "binary-asset-replacement",
+  "candidate_id": "captured_config_a",
+  "provider": "openai (via GitHub Copilot CLI sub-agent)",
+  "model": {
+    "name": "gpt-5.3-codex",
+    "version": "unknown"
+  },
+  "agent_tool_version": "copilot-cli-1.0.80",
+  "evaluation_protocol": "Fresh, stateless GitHub Copilot CLI sub-agent (task tool, agent_type=general-purpose) given only this materialized prompt package directory (reconstructed from the registry_version 3 protocol-freeze commit, in its own exclusively-claimed directory) and instructed to run shiftory explain --graphora off against the fixture repository, follow SKILL.md, and write its final verified explanation verbatim to RAW_RESPONSE.",
+  "invocation": {
+    "kind": "copilot_task",
+    "agent_type": "general-purpose",
+    "configured_model": "gpt-5.3-codex",
+    "tool": "copilot-cli",
+    "tool_version": "1.0.80",
+    "orchestrator_agent_handle": {
+      "value": "v3-bar-a",
+      "provenance": "caller_supplied_task_name_returned_as_runtime_handle",
+      "externally_verifiable": false
+    },
+    "generation_started_at_utc": null,
+    "generation_finished_at_utc": null,
+    "generation_timing_unavailable_reason": "The orchestrating session does not receive the sub-agent's internal start/end timestamps from the task tool API; only completion order and this function's own ingestion time are observed."
+  },
+  "capture_ingested_at_utc": "2026-09-02T08:14:55.656282+00:00",
+  "prompt_package_manifest": [
+    {
+      "path": "INSTRUCTIONS.md",
+      "sha256": "fcaedece84911bea6217bea59923cf5a85f0861897d3f74d4c998e8317908fa9"
+    },
+    {
+      "path": "SKILL.md",
+      "sha256": "0f7ddbe349e93b68924c2665f06e015114130083841702ce14c8c650b99c5be0"
+    },
+    {
+      "path": "case.json",
+      "sha256": "c54f664f1363a5a4384ec5c879b9cd4ad17bf2d2ef3bb319b0dfa4b3357ed96f"
+    },
+    {
+      "path": "repository/icon.dat",
+      "sha256": "bc2ae48e004de7c6243ae5a7e03d3be9bab48cfe0d1da0e9af1b580b7b3f3748"
+    }
+  ],
+  "prompt_package_digest": "2499113dd11784b0b18e3ca2217e0225924655a379bfbefb45eafd4ae39e07d2",
+  "evidence_sha256": "71d2c43b4081df1b4129f4d3e30e51cb390869187b5ed567d8ff7294e4738542",
+  "engine_identity": {
+    "component": "shiftory",
+    "verification_method": "git_commit",
+    "value": "d7abdb6abd977fbcd731f201cba6feaf93bbc0a4"
+  },
+  "benchmark_protocol_commit": {
+    "commit": "2ed5e105138caad07bc21eefe861b55608e31f23",
+    "verification_method": "full_manifest_and_protocol_registry_match",
+    "verified": true,
+    "note": "Verified: commit 2ed5e105138caad07bc21eefe861b55608e31f23's full committed protocol -- case.json, SKILL.md, INSTRUCTIONS.md text, the reconstructed fixture repository, AND protocol_registry.json's registry_version 3 config/case-revision/digest/directory-isolation declarations -- reconstructs content that matches this capture's own recorded prompt_package_manifest and declared provider/model/agent-type/tool/invocation-kind path-for-path and field-for-field. This case's registry_version 2 captures were withdrawn as second invocations after an unrecoverable shared-directory collision losing the true first attempt; this is a genuinely fresh first attempt generated after registry_version 3 was committed, in its own exclusively-claimed directory."
+  },
+  "generator_access_profile": {
+    "repository_access": true,
+    "filesystem_scope": "Runs in the same Copilot CLI environment as the orchestrating session; has general bash/file-system tool access and was instructed, but not sandboxed, to stay within the prompt package directory.",
+    "network_access": false,
+    "tool_access": [
+      "bash",
+      "view",
+      "edit",
+      "grep",
+      "glob"
+    ]
+  },
+  "isolation_method": "protocol",
+  "raw_response_sha256": "948937f134e0d2e9d1ef3e816a807c5fa4b51bcf5c2162777109bfa1c55fbd0c",
+  "raw_response_bytes": 1892,
+  "truncated": false,
+  "migrated_from_v1_sha256": null
+}

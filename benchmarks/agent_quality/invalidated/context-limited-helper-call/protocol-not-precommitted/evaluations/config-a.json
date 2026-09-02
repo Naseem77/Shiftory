@@ -1,0 +1,229 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-candidate-evaluation/v1",
+  "case_id": "context-limited-helper-call",
+  "rubric_version": 1,
+  "candidate_id": "captured_config_a",
+  "candidate_kind": "captured_real_run",
+  "explanation_sha256": "f0692da946d1870fe5ab8384595242b3218eaa6aa8695cc02de9990c7ac9f897",
+  "claims": [
+    {
+      "overlaps_with": [],
+      "evidence_anchor_cited": [],
+      "claim_id": "ca-1",
+      "source_item_id": "item_validate_strict_switch",
+      "field": "/items/0/title",
+      "maps_to_required_fact_id": "strict-flag-flips-to-true",
+      "verdict": "supported_correct",
+      "materiality": 5,
+      "confidence_expressed": "inferred",
+      "confidence_appropriate": true,
+      "rationale": "Both passes agreed: correctly summarizes the flag flip.",
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T05:15:00Z"
+      },
+      "start": 0,
+      "end": 40,
+      "excerpt_sha256": "a51001f6997eba5b22031764948b79c09a3c03cfdcdb223767c30baaf165d2b2"
+    },
+    {
+      "overlaps_with": [],
+      "evidence_anchor_cited": [],
+      "claim_id": "ca-2",
+      "source_item_id": "item_validate_strict_switch",
+      "field": "/items/0/before",
+      "maps_to_required_fact_id": "strict-flag-flips-to-true",
+      "verdict": "supported_correct",
+      "materiality": 5,
+      "confidence_expressed": "inferred",
+      "confidence_appropriate": true,
+      "rationale": "Both passes agreed: directly matches the removed line.",
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T05:15:00Z"
+      },
+      "start": 0,
+      "end": 54,
+      "excerpt_sha256": "8aa8102c431af32ee8b9ed153821221dc583de15ff2141ca45a674c3eea7d079"
+    },
+    {
+      "overlaps_with": [],
+      "evidence_anchor_cited": [],
+      "claim_id": "ca-3",
+      "source_item_id": "item_validate_strict_switch",
+      "field": "/items/0/before",
+      "maps_to_required_fact_id": null,
+      "verdict": "unsupported",
+      "materiality": 3,
+      "confidence_expressed": "inferred",
+      "confidence_appropriate": false,
+      "rationale": "Pass 2 identified this as an unsupported inference about validate's actual runtime behavior, which the ground truth says is unknown; adjudicator agrees this is the more careful reading (pass 1 had treated the whole 'before' field as uniformly supported).",
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T05:15:00Z"
+      },
+      "start": 56,
+      "end": 93,
+      "excerpt_sha256": "06a30a521189c9f48ee4960edb31a9729a069fdc234c872acb355047add3ef02"
+    },
+    {
+      "overlaps_with": [],
+      "evidence_anchor_cited": [],
+      "claim_id": "ca-4",
+      "source_item_id": "item_validate_strict_switch",
+      "field": "/items/0/after",
+      "maps_to_required_fact_id": "strict-flag-flips-to-true",
+      "verdict": "supported_correct",
+      "materiality": 5,
+      "confidence_expressed": "inferred",
+      "confidence_appropriate": true,
+      "rationale": "Both passes agreed: directly matches the added line.",
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T05:15:00Z"
+      },
+      "start": 0,
+      "end": 56,
+      "excerpt_sha256": "310a7a7134a33680b63879d0a79cdf574f9aff42fb376f3836fac8f6b340502f"
+    },
+    {
+      "overlaps_with": [],
+      "evidence_anchor_cited": [],
+      "claim_id": "ca-5",
+      "source_item_id": "item_validate_strict_switch",
+      "field": "/items/0/after",
+      "maps_to_required_fact_id": null,
+      "verdict": "unsupported",
+      "materiality": 3,
+      "confidence_expressed": "inferred",
+      "confidence_appropriate": false,
+      "rationale": "Same unsupported-inference issue as ca-3, on the after side.",
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T05:15:00Z"
+      },
+      "start": 58,
+      "end": 92,
+      "excerpt_sha256": "3dc9511dc0f362da8ffa76ccf52c4725f81cc8e75a825b28c29d382ba17eb966"
+    }
+  ],
+  "audit_coverage": [
+    {
+      "field": "/summary",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates the item's claim; not independently material."
+    },
+    {
+      "field": "/items/0/title",
+      "claim_ids": [
+        "ca-1"
+      ],
+      "decomposition_complete": true
+    },
+    {
+      "field": "/items/0/before",
+      "claim_ids": [
+        "ca-2",
+        "ca-3"
+      ],
+      "decomposition_complete": true
+    },
+    {
+      "field": "/items/0/after",
+      "claim_ids": [
+        "ca-4",
+        "ca-5"
+      ],
+      "decomposition_complete": true
+    }
+  ],
+  "annotation_passes": [
+    {
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "Independent annotator pass 1",
+          "organization": null,
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli task sub-agent",
+          "version": "1.0.80"
+        },
+        "method": "Fresh sub-agent given only the rubric and the exact captured candidate text; no access to any other pass's output.",
+        "timestamp": "2026-09-02T05:00:00Z"
+      },
+      "notes": "3 claims, all supported_correct/true; missed validate-implementation-not-visible and submit-call-unchanged (candidate contains no ambiguity acknowledgment at all after the case.json leak fix)."
+    },
+    {
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "Independent annotator pass 2",
+          "organization": null,
+          "model": "gpt-5.3-codex",
+          "tool": "copilot-cli task sub-agent",
+          "version": "1.0.80"
+        },
+        "method": "Fresh sub-agent given only the rubric and the exact captured candidate text; no access to any other pass's output.",
+        "timestamp": "2026-09-02T05:00:00Z"
+      },
+      "notes": "5 finer-grained claims; separately flagged the 'so validation ran/runs in X mode' clauses as unsupported inferences about validate's actual behavior, which the fixture cannot confirm. Same 2 missed facts."
+    }
+  ],
+  "adjudication": {
+    "rationale": "Passes agreed on the core flag-flip claims and on both missed facts. Pass 2 additionally identified a real unsupported over-reach (asserting what 'strict'/'non-strict' mode actually does at runtime) that pass 1 did not separately flag; the adjudicator adopts pass 2's more careful decomposition. This capture was regenerated after fixing a case.json description leak that had previously handed the candidate agent the validate-implementation-not-visible conclusion directly; with the leak fixed, this fresh capture omits that fact entirely, which is the more honest, unleaked result.",
+    "annotation_provenance": {
+      "actor_type": "agent",
+      "actor": {
+        "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+        "organization": "GitHub",
+        "model": "claude-sonnet-5",
+        "tool": "copilot-cli",
+        "version": "1.0.80"
+      },
+      "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+      "timestamp": "2026-09-02T05:15:00Z"
+    },
+    "overridden_claim_ids": []
+  }
+}

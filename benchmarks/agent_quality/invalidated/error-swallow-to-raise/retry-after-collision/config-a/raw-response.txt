@@ -1,0 +1,32 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "load_config no longer suppresses parsing errors; it now re-raises exceptions instead of returning an empty configuration.",
+  "items": [
+    {
+      "id": "item_propagate_config_errors",
+      "kind": "behavioral",
+      "title": "Configuration loading failures now propagate to callers",
+      "confidence": "inferred",
+      "before": "When json.load raised inside load_config, the except block returned an empty dict, so callers received {} and execution continued.",
+      "after": "When json.load raises inside load_config, the except block re-raises the original exception, so callers now observe a failure instead of receiving {}.",
+      "citations": [
+        {
+          "id": "source_ee7cb38bbed948a647aba5aa"
+        },
+        {
+          "id": "source_5cb3053b457d61a9c9068ba7"
+        }
+      ]
+    }
+  ],
+  "coverage_owners": [
+    {
+      "evidence_id": "line_d94bfbaf4c43679f1686eea4",
+      "owner_id": "item_propagate_config_errors"
+    },
+    {
+      "evidence_id": "line_0786ea28854b2ac24f35bfd0",
+      "owner_id": "item_propagate_config_errors"
+    }
+  ]
+}

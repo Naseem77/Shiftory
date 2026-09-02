@@ -1,0 +1,64 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "Email validation was removed from validators.py and reintroduced in utils.py with weaker acceptance criteria.",
+  "items": [
+    {
+      "id": "item_validate_email_weakened",
+      "kind": "behavioral",
+      "title": "validate_email changed from regex format validation to a simple '@' presence check",
+      "confidence": "inferred",
+      "before": "validators.py defined validate_email as bool(EMAIL_RE.match(value)) using ^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$, so valid inputs needed non-space local and domain parts plus a dot in the domain.",
+      "after": "validators.py no longer defines validate_email, and utils.py now defines validate_email as return \"@\" in value, which accepts any string containing '@'.",
+      "citations": [
+        {
+          "id": "source_81f13c7533f4e927fdf81ce9"
+        },
+        {
+          "id": "source_3c2a01bc85a8eea0eccf3f2a"
+        }
+      ]
+    }
+  ],
+  "coverage_owners": [
+    {
+      "evidence_id": "line_3d28e5c6ce7e3ed65c09ac9e",
+      "owner_id": "item_validate_email_weakened"
+    },
+    {
+      "evidence_id": "line_1c51808635779198aa73d32c",
+      "owner_id": "item_validate_email_weakened"
+    },
+    {
+      "evidence_id": "line_7d36ca8a0961de176ecb84f2",
+      "owner_id": "item_validate_email_weakened"
+    },
+    {
+      "evidence_id": "line_f4f9bb3553a8a40591a52b03",
+      "owner_id": "item_validate_email_weakened"
+    },
+    {
+      "evidence_id": "line_4579b3edeb1eb6e1b8e6b064",
+      "owner_id": "item_validate_email_weakened"
+    },
+    {
+      "evidence_id": "line_da03d3caaa71908ec97e4cfd",
+      "owner_id": "item_validate_email_weakened"
+    },
+    {
+      "evidence_id": "line_7b4602e55ffd4b12ad595d67",
+      "owner_id": "item_validate_email_weakened"
+    },
+    {
+      "evidence_id": "line_13072f4b3d47a51c87aa3458",
+      "owner_id": "item_validate_email_weakened"
+    },
+    {
+      "evidence_id": "line_b0dd9157dfad77ee29519708",
+      "owner_id": "item_validate_email_weakened"
+    },
+    {
+      "evidence_id": "line_adf3b5448baa5d63f946312f",
+      "owner_id": "item_validate_email_weakened"
+    }
+  ]
+}

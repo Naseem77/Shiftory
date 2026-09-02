@@ -161,6 +161,31 @@ Record evaluator, model, environment, and tool versions for any manual or agent
 quality evaluation. Paid or nondeterministic services must not become correctness
 gates.
 
+### Agent-quality benchmark (`benchmarks/agent_quality/`)
+
+This is the "optional prose assessment" category above, made rigorous rather
+than purely manual. Correctness/hallucination/omission/uncertainty results
+come from claim-level human- or agent-performed annotation
+(`candidate-evaluation-v1` records), never from automated text matching; a
+separate, clearly labeled `rubric_match_heuristic` is reported but never
+feeds those results. Follow the
+[case/rubric review workflow and predeclared capture configurations](benchmarks/agent_quality/README.md)
+when adding or changing a case:
+
+- a rubric change requires bumping its `version` and re-validating every
+  existing evaluation for that case;
+- every annotation and adjudication pass must record its
+  `annotation_provenance` (`actor_type: "human"` or `"agent"`) honestly --
+  never attribute an annotation to a human reviewer unless a human actually
+  performed and confirmed it;
+- real captured agent output (`captured/*`) is committed unedited, including
+  ties and structural failures, and is always labeled `captured_real_run`;
+  hand-authored `synthetic_baseline`/`synthetic_adversarial` fixtures exist
+  only to unit-test the scorer's arithmetic and must never be presented as
+  real agent evidence; and
+- a real captured agent's quality score is never a required CI gate (`gate`
+  is always `null` for `captured_real_run` candidates).
+
 ## Pull requests
 
 Include:

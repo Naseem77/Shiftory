@@ -1,0 +1,372 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-candidate-evaluation/v1",
+  "case_id": "binary-asset-replacement",
+  "candidate_id": "captured_config_a",
+  "candidate_kind": "captured_real_run",
+  "rubric_version": 1,
+  "explanation_sha256": "948937f134e0d2e9d1ef3e816a807c5fa4b51bcf5c2162777109bfa1c55fbd0c",
+  "claims": [
+    {
+      "claim_id": "c1",
+      "field": "/summary",
+      "start": 0,
+      "end": 67,
+      "source_item_id": "icon-dat-binary-replaced",
+      "excerpt_sha256": "f6812f0cc0fee05d3fc78d8ff067c7e13da4965892f672fad33d909012358d76",
+      "verdict": "unsupported",
+      "rationale": "Both passes agreed independently: the rubric/evidence only describes icon.dat's own blob-hash diff, with no repository-wide inventory establishing it is the ONLY binary file in the repo. The uniqueness claim ('single binary asset') is an unverifiable overreach beyond the bounded evidence, though tangential to the three required facts.",
+      "confidence_expressed": "extracted",
+      "confidence_appropriate": false,
+      "maps_to_required_fact_id": null,
+      "materiality": 2,
+      "evidence_anchor_cited": [],
+      "overlaps_with": [],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T11:20:00Z"
+      }
+    },
+    {
+      "claim_id": "c2",
+      "field": "/summary",
+      "start": 68,
+      "end": 99,
+      "source_item_id": "icon-dat-binary-replaced",
+      "excerpt_sha256": "35c139b1c155bda064e8e5ee4632e28a6941ea091440bb07153290c2ef01ea98",
+      "verdict": "supported_correct",
+      "rationale": "Restates that icon.dat's content changed, consistent with the blob-hash diff. Both passes agreed.",
+      "confidence_expressed": "extracted",
+      "confidence_appropriate": true,
+      "maps_to_required_fact_id": "binary-content-replaced",
+      "materiality": 4,
+      "evidence_anchor_cited": [],
+      "overlaps_with": [],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T11:20:00Z"
+      }
+    },
+    {
+      "claim_id": "c3",
+      "field": "/summary",
+      "start": 159,
+      "end": 252,
+      "source_item_id": "icon-dat-semantic-meaning-unresolved",
+      "excerpt_sha256": "36f1e32116717cda94fa8f7f49e4849ce3d1572d10392521535309fa84300060",
+      "verdict": "supported_correct",
+      "rationale": "Correctly and honestly reports the genuine evidentiary gap. Both passes agreed.",
+      "confidence_expressed": "extracted",
+      "confidence_appropriate": true,
+      "maps_to_required_fact_id": "content-meaning-not-available",
+      "materiality": 5,
+      "evidence_anchor_cited": [],
+      "overlaps_with": [],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T11:20:00Z"
+      }
+    },
+    {
+      "claim_id": "c4",
+      "field": "/items/0/statement",
+      "start": 0,
+      "end": 76,
+      "source_item_id": "icon-dat-binary-replaced",
+      "excerpt_sha256": "747155ca676e73502359cf93b41874b5088b07d4f95abbc2bc8564760b1c25e7",
+      "verdict": "supported_correct",
+      "rationale": "Pass1 judged this supported_correct as a plausible structural fact; pass2 flagged the specific commit prefixes as 'unsupported' since the abbreviated rubric text given to annotators does not repeat them. Adjudicated as supported_correct: the adjudicator independently reconstructed this case's real evidence (fixtures.reconstruct_fixture + fixtures.run_analyze) and confirmed the actual base/head commit SHAs are exactly d7468c1ce6e118acc33d2016bc20e30b331c7b7f and f66dfed41ca73b2b2a023f1b3186957c14ade889 -- the candidate's abbreviated prefixes match precisely, and the file mode 100644 is unchanged on both sides.",
+      "confidence_expressed": "extracted",
+      "confidence_appropriate": true,
+      "maps_to_required_fact_id": "mode-unchanged",
+      "materiality": 3,
+      "evidence_anchor_cited": [],
+      "overlaps_with": [],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T11:20:00Z"
+      }
+    },
+    {
+      "claim_id": "c5",
+      "field": "/items/0/statement",
+      "start": 77,
+      "end": 187,
+      "source_item_id": "icon-dat-binary-replaced",
+      "excerpt_sha256": "c322212acc50a51905dcaa240b72e0c277609d914ddb8c07d6dc7ce6a5a41269",
+      "verdict": "supported_correct",
+      "rationale": "Pass2 flagged these specific hash values as 'unsupported' since they are not repeated in the abbreviated rubric text given to annotators. Adjudicated as supported_correct: the adjudicator independently confirmed these are the EXACT real old_blob/new_blob values from this case's actual evidence -- a precise, checkable, correct fact, not a fabrication.",
+      "confidence_expressed": "extracted",
+      "confidence_appropriate": true,
+      "maps_to_required_fact_id": "binary-content-replaced",
+      "materiality": 5,
+      "evidence_anchor_cited": [],
+      "overlaps_with": [],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T11:20:00Z"
+      }
+    },
+    {
+      "claim_id": "c6",
+      "field": "/items/0/statement",
+      "start": 189,
+      "end": 235,
+      "source_item_id": "icon-dat-binary-replaced",
+      "excerpt_sha256": "2bf4b7daef8f875b628cb51b7fe0febc20380bd8337dc2c8721495311cb36e7e",
+      "verdict": "supported_correct",
+      "rationale": "A reasonable, accurate interpretive summary of the preceding hash-change fact. Both passes agreed.",
+      "confidence_expressed": "extracted",
+      "confidence_appropriate": true,
+      "maps_to_required_fact_id": "binary-content-replaced",
+      "materiality": 4,
+      "evidence_anchor_cited": [],
+      "overlaps_with": [],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T11:20:00Z"
+      }
+    },
+    {
+      "claim_id": "c7",
+      "field": "/items/1/before",
+      "start": 0,
+      "end": 116,
+      "source_item_id": "icon-dat-observed-bytes-changed",
+      "excerpt_sha256": "659db7e04edda2bd4aa1ce8329a1540bca7d218c9dccc27d3487d5478a546eb0",
+      "verdict": "supported_correct",
+      "rationale": "A reasonable, correctly-labeled 'inferred' consequence of the confirmed blob change. Both passes agreed.",
+      "confidence_expressed": "inferred",
+      "confidence_appropriate": true,
+      "maps_to_required_fact_id": null,
+      "materiality": 2,
+      "evidence_anchor_cited": [],
+      "overlaps_with": [],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T11:20:00Z"
+      }
+    },
+    {
+      "claim_id": "c8",
+      "field": "/items/1/after",
+      "start": 0,
+      "end": 109,
+      "source_item_id": "icon-dat-observed-bytes-changed",
+      "excerpt_sha256": "e687b59bc4fec3b57d69465deaf9df742a894241fd45cf5d5b783c7bd1087916",
+      "verdict": "supported_correct",
+      "rationale": "Symmetric, correctly-labeled 'inferred' consequence. Both passes agreed.",
+      "confidence_expressed": "inferred",
+      "confidence_appropriate": true,
+      "maps_to_required_fact_id": null,
+      "materiality": 2,
+      "evidence_anchor_cited": [],
+      "overlaps_with": [],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T11:20:00Z"
+      }
+    },
+    {
+      "claim_id": "c9",
+      "field": "/items/2/statement",
+      "start": 0,
+      "end": 215,
+      "source_item_id": "icon-dat-semantic-meaning-unresolved",
+      "excerpt_sha256": "3cfa8e95b41bfd09a6c47121501aaea6e7677aebaf8b97251b65378bcc2afc86",
+      "verdict": "supported_correct",
+      "rationale": "Accurately and honestly reports the genuine ambiguity the rubric requires -- a claim reporting genuine ambiguity as unresolved IS supported_correct, not itself an ambiguous verdict. Both passes agreed this is correctly labeled 'unresolved' confidence rather than fabricating a specific meaning.",
+      "confidence_expressed": "unresolved",
+      "confidence_appropriate": true,
+      "maps_to_required_fact_id": "content-meaning-not-available",
+      "materiality": 5,
+      "evidence_anchor_cited": [],
+      "overlaps_with": [],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+        "timestamp": "2026-09-02T11:20:00Z"
+      }
+    }
+  ],
+  "audit_coverage": [
+    {
+      "field": "/summary",
+      "claim_ids": [
+        "c1",
+        "c2",
+        "c3"
+      ],
+      "decomposition_complete": true
+    },
+    {
+      "field": "/items/0/statement",
+      "claim_ids": [
+        "c4",
+        "c5",
+        "c6"
+      ],
+      "decomposition_complete": true
+    },
+    {
+      "field": "/items/1/before",
+      "claim_ids": [
+        "c7"
+      ],
+      "decomposition_complete": true
+    },
+    {
+      "field": "/items/1/after",
+      "claim_ids": [
+        "c8"
+      ],
+      "decomposition_complete": true
+    },
+    {
+      "field": "/items/2/statement",
+      "claim_ids": [
+        "c9"
+      ],
+      "decomposition_complete": true
+    },
+    {
+      "field": "/items/0/title",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Title restates the same binary-replacement fact already decomposed and graded via /items/0/statement; it introduces no new factual content to separately audit."
+    },
+    {
+      "field": "/items/1/title",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Title restates the same observed-bytes-changed fact already decomposed and graded via /items/1/before,after; it introduces no new factual content to separately audit."
+    },
+    {
+      "field": "/items/2/title",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Title restates the same unresolved-meaning fact already decomposed and graded via /items/2/statement; it introduces no new factual content to separately audit."
+    }
+  ],
+  "annotation_passes": [
+    {
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "Independent annotator pass",
+          "organization": null,
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli task sub-agent",
+          "version": "1.0.80"
+        },
+        "method": "Fresh sub-agent given only the rubric and the exact captured candidate text; no access to any other pass's output.",
+        "timestamp": "2026-09-02T11:20:00Z"
+      },
+      "notes": "See adjudication rationale for reconciliation."
+    },
+    {
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "Independent annotator pass",
+          "organization": null,
+          "model": "gpt-5.3-codex",
+          "tool": "copilot-cli task sub-agent",
+          "version": "1.0.80"
+        },
+        "method": "Fresh sub-agent given only the rubric and the exact captured candidate text; no access to any other pass's output.",
+        "timestamp": "2026-09-02T11:20:00Z"
+      },
+      "notes": "See adjudication rationale for reconciliation."
+    }
+  ],
+  "adjudication": {
+    "annotation_provenance": {
+      "actor_type": "agent",
+      "actor": {
+        "name": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+        "organization": "GitHub",
+        "model": "claude-sonnet-5",
+        "tool": "copilot-cli",
+        "version": "1.0.80"
+      },
+      "method": "Reconciled two independent agent annotation passes into a single adjudicated claim set.",
+      "timestamp": "2026-09-02T11:20:00Z"
+    },
+    "overridden_claim_ids": [
+      "c4",
+      "c5"
+    ],
+    "rationale": "2 of 9 adjudicated claims (in this record's final merged claim set; pass2's own finer-grained decomposition disputed more sub-fragments of the same two underlying facts) involved a disagreement (disagreement_rate 2/9 = 0.22): pass2 flagged the specific commit-prefix and blob-hash values in c4/c5 as 'unsupported' on the theory that the abbreviated rubric text given to blind annotators does not repeat these exact values -- a reasonable caution given what pass2 could see, but incorrect: the adjudicator independently reconstructed this case's real evidence (fixtures.reconstruct_fixture + fixtures.run_analyze) and confirmed every specific hash the candidate cites (d7468c1ce6e118acc33d2016bc20e30b331c7b7f, f66dfed41ca73b2b2a023f1b3186957c14ade889, 85025d98693fe77b700bcf818dfd8fcd13c4e961, 4bf941a61efbd197352e63126c8b27701fe8ff3c) is exactly correct, so these are adjudicated supported_correct with ground-truth verification, not merely pass1's opinion. Both passes independently and correctly caught the one genuine overreach: c1's claim that icon.dat is the repository's 'single' binary asset is not established by evidence about icon.dat alone -- this is a consensus finding, not a disagreement, so it is not counted in overridden_claim_ids. Coverage is 3/3 -- all three required facts (binary-content-replaced, content-meaning-not-available, mode-unchanged) are satisfied, with the genuine ambiguity fact correctly reported as unresolved rather than fabricated."
+  }
+}

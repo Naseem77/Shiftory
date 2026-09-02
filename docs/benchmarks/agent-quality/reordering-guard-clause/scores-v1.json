@@ -1,0 +1,268 @@
+{
+  "candidates": [
+    {
+      "accounting": {
+        "citation_count": 3,
+        "hunk_coverage_ratio": 1.0,
+        "hunk_covered": 1,
+        "hunk_total": 1,
+        "line_coverage_ratio": 1.0,
+        "line_owned": 2,
+        "line_total": 2,
+        "span_coverage_ratio": 1.0,
+        "span_owned": 2,
+        "span_total": 2,
+        "unit_coverage_ratio": 1.0,
+        "unit_covered": 1,
+        "unit_total": 1
+      },
+      "audit_status": null,
+      "candidate_id": "synthetic_baseline",
+      "candidate_kind": "synthetic_baseline",
+      "case_id": "reordering-guard-clause",
+      "claim_factuality": {
+        "assessable_count": 3,
+        "assessable_weight": 11,
+        "ratio": 1.0,
+        "supported_count": 3,
+        "supported_weight": 11
+      },
+      "contradicted_claims": {
+        "claim_ids": [],
+        "count": 0,
+        "weight": 0
+      },
+      "explanation_sha256": "41b6fe0b2958cf5c38e081351d33fd86a98da4648c54826d5d5a921528e78b81",
+      "gate": {
+        "pass": true,
+        "reasons": []
+      },
+      "required_behavior_coverage": {
+        "ratio": 1.0,
+        "satisfied_count": 3,
+        "satisfied_ids": [
+          "guard-moved-after-lookup",
+          "lookup-none-implication-uncertain",
+          "return-contract-unchanged-for-resolved-lookups"
+        ],
+        "total_count": 3
+      },
+      "rubric_match_heuristic": null,
+      "schema": "shiftory.benchmark-agent-quality-score/v1",
+      "semantic_omissions": {
+        "missed_count": 0,
+        "missed_ids": [],
+        "missed_weight": 0
+      },
+      "structural_failure": null,
+      "uncertainty_honesty": {
+        "checked": 3,
+        "violation_ids": [],
+        "violations": 0
+      },
+      "unsupported_claims": {
+        "claim_ids": [],
+        "count": 0,
+        "weight": 0
+      },
+      "usefulness_relevance": {
+        "ambiguous_unresolvable_claims": 0,
+        "item_count": 3,
+        "non_semantic_claims": 0,
+        "useful_count": 3
+      }
+    },
+    {
+      "accounting": {
+        "citation_count": 3,
+        "hunk_coverage_ratio": 1.0,
+        "hunk_covered": 1,
+        "hunk_total": 1,
+        "line_coverage_ratio": 1.0,
+        "line_owned": 2,
+        "line_total": 2,
+        "span_coverage_ratio": 1.0,
+        "span_owned": 2,
+        "span_total": 2,
+        "unit_coverage_ratio": 1.0,
+        "unit_covered": 1,
+        "unit_total": 1
+      },
+      "audit_status": null,
+      "candidate_id": "synthetic_adversarial",
+      "candidate_kind": "synthetic_adversarial",
+      "case_id": "reordering-guard-clause",
+      "claim_factuality": {
+        "assessable_count": 2,
+        "assessable_weight": 9,
+        "ratio": 0.0,
+        "supported_count": 0,
+        "supported_weight": 0
+      },
+      "contradicted_claims": {
+        "claim_ids": [
+          "c-guard-still-first"
+        ],
+        "count": 1,
+        "weight": 5
+      },
+      "explanation_sha256": "f305c4bb6dd4d3c1a70c1468172a359b54a7927c1c84e4b83636ef7a64f012b0",
+      "gate": {
+        "pass": false,
+        "reasons": [
+          "1 unsupported claim(s)",
+          "1 contradicted claim(s)",
+          "3 missed required fact(s)",
+          "2 uncertainty-honesty violation(s)"
+        ]
+      },
+      "required_behavior_coverage": {
+        "ratio": 0.0,
+        "satisfied_count": 0,
+        "satisfied_ids": [],
+        "total_count": 3
+      },
+      "rubric_match_heuristic": null,
+      "schema": "shiftory.benchmark-agent-quality-score/v1",
+      "semantic_omissions": {
+        "missed_count": 3,
+        "missed_ids": [
+          "guard-moved-after-lookup",
+          "lookup-none-implication-uncertain",
+          "return-contract-unchanged-for-resolved-lookups"
+        ],
+        "missed_weight": 11
+      },
+      "structural_failure": null,
+      "uncertainty_honesty": {
+        "checked": 2,
+        "violation_ids": [
+          "c-guard-still-first",
+          "c-lookup-safe-for-none"
+        ],
+        "violations": 2
+      },
+      "unsupported_claims": {
+        "claim_ids": [
+          "c-lookup-safe-for-none"
+        ],
+        "count": 1,
+        "weight": 4
+      },
+      "usefulness_relevance": {
+        "ambiguous_unresolvable_claims": 0,
+        "item_count": 3,
+        "non_semantic_claims": 0,
+        "useful_count": 0
+      }
+    },
+    {
+      "accounting": {
+        "citation_count": 0,
+        "hunk_coverage_ratio": 1.0,
+        "hunk_covered": 1,
+        "hunk_total": 1,
+        "line_coverage_ratio": 1.0,
+        "line_owned": 2,
+        "line_total": 2,
+        "span_coverage_ratio": 1.0,
+        "span_owned": 2,
+        "span_total": 2,
+        "unit_coverage_ratio": 1.0,
+        "unit_covered": 1,
+        "unit_total": 1
+      },
+      "audit_status": {
+        "actor_type": "agent",
+        "adjudicator": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+        "disagreement_count": 1,
+        "disagreement_rate": 0.1111111111111111,
+        "mode": "dual_audit"
+      },
+      "candidate_id": "captured_config_a",
+      "candidate_kind": "captured_real_run",
+      "case_id": "reordering-guard-clause",
+      "claim_factuality": {
+        "assessable_count": 8,
+        "assessable_weight": 34,
+        "ratio": 1.0,
+        "supported_count": 8,
+        "supported_weight": 34
+      },
+      "contradicted_claims": {
+        "claim_ids": [],
+        "count": 0,
+        "weight": 0
+      },
+      "explanation_sha256": "e7cd052a887652348d7287e277213c9e9b462b83782276b75873b884c2d28e4f",
+      "gate": null,
+      "required_behavior_coverage": {
+        "ratio": 0.3333333333333333,
+        "satisfied_count": 1,
+        "satisfied_ids": [
+          "guard-moved-after-lookup"
+        ],
+        "total_count": 3
+      },
+      "rubric_match_heuristic": null,
+      "schema": "shiftory.benchmark-agent-quality-score/v1",
+      "semantic_omissions": {
+        "missed_count": 2,
+        "missed_ids": [
+          "lookup-none-implication-uncertain",
+          "return-contract-unchanged-for-resolved-lookups"
+        ],
+        "missed_weight": 6
+      },
+      "structural_failure": null,
+      "uncertainty_honesty": {
+        "checked": 9,
+        "violation_ids": [
+          "ca-1",
+          "ca-2",
+          "ca-4",
+          "ca-5",
+          "ca-7",
+          "ca-9"
+        ],
+        "violations": 6
+      },
+      "unsupported_claims": {
+        "claim_ids": [],
+        "count": 0,
+        "weight": 0
+      },
+      "usefulness_relevance": {
+        "ambiguous_unresolvable_claims": 0,
+        "item_count": 1,
+        "non_semantic_claims": 1,
+        "useful_count": 8
+      }
+    },
+    {
+      "accounting": null,
+      "audit_status": null,
+      "candidate_id": "captured_config_b",
+      "candidate_kind": "captured_real_run",
+      "case_id": "reordering-guard-clause",
+      "claim_factuality": null,
+      "contradicted_claims": null,
+      "explanation_sha256": null,
+      "gate": null,
+      "required_behavior_coverage": null,
+      "rubric_match_heuristic": null,
+      "schema": "shiftory.benchmark-agent-quality-score/v1",
+      "semantic_omissions": null,
+      "structural_failure": {
+        "protocol_violation": "raw response cites evidence ids that do not exist in the real evidence for this diff",
+        "raw_response_sha256": "8627e70a2b232421efd0b177c41ac2e9660be19817db5d8aad45de3405695538",
+        "reason": "The raw response is valid shiftory.explanation/v1-shaped JSON (passes the shallow schema check agent_harness.capture_result performs), but fails the real shiftory.explain.validator.validate_explanation structural check: its citations array references evidence ids (e.g. fact_* identifiers) that do not exist anywhere in this case's real, deterministically-generated evidence -- the model fabricated citation ids that look plausible but were never actually produced by shiftory analyze for this diff. This is a genuine accounting-level structural failure discovered by running the real validator, not a repair-worthy formatting issue; per protocol, the raw response and agent-run provenance are preserved exactly as first received, and no semantic score is synthesized for this candidate."
+      },
+      "uncertainty_honesty": null,
+      "unsupported_claims": null,
+      "usefulness_relevance": null
+    }
+  ],
+  "case_id": "reordering-guard-clause",
+  "schema": "shiftory.benchmark-agent-quality-scores/v1"
+}

@@ -1,0 +1,22 @@
+{
+  "schema": "shiftory.offline-git-fixture/v1",
+  "id": "threshold-value-replacement",
+  "description": "Two numeric constants controlling a network retry loop's timeout and attempt count both change between base and head.",
+  "history": "history.fast-import",
+  "import_ref": "refs/heads/main",
+  "marks": {
+    "base": 1,
+    "head": 2
+  },
+  "expected_commits": {
+    "base": "961dd79a57a15ae6241e8d79aeca776870447454",
+    "head": "8dc8b0f3c8e56e180fe4ac9b6cf83e54e0b23ea6"
+  },
+  "expected_inventory": {
+    "files": 1,
+    "hunks": 1,
+    "added_lines": 2,
+    "deleted_lines": 2
+  },
+  "network_required": false
+}

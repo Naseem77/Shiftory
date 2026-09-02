@@ -1,0 +1,55 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "validate_email is deleted from validators.py and a differently-implemented, weaker validate_email is added to utils.py; this is not a like-for-like move despite the shared name.",
+  "items": [
+    {
+      "id": "email-check-removed",
+      "kind": "behavioral",
+      "title": "validate_email is deleted from validators.py",
+      "after": null,
+      "before": "validators.py defined validate_email using an anchored regex (EMAIL_RE) requiring text, an '@', more text, a '.', and more text.",
+      "absence": "after",
+      "statement": "validate_email and its EMAIL_RE regex are removed entirely from validators.py; the file no longer performs any email validation.",
+      "confidence": "extracted",
+      "citations": [
+        "conceptual-hunk:validators.py#1"
+      ]
+    },
+    {
+      "id": "weaker-email-check-added",
+      "kind": "behavioral",
+      "title": "A different validate_email is added to utils.py",
+      "before": null,
+      "after": "utils.py defines a new validate_email that returns True whenever the input string contains an '@' character.",
+      "absence": "before",
+      "statement": "A new validate_email function is added to utils.py, but it only checks for the presence of an '@' character rather than the anchored regex the old validators.py function used.",
+      "confidence": "extracted",
+      "citations": [
+        "conceptual-hunk:utils.py#1"
+      ]
+    },
+    {
+      "id": "not-a-real-move",
+      "kind": "behavioral",
+      "title": "This is not a like-for-like move",
+      "before": "validators.py's validate_email rejected any string not matching text@text.text exactly.",
+      "after": "utils.py's validate_email accepts any string containing '@' anywhere, including strings like 'a@' or '@@@' that the old function rejected.",
+      "statement": "Despite the same function name reappearing in a different file, this is not a behavior-preserving move: the validation logic materially weakens from an anchored regex match to a simple substring check.",
+      "confidence": "extracted",
+      "citations": [
+        "conceptual-hunk:validators.py#1",
+        "conceptual-hunk:utils.py#1"
+      ]
+    }
+  ],
+  "coverage_owners": [
+    {
+      "evidence_id": "conceptual-hunk:validators.py#1",
+      "owner_id": "email-check-removed"
+    },
+    {
+      "evidence_id": "conceptual-hunk:utils.py#1",
+      "owner_id": "weaker-email-check-added"
+    }
+  ]
+}

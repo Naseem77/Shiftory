@@ -1,0 +1,85 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-candidate-evaluation/v1",
+  "case_id": "threshold-value-replacement",
+  "rubric_version": 1,
+  "candidate_id": "synthetic_adversarial",
+  "candidate_kind": "synthetic_adversarial",
+  "explanation_sha256": "0bf6b710fd163cbfed93284a70113a3a331f7002c1d6ba173462229f7129e6fa",
+  "claims": [
+    {
+      "overlaps_with": [],
+      "evidence_anchor_cited": [
+        "conceptual-hunk:client.py#1"
+      ],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Manual single-pass authoring while implementing this benchmark layer; provisional until independently re-reviewed.",
+        "timestamp": "2026-09-02T00:00:00Z"
+      },
+      "claim_id": "c-more-time-given",
+      "source_item_id": "more-time-given",
+      "field": "/items/0/statement",
+      "maps_to_required_fact_id": "timeout-shortened",
+      "verdict": "contradicted",
+      "materiality": 4,
+      "confidence_expressed": "extracted",
+      "confidence_appropriate": false,
+      "rationale": "Directly contradicts the diff: timeout_seconds decreases from 30 to 5, it does not increase.",
+      "start": 0,
+      "end": 137,
+      "excerpt_sha256": "68c05e9c7bc9283693774a3f86b1a5a07162675051dec1e32aca672b0c8565b1"
+    }
+  ],
+  "audit_coverage": [
+    {
+      "field": "/summary",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates or labels a material claim already recorded elsewhere for this item; not an independently material assertion."
+    },
+    {
+      "field": "/items/0/title",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates or labels a material claim already recorded elsewhere for this item; not an independently material assertion."
+    },
+    {
+      "field": "/items/0/before",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates or labels a material claim already recorded elsewhere for this item; not an independently material assertion."
+    },
+    {
+      "field": "/items/0/after",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates or labels a material claim already recorded elsewhere for this item; not an independently material assertion."
+    },
+    {
+      "field": "/items/0/statement",
+      "claim_ids": [
+        "c-more-time-given"
+      ],
+      "decomposition_complete": true
+    },
+    {
+      "field": "/items/1/title",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates or labels a material claim already recorded elsewhere for this item; not an independently material assertion."
+    },
+    {
+      "field": "/items/1/statement",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Generic module-overview filler with no material, checkable behavioral assertion; correctly not decomposed into a claim."
+    }
+  ]
+}

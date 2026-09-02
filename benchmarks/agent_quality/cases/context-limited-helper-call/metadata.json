@@ -1,0 +1,22 @@
+{
+  "schema": "shiftory.offline-git-fixture/v1",
+  "id": "context-limited-helper-call",
+  "description": "A call to a helper function named validate() changes one of its keyword arguments from False to True.",
+  "history": "history.fast-import",
+  "import_ref": "refs/heads/main",
+  "marks": {
+    "base": 1,
+    "head": 2
+  },
+  "expected_commits": {
+    "base": "94c496c8ea43829a1deb0f2d4e4c290677e2e3fd",
+    "head": "5aeae8be0df853172cb2f4c483e8a82a7044cbee"
+  },
+  "expected_inventory": {
+    "files": 1,
+    "hunks": 1,
+    "added_lines": 1,
+    "deleted_lines": 1
+  },
+  "network_required": false
+}

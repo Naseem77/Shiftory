@@ -1,0 +1,27 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-invalidated-capture/v1",
+  "status": "invalidated-protocol-not-precommitted-v1",
+  "reason_code": "retry-after-unrecoverable-shared-directory-collision",
+  "config_id": "config-a",
+  "original_case_id": "threshold-value-replacement",
+  "corrected_case_id": "threshold-value-replacement",
+  "reason": "This capture (recap2-tvr-a) was recorded as an official, first-attempt registry_version 2 capture, but it was in fact a SECOND invocation for this case/config: the first invocation's output was silently lost to a shared-prompt-directory collision (see invalidated/threshold-value-replacement/lost-generation-attempts/config-a.json for the honest incident record of that lost first attempt). registry_version 2's own invocation_protocol already declared one_attempt_only/no_retry, so generating and recording a second invocation after the first was silently overwritten -- however unintentional -- violates that declared invariant for this capture, independent of whether its content or protocol-commit verification otherwise holds (both do). Withdrawn and replaced with a genuinely first, one-shot invocation generated after registry_version 3 was committed, which adds unique_prompt_directory_per_invocation, output_directory_must_not_preexist, and exclusive_directory_creation specifically to make this class of defect structurally impossible.",
+  "discovered_by": {
+    "actor_type": "agent",
+    "actor": "GitHub Copilot CLI (parent coordinating session)",
+    "method": "Integrity review of the registry_version 2 recapture round identified that the surviving captures for these three cases were second invocations under a protocol that already declared one_attempt_only, because the true first invocations were lost to a directory collision rather than genuinely absent.",
+    "timestamp": "2026-09-02T10:56:00Z"
+  },
+  "original_prompt_package_digest": "b786f75c4a5eb8676db072240849a509574ba0011023ced06618015086fc1247",
+  "archived_raw_response_sha256": "77b60f7438b6dddab638e899b13d6777db86deb72fc7288815c4f4769034cf96",
+  "archived_raw_response_bytes": 1219,
+  "archived_explanation_sha256": "77b60f7438b6dddab638e899b13d6777db86deb72fc7288815c4f4769034cf96",
+  "archived_agent_run_sha256": "a56ce5d9a65c3cdf9b0b1f6a62978a857b0f753adce1315712f9fef4df861812",
+  "archived_evaluation_sha256": "c61b1ae0c5c106276227542151cf8168f1534161083600e5d9d64ceb94a11999",
+  "archived_score_sha256": "b6de29b9c7e2866e1909a799b9e6f455b5cb1e3a28cef399e00c43362ae5e54d",
+  "replacement_capture": {
+    "case_id": "threshold-value-replacement",
+    "config_id": "config-a",
+    "path": "benchmarks/agent_quality/cases/threshold-value-replacement/captured/config-a"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-invalidated-capture/v1",
+  "status": "invalidated-protocol-not-precommitted-v1",
+  "reason_code": "protocol-config-not-precommitted",
+  "config_id": "config-a",
+  "original_case_id": "error-swallow-to-raise",
+  "corrected_case_id": "error-swallow-to-raise",
+  "reason": "This capture's benchmark_protocol_commit references 7b9d99ba6ecfae6dc53620362e87e776655ecb3b, the earliest commit at which both this case's content and the capture harness (agent_harness.py) were simultaneously present in this repository's history. A later, stricter independent review found that agent_harness.recompute_benchmark_protocol_commit_verification only ever checked full prompt-package content-equality, never whether the referenced commit also carried benchmarks/agent_quality/protocol_registry.json (the predeclared config-a/config-b registry) -- so a capture's provider/model/agent-type/tool/invocation-kind was never actually cross-checked against a committed configuration, only its prompt bytes. protocol_registry.json did not exist at all until the protocol-freeze commit 5c7289b, strictly after this capture was generated and ingested. Content-equality with the currently-committed protocol still holds (verified independently), but the registry/config was not itself committed before this capture, so it fails the strengthened verification. Withdrawn and replaced with a fresh capture generated after 5c7289b, which does carry a committed protocol_registry.json.",
+  "discovered_by": {
+    "actor_type": "agent",
+    "actor": "GitHub Copilot CLI (parent coordinating session)",
+    "method": "Review of recompute_benchmark_protocol_commit_verification's implementation found it never loaded or checked protocol_registry.json at the referenced commit, only the prompt-package manifest; re-running the strengthened check against this capture's referenced commit confirmed no registry existed there.",
+    "timestamp": "2026-09-02T07:00:00Z"
+  },
+  "original_prompt_package_digest": "93a9aa99855052aeac5a2c5a120185732f48b280b5cfddd231704d5394ecba8f",
+  "archived_raw_response_sha256": "73b7d1040b3839d1c635477570bd6831695086e323fc1064d08a2319f18336c4",
+  "archived_raw_response_bytes": 1106,
+  "archived_explanation_sha256": "73b7d1040b3839d1c635477570bd6831695086e323fc1064d08a2319f18336c4",
+  "archived_agent_run_sha256": "98e2ce269213f7c798493d13980ee32baa5fa7a2271a5a226580d27cec3ceab3",
+  "archived_evaluation_sha256": "477342099723cfdb578d1bfd5e146245f8180d0905487351c664d825c6377002",
+  "archived_score_sha256": "6970978af96b254da3b19eb37081326f0378355962e116a34850615ac6a93b90",
+  "replacement_capture": {
+    "case_id": "error-swallow-to-raise",
+    "config_id": "config-a",
+    "path": "benchmarks/agent_quality/cases/error-swallow-to-raise/captured/config-a"
+  }
+}

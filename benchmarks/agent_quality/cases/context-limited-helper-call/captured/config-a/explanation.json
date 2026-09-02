@@ -1,0 +1,28 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "process_order now calls validate with strict mode enabled before submitting the order.",
+  "items": [
+    {
+      "id": "enable-strict-validation-call",
+      "kind": "behavioral",
+      "title": "Enabling strict validation in process_order",
+      "confidence": "extracted",
+      "before": "process_order called validate(order, strict=False) before submit(order).",
+      "after": "process_order calls validate(order, strict=True) before submit(order).",
+      "citations": [
+        "line_64f66366b63e75ecfb5c4355",
+        "line_e632edd98ca6bad6e0e380f1"
+      ]
+    }
+  ],
+  "coverage_owners": [
+    {
+      "evidence_id": "line_64f66366b63e75ecfb5c4355",
+      "owner_id": "enable-strict-validation-call"
+    },
+    {
+      "evidence_id": "line_e632edd98ca6bad6e0e380f1",
+      "owner_id": "enable-strict-validation-call"
+    }
+  ]
+}

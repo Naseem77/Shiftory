@@ -1,0 +1,80 @@
+{
+  "accounting": {
+    "citation_count": 10,
+    "hunk_coverage_ratio": 1.0,
+    "hunk_covered": 2,
+    "hunk_total": 2,
+    "line_coverage_ratio": 1.0,
+    "line_owned": 10,
+    "line_total": 10,
+    "span_coverage_ratio": 1.0,
+    "span_owned": 2,
+    "span_total": 2,
+    "unit_coverage_ratio": 1.0,
+    "unit_covered": 2,
+    "unit_total": 2
+  },
+  "audit_status": {
+    "actor_type": "agent",
+    "adjudicator": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+    "disagreement_count": 4,
+    "disagreement_rate": 0.4444444444444444,
+    "mode": "dual_audit"
+  },
+  "candidate_id": "captured_config_a",
+  "candidate_kind": "captured_real_run",
+  "case_id": "cross-file-validation-edit",
+  "claim_factuality": {
+    "assessable_count": 9,
+    "assessable_weight": 32,
+    "ratio": 1.0,
+    "supported_count": 9,
+    "supported_weight": 32
+  },
+  "contradicted_claims": {
+    "claim_ids": [],
+    "count": 0,
+    "weight": 0
+  },
+  "explanation_sha256": "16b5e4def2a4583529adbfb6974f7870418be7b9b1ccf41ac68cf5d74a618fe7",
+  "gate": null,
+  "required_behavior_coverage": {
+    "ratio": 1.0,
+    "satisfied_count": 3,
+    "satisfied_ids": [
+      "not-a-behavior-preserving-move",
+      "validate-email-removed-from-validators",
+      "weaker-validate-email-added-to-utils"
+    ],
+    "total_count": 3
+  },
+  "rubric_match_heuristic": null,
+  "schema": "shiftory.benchmark-agent-quality-score/v1",
+  "semantic_omissions": {
+    "missed_count": 0,
+    "missed_ids": [],
+    "missed_weight": 0
+  },
+  "structural_failure": null,
+  "uncertainty_honesty": {
+    "checked": 9,
+    "violation_ids": [
+      "ca-1",
+      "ca-3",
+      "ca-4",
+      "ca-7"
+    ],
+    "violations": 4
+  },
+  "unsupported_claims": {
+    "claim_ids": [],
+    "count": 0,
+    "weight": 0
+  },
+  "usefulness_relevance": {
+    "ambiguous_unresolvable_claims": 0,
+    "item_count": 1,
+    "non_semantic_claims": 0,
+    "useful_count": 3
+  }
+}

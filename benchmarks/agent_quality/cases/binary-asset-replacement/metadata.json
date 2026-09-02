@@ -1,0 +1,19 @@
+{
+  "schema": "shiftory.offline-git-fixture/v1",
+  "id": "binary-asset-replacement",
+  "description": "A small binary asset file's raw bytes are replaced between base and head; there is no textual diff to describe what changed within the file.",
+  "history": "history.fast-import",
+  "import_ref": "refs/heads/main",
+  "marks": {
+    "base": 1,
+    "head": 2
+  },
+  "expected_commits": {
+    "base": "d7468c1ce6e118acc33d2016bc20e30b331c7b7f",
+    "head": "f66dfed41ca73b2b2a023f1b3186957c14ade889"
+  },
+  "expected_inventory": {
+    "files": 1
+  },
+  "network_required": false
+}

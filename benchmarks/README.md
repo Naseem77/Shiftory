@@ -51,3 +51,12 @@ allowed, but its artifacts are never release reports. Publication requires a
 clean committed Shiftory worktree and binds every report to that commit's
 implementation manifest, package/dependency details, runner digest, and golden
 input digest. Do not hand-edit generated reports.
+
+## Agent-quality benchmark
+
+[`agent_quality/`](agent_quality/README.md) is a separate layer that scores
+real, agent-authored explanations against hand-audited semantic rubrics; it
+never modifies anything described above. See its
+[README](agent_quality/README.md) and the
+[agent-quality benchmark methodology](../docs/agent-quality-benchmark-methodology.md).
+

@@ -1,0 +1,11 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-case/v1",
+  "id": "cross-file-validation-edit",
+  "version": 3,
+  "category": "cross-file-definition-change",
+  "description": "The function validate_email is removed from validators.py. A different file, utils.py, gains a new function definition also named validate_email.",
+  "fixture": {
+    "history": "history.fast-import",
+    "metadata": "metadata.json"
+  }
+}

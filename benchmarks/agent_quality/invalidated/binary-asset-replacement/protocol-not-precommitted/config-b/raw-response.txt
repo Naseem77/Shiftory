@@ -1,0 +1,23 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "Replaces the raw binary contents of icon.dat with updated asset bytes.",
+  "items": [
+    {
+      "id": "replace-icon-asset",
+      "kind": "behavioral",
+      "title": "Replace binary icon asset",
+      "confidence": "extracted",
+      "absence": null,
+      "before": "The binary file icon.dat contains original raw byte sequence (blob 85025d98693fe77b700bcf818dfd8fcd13c4e961).",
+      "after": "The binary file icon.dat contains updated raw byte sequence (blob 4bf941a61efbd197352e63126c8b27701fe8ff3c).",
+      "statement": "The binary file icon.dat is updated with new raw bytes.",
+      "citations": []
+    }
+  ],
+  "coverage_owners": [
+    {
+      "evidence_id": "unit_522aa1f2f4bedd75c4d3005e",
+      "owner_id": "replace-icon-asset"
+    }
+  ]
+}

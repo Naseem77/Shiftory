@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shiftory.dev/schemas/benchmark-agent-quality-score-v1.json",
+  "title": "Shiftory agent-quality deterministic score",
+  "description": "Pure arithmetic aggregation over one audited candidate-evaluation-v1 record (plus, separately, an optional non-authoritative lexical heuristic). Never claims to automate semantic judgment: every semantic section here is a deterministic summary of human/agent-authored claim verdicts, not a re-derivation of them. Fields are null (not zero/omitted) when the underlying candidate was structurally invalid -- see structural_failure.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "case_id", "candidate_id", "candidate_kind", "explanation_sha256"],
+  "properties": {
+    "schema": {"const": "shiftory.benchmark-agent-quality-score/v1"},
+    "case_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"},
+    "candidate_id": {"type": "string", "minLength": 1, "maxLength": 80},
+    "candidate_kind": {
+      "enum": ["captured_real_run", "synthetic_baseline", "synthetic_adversarial"]
+    },
+    "explanation_sha256": {"type": ["string", "null"], "pattern": "^([0-9a-f]{64})?$"},
+    "accounting": {"type": ["object", "null"]},
+    "claim_factuality": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "supported_weight": {"type": "number", "minimum": 0},
+        "assessable_weight": {"type": "number", "minimum": 0},
+        "supported_count": {"type": "integer", "minimum": 0},
+        "assessable_count": {"type": "integer", "minimum": 0},
+        "ratio": {"type": ["number", "null"], "minimum": 0, "maximum": 1}
+      }
+    },
+    "unsupported_claims": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "count": {"type": "integer", "minimum": 0},
+        "weight": {"type": "number", "minimum": 0},
+        "claim_ids": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "contradicted_claims": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "count": {"type": "integer", "minimum": 0},
+        "weight": {"type": "number", "minimum": 0},
+        "claim_ids": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "required_behavior_coverage": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "satisfied_count": {"type": "integer", "minimum": 0},
+        "total_count": {"type": "integer", "minimum": 0},
+        "ratio": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "satisfied_ids": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "semantic_omissions": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "missed_count": {"type": "integer", "minimum": 0},
+        "missed_weight": {"type": "number", "minimum": 0},
+        "missed_ids": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "uncertainty_honesty": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "checked": {"type": "integer", "minimum": 0},
+        "violations": {"type": "integer", "minimum": 0},
+        "violation_ids": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "usefulness_relevance": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "useful_count": {"type": "integer", "minimum": 0},
+        "item_count": {"type": "integer", "minimum": 0},
+        "non_semantic_claims": {"type": "integer", "minimum": 0},
+        "ambiguous_unresolvable_claims": {"type": "integer", "minimum": 0}
+      }
+    },
+    "rubric_match_heuristic": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "caveat": {"const": "Non-authoritative literal-alias heuristic; not evidence of semantic correctness and never used to compute the sections above."},
+        "hits": {"type": "integer", "minimum": 0},
+        "misses": {"type": "integer", "minimum": 0},
+        "matched_fact_ids": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "audit_status": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "mode": {"enum": ["dual_audit", "provisional_single_audit"]},
+        "actor_type": {"enum": ["human", "agent", "mixed"]},
+        "disagreement_count": {"type": "integer", "minimum": 0},
+        "disagreement_rate": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "adjudicator": {"type": ["string", "null"]}
+      }
+    },
+    "gate": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "pass": {"type": "boolean"},
+        "reasons": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "structural_failure": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "reason": {"type": "string"},
+        "raw_response_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "protocol_violation": {"type": "string"}
+      }
+    }
+  }
+}

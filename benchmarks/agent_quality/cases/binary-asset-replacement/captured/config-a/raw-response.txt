@@ -1,0 +1,42 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "The change replaces the binary contents of icon.dat. The evidence confirms a blob swap but does not decode the asset, so downstream runtime effects are unresolved from this evidence alone.",
+  "items": [
+    {
+      "id": "item-icon-dat-binary-replaced",
+      "kind": "structural",
+      "title": "Binary asset payload was replaced",
+      "statement": "Before, icon.dat pointed to blob 85025d98693fe77b700bcf818dfd8fcd13c4e961; after, it points to blob 4bf941a61efbd197352e63126c8b27701fe8ff3c, indicating a full binary payload replacement.",
+      "confidence": "extracted",
+      "citations": [
+        {
+          "id": "unit_522aa1f2f4bedd75c4d3005e"
+        },
+        {
+          "id": "fact_32314a96f2b283ccc2da5503"
+        },
+        {
+          "id": "fact_711411314f61102f006d3668"
+        }
+      ]
+    },
+    {
+      "id": "item-runtime-effect-unresolved",
+      "kind": "unresolved",
+      "title": "Decoded semantic effect of the asset swap is not available",
+      "statement": "The evidence classifies the change as binary-only with no line-level source context, so the specific visual or functional behavior change produced by the new asset cannot be resolved here.",
+      "confidence": "unresolved",
+      "citations": [
+        {
+          "id": "unit_522aa1f2f4bedd75c4d3005e"
+        }
+      ]
+    }
+  ],
+  "coverage_owners": [
+    {
+      "evidence_id": "unit_522aa1f2f4bedd75c4d3005e",
+      "owner_id": "item-icon-dat-binary-replaced"
+    }
+  ]
+}

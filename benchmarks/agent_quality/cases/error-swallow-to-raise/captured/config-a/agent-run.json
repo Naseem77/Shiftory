@@ -1,0 +1,76 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-agent-run/v2",
+  "case_id": "error-swallow-to-raise",
+  "candidate_id": "captured_config_a",
+  "provider": "openai (via GitHub Copilot CLI sub-agent)",
+  "model": {
+    "name": "gpt-5.3-codex",
+    "version": "unknown"
+  },
+  "agent_tool_version": "copilot-cli-1.0.80",
+  "evaluation_protocol": "Fresh, stateless GitHub Copilot CLI sub-agent (task tool, agent_type=general-purpose) given only this materialized prompt package directory (reconstructed from the committed protocol freeze) and instructed to run shiftory explain --graphora off against the fixture repository, follow SKILL.md, and write its final verified explanation verbatim to RAW_RESPONSE.",
+  "invocation": {
+    "kind": "copilot_task",
+    "agent_type": "general-purpose",
+    "configured_model": "gpt-5.3-codex",
+    "tool": "copilot-cli",
+    "tool_version": "1.0.80",
+    "orchestrator_agent_handle": {
+      "value": "recap2-esr-a",
+      "provenance": "caller_supplied_task_name_returned_as_runtime_handle",
+      "externally_verifiable": false
+    },
+    "generation_started_at_utc": null,
+    "generation_finished_at_utc": null,
+    "generation_timing_unavailable_reason": "The orchestrating session does not receive the sub-agent's internal start/end timestamps from the task tool API; only completion order and this function's own ingestion time are observed."
+  },
+  "capture_ingested_at_utc": "2026-09-02T07:12:37.820223+00:00",
+  "prompt_package_manifest": [
+    {
+      "path": "INSTRUCTIONS.md",
+      "sha256": "fcaedece84911bea6217bea59923cf5a85f0861897d3f74d4c998e8317908fa9"
+    },
+    {
+      "path": "SKILL.md",
+      "sha256": "0f7ddbe349e93b68924c2665f06e015114130083841702ce14c8c650b99c5be0"
+    },
+    {
+      "path": "case.json",
+      "sha256": "562ff0d06da0f75796a9c062895afe14bf7628eb19f0e47b5b52335ff9cd1136"
+    },
+    {
+      "path": "repository/config.py",
+      "sha256": "31be1bcc8b44143b12a89fda2967e14d17d70e760064769e5bd5378e6d8833f9"
+    }
+  ],
+  "prompt_package_digest": "93a9aa99855052aeac5a2c5a120185732f48b280b5cfddd231704d5394ecba8f",
+  "evidence_sha256": "5b3e6cbf56e30425ce5055379d462a74728897d42c44d24cb02d3345d51da1ae",
+  "engine_identity": {
+    "component": "shiftory",
+    "verification_method": "git_commit",
+    "value": "f9c250a59b3d9e3342c281d42e89aa0e32f347f3"
+  },
+  "benchmark_protocol_commit": {
+    "commit": "5c7289bd8e540317ce45d4407044c5c846698ecb",
+    "verification_method": "full_manifest_and_protocol_registry_match",
+    "verified": true,
+    "note": "Verified: commit 5c7289bd8e540317ce45d4407044c5c846698ecb's full committed protocol -- case.json, SKILL.md, INSTRUCTIONS.md text, the reconstructed fixture repository, AND protocol_registry.json's config/case-revision/digest declarations -- reconstructs content that matches this capture's own recorded prompt_package_manifest and declared provider/model/agent-type/tool/invocation-kind path-for-path and field-for-field. This case was previously bound to 7b9d99b, which lacks a committed protocol_registry.json and therefore fails the strengthened check; this is the protocol-freeze commit, committed before this capture was generated -- see docs/agent-quality-benchmark-methodology.md's 'Protocol freeze and recapture'."
+  },
+  "generator_access_profile": {
+    "repository_access": true,
+    "filesystem_scope": "Runs in the same Copilot CLI environment as the orchestrating session; has general bash/file-system tool access and was instructed, but not sandboxed, to stay within the prompt package directory.",
+    "network_access": false,
+    "tool_access": [
+      "bash",
+      "view",
+      "edit",
+      "grep",
+      "glob"
+    ]
+  },
+  "isolation_method": "protocol",
+  "raw_response_sha256": "bf1555a74bdd3c7063fbf8b64cf4dff0c363018f1868b449c17e2eaa882467c7",
+  "raw_response_bytes": 1136,
+  "truncated": false,
+  "migrated_from_v1_sha256": null
+}

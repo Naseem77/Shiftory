@@ -1,0 +1,40 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "The retry configuration in fetch_with_retry was changed to use a shorter per-attempt timeout and more retry attempts.",
+  "items": [
+    {
+      "id": "item_retry_config_changed",
+      "kind": "behavioral",
+      "title": "fetch_with_retry adjusts timeout and retry attempt thresholds",
+      "confidence": "extracted",
+      "before": "fetch_with_retry configured timeout_seconds to 30 and max_attempts to 1.",
+      "after": "fetch_with_retry configures timeout_seconds to 5 and max_attempts to 4.",
+      "citations": [
+        {
+          "id": "source_a14ea6cf1eeef1573ed8855d"
+        },
+        {
+          "id": "source_80d49b9bcd5c7145d90c4a38"
+        }
+      ]
+    }
+  ],
+  "coverage_owners": [
+    {
+      "evidence_id": "line_bb015cfee40312bfd8fb5b55",
+      "owner_id": "item_retry_config_changed"
+    },
+    {
+      "evidence_id": "line_46fd66b2be752ae32924a636",
+      "owner_id": "item_retry_config_changed"
+    },
+    {
+      "evidence_id": "line_ef3a2e79e8b24ae75a615833",
+      "owner_id": "item_retry_config_changed"
+    },
+    {
+      "evidence_id": "line_cb5e9cae2000dffb76b88172",
+      "owner_id": "item_retry_config_changed"
+    }
+  ]
+}

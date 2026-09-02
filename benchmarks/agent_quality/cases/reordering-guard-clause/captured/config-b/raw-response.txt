@@ -1,0 +1,28 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "In `app.py`, `lookup(user_id)` is now executed before the `if user_id is None` guard check in `get_active_user`.",
+  "items": [
+    {
+      "id": "lookup-before-guard-clause",
+      "kind": "behavioral",
+      "title": "Call lookup before checking for None user ID",
+      "confidence": "inferred",
+      "before": "When `user_id` is `None`, `get_active_user` returned `None` immediately without invoking `lookup(user_id)`.",
+      "after": "`get_active_user` invokes `lookup(user_id)` unconditionally before evaluating whether `user_id is None`.",
+      "citations": [
+        "source_47367c0a1408b9af64026e06",
+        "source_3f8b438b4293abc650f2981e"
+      ]
+    }
+  ],
+  "coverage_owners": [
+    {
+      "evidence_id": "line_7f36f904827cbea0090230d5",
+      "owner_id": "lookup-before-guard-clause"
+    },
+    {
+      "evidence_id": "line_c8df1ee0c532a1578df4aaaa",
+      "owner_id": "lookup-before-guard-clause"
+    }
+  ]
+}

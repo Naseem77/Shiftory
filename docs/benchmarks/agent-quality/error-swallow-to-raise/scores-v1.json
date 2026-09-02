@@ -1,0 +1,158 @@
+{
+  "candidates": [
+    {
+      "accounting": {
+        "citation_count": 3,
+        "hunk_coverage_ratio": 1.0,
+        "hunk_covered": 1,
+        "hunk_total": 1,
+        "line_coverage_ratio": 1.0,
+        "line_owned": 2,
+        "line_total": 2,
+        "span_coverage_ratio": 1.0,
+        "span_owned": 2,
+        "span_total": 2,
+        "unit_coverage_ratio": 1.0,
+        "unit_covered": 1,
+        "unit_total": 1
+      },
+      "audit_status": null,
+      "candidate_id": "synthetic_baseline",
+      "candidate_kind": "synthetic_baseline",
+      "case_id": "error-swallow-to-raise",
+      "claim_factuality": {
+        "assessable_count": 3,
+        "assessable_weight": 11,
+        "ratio": 1.0,
+        "supported_count": 3,
+        "supported_weight": 11
+      },
+      "contradicted_claims": {
+        "claim_ids": [],
+        "count": 0,
+        "weight": 0
+      },
+      "explanation_sha256": "4d3351b7cfda866f2a3246ef3a801585ec04eb74302cf20494bd22db8fd1e520",
+      "gate": {
+        "pass": true,
+        "reasons": []
+      },
+      "required_behavior_coverage": {
+        "ratio": 1.0,
+        "satisfied_count": 3,
+        "satisfied_ids": [
+          "callers-impact-unclear",
+          "malformed-config-now-raises",
+          "success-path-unchanged"
+        ],
+        "total_count": 3
+      },
+      "rubric_match_heuristic": null,
+      "schema": "shiftory.benchmark-agent-quality-score/v1",
+      "semantic_omissions": {
+        "missed_count": 0,
+        "missed_ids": [],
+        "missed_weight": 0
+      },
+      "structural_failure": null,
+      "uncertainty_honesty": {
+        "checked": 3,
+        "violation_ids": [],
+        "violations": 0
+      },
+      "unsupported_claims": {
+        "claim_ids": [],
+        "count": 0,
+        "weight": 0
+      },
+      "usefulness_relevance": {
+        "ambiguous_unresolvable_claims": 0,
+        "item_count": 3,
+        "non_semantic_claims": 0,
+        "useful_count": 3
+      }
+    },
+    {
+      "accounting": {
+        "citation_count": 2,
+        "hunk_coverage_ratio": 1.0,
+        "hunk_covered": 1,
+        "hunk_total": 1,
+        "line_coverage_ratio": 1.0,
+        "line_owned": 2,
+        "line_total": 2,
+        "span_coverage_ratio": 1.0,
+        "span_owned": 2,
+        "span_total": 2,
+        "unit_coverage_ratio": 1.0,
+        "unit_covered": 1,
+        "unit_total": 1
+      },
+      "audit_status": null,
+      "candidate_id": "synthetic_adversarial",
+      "candidate_kind": "synthetic_adversarial",
+      "case_id": "error-swallow-to-raise",
+      "claim_factuality": {
+        "assessable_count": 1,
+        "assessable_weight": 5,
+        "ratio": 0.0,
+        "supported_count": 0,
+        "supported_weight": 0
+      },
+      "contradicted_claims": {
+        "claim_ids": [
+          "c-config-still-safe"
+        ],
+        "count": 1,
+        "weight": 5
+      },
+      "explanation_sha256": "949e51b94120c0c98b4cf96f390b591f8352755bbd64f8aa9f2895b124fb4b86",
+      "gate": {
+        "pass": false,
+        "reasons": [
+          "1 contradicted claim(s)",
+          "3 missed required fact(s)",
+          "1 uncertainty-honesty violation(s)"
+        ]
+      },
+      "required_behavior_coverage": {
+        "ratio": 0.0,
+        "satisfied_count": 0,
+        "satisfied_ids": [],
+        "total_count": 3
+      },
+      "rubric_match_heuristic": null,
+      "schema": "shiftory.benchmark-agent-quality-score/v1",
+      "semantic_omissions": {
+        "missed_count": 3,
+        "missed_ids": [
+          "callers-impact-unclear",
+          "malformed-config-now-raises",
+          "success-path-unchanged"
+        ],
+        "missed_weight": 11
+      },
+      "structural_failure": null,
+      "uncertainty_honesty": {
+        "checked": 1,
+        "violation_ids": [
+          "c-config-still-safe"
+        ],
+        "violations": 1
+      },
+      "unsupported_claims": {
+        "claim_ids": [],
+        "count": 0,
+        "weight": 0
+      },
+      "usefulness_relevance": {
+        "ambiguous_unresolvable_claims": 0,
+        "item_count": 2,
+        "non_semantic_claims": 0,
+        "useful_count": 0
+      }
+    }
+  ],
+  "case_id": "error-swallow-to-raise",
+  "schema": "shiftory.benchmark-agent-quality-scores/v1"
+}

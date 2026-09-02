@@ -1,0 +1,158 @@
+{
+  "candidates": [
+    {
+      "accounting": {
+        "citation_count": 3,
+        "hunk_coverage_ratio": 1.0,
+        "hunk_covered": 0,
+        "hunk_total": 0,
+        "line_coverage_ratio": 1.0,
+        "line_owned": 0,
+        "line_total": 0,
+        "span_coverage_ratio": 1.0,
+        "span_owned": 0,
+        "span_total": 0,
+        "unit_coverage_ratio": 1.0,
+        "unit_covered": 1,
+        "unit_total": 1
+      },
+      "audit_status": null,
+      "candidate_id": "synthetic_baseline",
+      "candidate_kind": "synthetic_baseline",
+      "case_id": "binary-asset-replacement",
+      "claim_factuality": {
+        "assessable_count": 3,
+        "assessable_weight": 12,
+        "ratio": 1.0,
+        "supported_count": 3,
+        "supported_weight": 12
+      },
+      "contradicted_claims": {
+        "claim_ids": [],
+        "count": 0,
+        "weight": 0
+      },
+      "explanation_sha256": "a86a1379ddf77f21c242a98febbe276946ef84f4f5c4829d5322cfb7c3c50374",
+      "gate": {
+        "pass": true,
+        "reasons": []
+      },
+      "required_behavior_coverage": {
+        "ratio": 1.0,
+        "satisfied_count": 3,
+        "satisfied_ids": [
+          "binary-content-replaced",
+          "content-meaning-not-available",
+          "mode-unchanged"
+        ],
+        "total_count": 3
+      },
+      "rubric_match_heuristic": null,
+      "schema": "shiftory.benchmark-agent-quality-score/v1",
+      "semantic_omissions": {
+        "missed_count": 0,
+        "missed_ids": [],
+        "missed_weight": 0
+      },
+      "structural_failure": null,
+      "uncertainty_honesty": {
+        "checked": 3,
+        "violation_ids": [],
+        "violations": 0
+      },
+      "unsupported_claims": {
+        "claim_ids": [],
+        "count": 0,
+        "weight": 0
+      },
+      "usefulness_relevance": {
+        "ambiguous_unresolvable_claims": 0,
+        "item_count": 3,
+        "non_semantic_claims": 0,
+        "useful_count": 3
+      }
+    },
+    {
+      "accounting": {
+        "citation_count": 2,
+        "hunk_coverage_ratio": 1.0,
+        "hunk_covered": 0,
+        "hunk_total": 0,
+        "line_coverage_ratio": 1.0,
+        "line_owned": 0,
+        "line_total": 0,
+        "span_coverage_ratio": 1.0,
+        "span_owned": 0,
+        "span_total": 0,
+        "unit_coverage_ratio": 1.0,
+        "unit_covered": 1,
+        "unit_total": 1
+      },
+      "audit_status": null,
+      "candidate_id": "synthetic_adversarial",
+      "candidate_kind": "synthetic_adversarial",
+      "case_id": "binary-asset-replacement",
+      "claim_factuality": {
+        "assessable_count": 1,
+        "assessable_weight": 5,
+        "ratio": 0.0,
+        "supported_count": 0,
+        "supported_weight": 0
+      },
+      "contradicted_claims": {
+        "claim_ids": [],
+        "count": 0,
+        "weight": 0
+      },
+      "explanation_sha256": "196351e79e05739d572952ff74af5210c8d5ee77e42903da3462aae89607c592",
+      "gate": {
+        "pass": false,
+        "reasons": [
+          "1 unsupported claim(s)",
+          "3 missed required fact(s)",
+          "1 uncertainty-honesty violation(s)"
+        ]
+      },
+      "required_behavior_coverage": {
+        "ratio": 0.0,
+        "satisfied_count": 0,
+        "satisfied_ids": [],
+        "total_count": 3
+      },
+      "rubric_match_heuristic": null,
+      "schema": "shiftory.benchmark-agent-quality-score/v1",
+      "semantic_omissions": {
+        "missed_count": 3,
+        "missed_ids": [
+          "binary-content-replaced",
+          "content-meaning-not-available",
+          "mode-unchanged"
+        ],
+        "missed_weight": 12
+      },
+      "structural_failure": null,
+      "uncertainty_honesty": {
+        "checked": 1,
+        "violation_ids": [
+          "c-logo-updated"
+        ],
+        "violations": 1
+      },
+      "unsupported_claims": {
+        "claim_ids": [
+          "c-logo-updated"
+        ],
+        "count": 1,
+        "weight": 5
+      },
+      "usefulness_relevance": {
+        "ambiguous_unresolvable_claims": 0,
+        "item_count": 2,
+        "non_semantic_claims": 0,
+        "useful_count": 0
+      }
+    }
+  ],
+  "case_id": "binary-asset-replacement",
+  "schema": "shiftory.benchmark-agent-quality-scores/v1"
+}

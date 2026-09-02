@@ -1,0 +1,158 @@
+{
+  "candidates": [
+    {
+      "accounting": {
+        "citation_count": 3,
+        "hunk_coverage_ratio": 1.0,
+        "hunk_covered": 1,
+        "hunk_total": 1,
+        "line_coverage_ratio": 1.0,
+        "line_owned": 2,
+        "line_total": 2,
+        "span_coverage_ratio": 1.0,
+        "span_owned": 2,
+        "span_total": 2,
+        "unit_coverage_ratio": 1.0,
+        "unit_covered": 1,
+        "unit_total": 1
+      },
+      "audit_status": null,
+      "candidate_id": "synthetic_baseline",
+      "candidate_kind": "synthetic_baseline",
+      "case_id": "context-limited-helper-call",
+      "claim_factuality": {
+        "assessable_count": 3,
+        "assessable_weight": 11,
+        "ratio": 1.0,
+        "supported_count": 3,
+        "supported_weight": 11
+      },
+      "contradicted_claims": {
+        "claim_ids": [],
+        "count": 0,
+        "weight": 0
+      },
+      "explanation_sha256": "ec3cf19a5e8a0fa82dfc85cfc37ff698865b2b7d9003d70307bf9878242debc6",
+      "gate": {
+        "pass": true,
+        "reasons": []
+      },
+      "required_behavior_coverage": {
+        "ratio": 1.0,
+        "satisfied_count": 3,
+        "satisfied_ids": [
+          "strict-flag-flips-to-true",
+          "submit-call-unchanged",
+          "validate-implementation-not-visible"
+        ],
+        "total_count": 3
+      },
+      "rubric_match_heuristic": null,
+      "schema": "shiftory.benchmark-agent-quality-score/v1",
+      "semantic_omissions": {
+        "missed_count": 0,
+        "missed_ids": [],
+        "missed_weight": 0
+      },
+      "structural_failure": null,
+      "uncertainty_honesty": {
+        "checked": 3,
+        "violation_ids": [],
+        "violations": 0
+      },
+      "unsupported_claims": {
+        "claim_ids": [],
+        "count": 0,
+        "weight": 0
+      },
+      "usefulness_relevance": {
+        "ambiguous_unresolvable_claims": 0,
+        "item_count": 3,
+        "non_semantic_claims": 0,
+        "useful_count": 3
+      }
+    },
+    {
+      "accounting": {
+        "citation_count": 2,
+        "hunk_coverage_ratio": 1.0,
+        "hunk_covered": 1,
+        "hunk_total": 1,
+        "line_coverage_ratio": 1.0,
+        "line_owned": 2,
+        "line_total": 2,
+        "span_coverage_ratio": 1.0,
+        "span_owned": 2,
+        "span_total": 2,
+        "unit_coverage_ratio": 1.0,
+        "unit_covered": 1,
+        "unit_total": 1
+      },
+      "audit_status": null,
+      "candidate_id": "synthetic_adversarial",
+      "candidate_kind": "synthetic_adversarial",
+      "case_id": "context-limited-helper-call",
+      "claim_factuality": {
+        "assessable_count": 1,
+        "assessable_weight": 4,
+        "ratio": 0.0,
+        "supported_count": 0,
+        "supported_weight": 0
+      },
+      "contradicted_claims": {
+        "claim_ids": [],
+        "count": 0,
+        "weight": 0
+      },
+      "explanation_sha256": "899de93e98ecf6d61226409f83aca6558680932164290201003408b885ee5cb7",
+      "gate": {
+        "pass": false,
+        "reasons": [
+          "1 unsupported claim(s)",
+          "3 missed required fact(s)",
+          "1 uncertainty-honesty violation(s)"
+        ]
+      },
+      "required_behavior_coverage": {
+        "ratio": 0.0,
+        "satisfied_count": 0,
+        "satisfied_ids": [],
+        "total_count": 3
+      },
+      "rubric_match_heuristic": null,
+      "schema": "shiftory.benchmark-agent-quality-score/v1",
+      "semantic_omissions": {
+        "missed_count": 3,
+        "missed_ids": [
+          "strict-flag-flips-to-true",
+          "submit-call-unchanged",
+          "validate-implementation-not-visible"
+        ],
+        "missed_weight": 11
+      },
+      "structural_failure": null,
+      "uncertainty_honesty": {
+        "checked": 1,
+        "violation_ids": [
+          "c-stricter-rejection"
+        ],
+        "violations": 1
+      },
+      "unsupported_claims": {
+        "claim_ids": [
+          "c-stricter-rejection"
+        ],
+        "count": 1,
+        "weight": 4
+      },
+      "usefulness_relevance": {
+        "ambiguous_unresolvable_claims": 0,
+        "item_count": 2,
+        "non_semantic_claims": 0,
+        "useful_count": 0
+      }
+    }
+  ],
+  "case_id": "context-limited-helper-call",
+  "schema": "shiftory.benchmark-agent-quality-scores/v1"
+}

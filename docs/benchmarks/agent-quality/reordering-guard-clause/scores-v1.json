@@ -158,7 +158,7 @@
     },
     {
       "accounting": {
-        "citation_count": 2,
+        "citation_count": 0,
         "hunk_coverage_ratio": 1.0,
         "hunk_covered": 1,
         "hunk_total": 1,
@@ -175,26 +175,26 @@
       "audit_status": {
         "actor_type": "agent",
         "adjudicator": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
-        "disagreement_count": 3,
-        "disagreement_rate": 0.75,
+        "disagreement_count": 1,
+        "disagreement_rate": 0.1111111111111111,
         "mode": "dual_audit"
       },
       "candidate_id": "captured_config_a",
       "candidate_kind": "captured_real_run",
       "case_id": "reordering-guard-clause",
       "claim_factuality": {
-        "assessable_count": 4,
-        "assessable_weight": 18,
-        "ratio": 0.7777777777777778,
-        "supported_count": 3,
-        "supported_weight": 14
+        "assessable_count": 8,
+        "assessable_weight": 34,
+        "ratio": 1.0,
+        "supported_count": 8,
+        "supported_weight": 34
       },
       "contradicted_claims": {
         "claim_ids": [],
         "count": 0,
         "weight": 0
       },
-      "explanation_sha256": "664b4730f53c92f884e5a83a2751a9702a4440abb376788328016ff7b66e622e",
+      "explanation_sha256": "e7cd052a887652348d7287e277213c9e9b462b83782276b75873b884c2d28e4f",
       "gate": null,
       "required_behavior_coverage": {
         "ratio": 0.3333333333333333,
@@ -216,101 +216,51 @@
       },
       "structural_failure": null,
       "uncertainty_honesty": {
-        "checked": 4,
+        "checked": 9,
         "violation_ids": [
-          "ca-4"
+          "ca-1",
+          "ca-2",
+          "ca-4",
+          "ca-5",
+          "ca-7",
+          "ca-9"
         ],
-        "violations": 1
+        "violations": 6
       },
       "unsupported_claims": {
-        "claim_ids": [
-          "ca-4"
-        ],
-        "count": 1,
-        "weight": 4
+        "claim_ids": [],
+        "count": 0,
+        "weight": 0
       },
       "usefulness_relevance": {
         "ambiguous_unresolvable_claims": 0,
         "item_count": 1,
-        "non_semantic_claims": 0,
-        "useful_count": 3
+        "non_semantic_claims": 1,
+        "useful_count": 8
       }
     },
     {
-      "accounting": {
-        "citation_count": 2,
-        "hunk_coverage_ratio": 1.0,
-        "hunk_covered": 1,
-        "hunk_total": 1,
-        "line_coverage_ratio": 1.0,
-        "line_owned": 2,
-        "line_total": 2,
-        "span_coverage_ratio": 1.0,
-        "span_owned": 2,
-        "span_total": 2,
-        "unit_coverage_ratio": 1.0,
-        "unit_covered": 1,
-        "unit_total": 1
-      },
-      "audit_status": {
-        "actor_type": "agent",
-        "adjudicator": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
-        "disagreement_count": 0,
-        "disagreement_rate": 0.0,
-        "mode": "dual_audit"
-      },
+      "accounting": null,
+      "audit_status": null,
       "candidate_id": "captured_config_b",
       "candidate_kind": "captured_real_run",
       "case_id": "reordering-guard-clause",
-      "claim_factuality": {
-        "assessable_count": 4,
-        "assessable_weight": 18,
-        "ratio": 1.0,
-        "supported_count": 4,
-        "supported_weight": 18
-      },
-      "contradicted_claims": {
-        "claim_ids": [],
-        "count": 0,
-        "weight": 0
-      },
-      "explanation_sha256": "832e6ad6a6e8c495abb2f9a6b0ad6750e77dad3f7a7d2293b095f515a264fcca",
+      "claim_factuality": null,
+      "contradicted_claims": null,
+      "explanation_sha256": null,
       "gate": null,
-      "required_behavior_coverage": {
-        "ratio": 0.3333333333333333,
-        "satisfied_count": 1,
-        "satisfied_ids": [
-          "guard-moved-after-lookup"
-        ],
-        "total_count": 3
-      },
+      "required_behavior_coverage": null,
       "rubric_match_heuristic": null,
       "schema": "shiftory.benchmark-agent-quality-score/v1",
-      "semantic_omissions": {
-        "missed_count": 2,
-        "missed_ids": [
-          "lookup-none-implication-uncertain",
-          "return-contract-unchanged-for-resolved-lookups"
-        ],
-        "missed_weight": 6
+      "semantic_omissions": null,
+      "structural_failure": {
+        "protocol_violation": "raw response cites evidence ids that do not exist in the real evidence for this diff",
+        "raw_response_sha256": "8627e70a2b232421efd0b177c41ac2e9660be19817db5d8aad45de3405695538",
+        "reason": "The raw response is valid shiftory.explanation/v1-shaped JSON (passes the shallow schema check agent_harness.capture_result performs), but fails the real shiftory.explain.validator.validate_explanation structural check: its citations array references evidence ids (e.g. fact_* identifiers) that do not exist anywhere in this case's real, deterministically-generated evidence -- the model fabricated citation ids that look plausible but were never actually produced by shiftory analyze for this diff. This is a genuine accounting-level structural failure discovered by running the real validator, not a repair-worthy formatting issue; per protocol, the raw response and agent-run provenance are preserved exactly as first received, and no semantic score is synthesized for this candidate."
       },
-      "structural_failure": null,
-      "uncertainty_honesty": {
-        "checked": 4,
-        "violation_ids": [],
-        "violations": 0
-      },
-      "unsupported_claims": {
-        "claim_ids": [],
-        "count": 0,
-        "weight": 0
-      },
-      "usefulness_relevance": {
-        "ambiguous_unresolvable_claims": 0,
-        "item_count": 1,
-        "non_semantic_claims": 0,
-        "useful_count": 4
-      }
+      "uncertainty_honesty": null,
+      "unsupported_claims": null,
+      "usefulness_relevance": null
     }
   ],
   "case_id": "reordering-guard-clause",

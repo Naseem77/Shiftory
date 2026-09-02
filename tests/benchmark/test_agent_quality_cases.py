@@ -358,51 +358,72 @@ def test_synthetic_candidates_are_valid_and_discriminate(case_id: str) -> None:
 
 
 INVALIDATED_DIR = CASES_DIR.parent / "invalidated"
-INVALIDATED_CASE_IDS = (
-    sorted(path.name for path in INVALIDATED_DIR.iterdir() if path.is_dir())
-    if INVALIDATED_DIR.is_dir()
-    else []
+
+
+def _archive_groups() -> list[Path]:
+    """Every directory that directly contains config-a/invalidation.json and
+    config-b/invalidation.json -- either benchmarks/agent_quality/invalidated/
+    <case>/ itself (the original answer-leak archive layout) or a named
+    subdirectory of it, such as .../protocol-not-precommitted/ (used when a
+    case has more than one archive group, so two withdrawal reasons for the
+    same case can never share a directory or be confused with each other)."""
+    if not INVALIDATED_DIR.is_dir():
+        return []
+    groups = []
+    for path in INVALIDATED_DIR.rglob("*"):
+        if path.is_dir() and (path / "config-a" / "invalidation.json").is_file():
+            groups.append(path)
+    return sorted(groups)
+
+
+ARCHIVE_GROUPS = _archive_groups()
+
+
+@pytest.mark.parametrize(
+    "group_root", ARCHIVE_GROUPS, ids=lambda p: str(p.relative_to(INVALIDATED_DIR))
 )
-
-
-@pytest.mark.parametrize("case_id", INVALIDATED_CASE_IDS)
 def test_withdrawn_captures_are_hash_verified_and_never_officially_enumerated(
-    case_id: str,
+    group_root: Path,
 ) -> None:
-    """A withdrawn (answer-key-leak) capture must carry a schema-valid
+    """Every withdrawn-capture archive group must carry a schema-valid
     invalidated-capture-v1 record whose every referenced digest matches the
     actual archived bytes (proving the archive is an honest, unmodified copy
     of what was withdrawn -- see validation.py's validate_invalidated_capture),
     and the archive directory this lives under must never be reachable by
     runner.py's official case/candidate enumeration, so it can never be
     accidentally scored or published as a real result."""
-    case_root = INVALIDATED_DIR / case_id
     configs = sorted(
         path.name
-        for path in case_root.iterdir()
+        for path in group_root.iterdir()
         if path.is_dir() and (path / "invalidation.json").is_file()
     )
     assert configs == ["config-a", "config-b"], (
-        f"invalidated/{case_id} must contain exactly config-a and config-b, found {configs}"
+        f"{group_root} must contain exactly config-a and config-b, found {configs}"
     )
     for config in configs:
-        record = v.validate_invalidated_capture(case_root, config)
-        assert record["status"] == "invalidated-answer-leak-v1"
+        record = v.validate_invalidated_capture(group_root, config)
+        assert record["status"] in (
+            "invalidated-answer-leak-v1",
+            "invalidated-protocol-not-precommitted-v1",
+        )
         replacement = record["replacement_capture"]
         # The replacement must be a currently-official case/config, never
         # pointing back at another withdrawn archive.
         assert replacement["case_id"] in CASE_IDS, (
-            f"invalidated/{case_id}/{config}'s replacement_capture.case_id "
+            f"{group_root}/{config}'s replacement_capture.case_id "
             f"{replacement['case_id']!r} is not an official case"
         )
         replacement_path = CASES_DIR.parent.parent.parent / replacement["path"]
         assert replacement_path.is_dir(), (
-            f"invalidated/{case_id}/{config}'s replacement_capture.path does not exist on disk"
+            f"{group_root}/{config}'s replacement_capture.path does not exist on disk"
         )
         # The withdrawn raw response must not be byte-identical to the
         # official replacement's explanation -- if it were, withdrawal would
         # have accomplished nothing (this also incidentally proves the
-        # replacement was actually regenerated, not just copied back).
+        # replacement was actually regenerated, not just copied back). This
+        # only applies when the replacement is itself a valid (non-structural-
+        # failure) candidate -- a genuinely fresh capture is still a fresh
+        # capture even if it happens to be a structural failure.
         official_path = (
             CASES_DIR
             / replacement["case_id"]
@@ -412,18 +433,24 @@ def test_withdrawn_captures_are_hash_verified_and_never_officially_enumerated(
         )
         if official_path.is_file():
             assert v.sha256_file(official_path) != record["archived_raw_response_sha256"], (
-                f"invalidated/{case_id}/{config}: official replacement is byte-identical "
+                f"{group_root}/{config}: official replacement is byte-identical "
                 "to the withdrawn capture"
             )
 
-        # The original, leaked case id must never also be a live, officially
-        # scored case -- proving withdrawal actually removed it from
-        # circulation rather than merely renaming a still-reachable duplicate.
-        original_case_id = record["original_case_id"]
-        assert original_case_id not in CASE_IDS, (
-            f"the withdrawn, leaked case id {original_case_id!r} must never also be a live, "
-            "officially-scored case"
-        )
+        # The original, leaked/precommitment-violating case id must never also
+        # be a live, officially-scored case -- proving withdrawal actually
+        # removed it from circulation rather than merely renaming a
+        # still-reachable duplicate. (For protocol-not-precommitted archives,
+        # original_case_id equals corrected_case_id, which IS the live case --
+        # what matters there is that the *specific captures* were removed from
+        # cases/*/captured/, checked separately below.)
+        record_a = v.validate_invalidated_capture(group_root, "config-a")
+        if record_a["status"] == "invalidated-answer-leak-v1":
+            original_case_id = record["original_case_id"]
+            assert original_case_id not in CASE_IDS, (
+                f"the withdrawn, leaked case id {original_case_id!r} must never also be a "
+                "live, officially-scored case"
+            )
 
     # The archive must never live where runner.py's official enumeration
     # would find it: case_ids() only scans CASES_DIR (benchmarks/agent_quality/cases),
@@ -431,3 +458,26 @@ def test_withdrawn_captures_are_hash_verified_and_never_officially_enumerated(
     assert INVALIDATED_DIR.parent == CASES_DIR.parent
     assert INVALIDATED_DIR != CASES_DIR
     assert not str(INVALIDATED_DIR).startswith(str(CASES_DIR) + "/")
+
+
+def test_exactly_eight_archived_captures_with_distinct_reasons() -> None:
+    """Enforces the full-archive invariant: exactly 8 withdrawn captures exist
+    in total (2 answer-leak withdrawals for cross-file-validation-edit's
+    original delete-add-not-a-rename captures, plus 6
+    protocol-not-precommitted withdrawals for reordering-guard-clause,
+    context-limited-helper-call, and cross-file-validation-edit's
+    once-official-but-not-precommitted captures), each with a distinct,
+    machine-readable status/reason_code -- never silently merged, deduplicated,
+    or miscounted."""
+    total = 0
+    by_status: dict[str, int] = {}
+    for group_root in ARCHIVE_GROUPS:
+        for config in ("config-a", "config-b"):
+            record = v.validate_invalidated_capture(group_root, config)
+            total += 1
+            by_status[record["status"]] = by_status.get(record["status"], 0) + 1
+    assert total == 8, f"expected exactly 8 archived captures, found {total}"
+    assert by_status == {
+        "invalidated-answer-leak-v1": 2,
+        "invalidated-protocol-not-precommitted-v1": 6,
+    }, by_status

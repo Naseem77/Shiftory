@@ -158,7 +158,7 @@
     },
     {
       "accounting": {
-        "citation_count": 10,
+        "citation_count": 2,
         "hunk_coverage_ratio": 1.0,
         "hunk_covered": 2,
         "hunk_total": 2,
@@ -175,26 +175,26 @@
       "audit_status": {
         "actor_type": "agent",
         "adjudicator": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
-        "disagreement_count": 4,
-        "disagreement_rate": 0.4444444444444444,
+        "disagreement_count": 1,
+        "disagreement_rate": 0.09090909090909091,
         "mode": "dual_audit"
       },
       "candidate_id": "captured_config_a",
       "candidate_kind": "captured_real_run",
       "case_id": "cross-file-validation-edit",
       "claim_factuality": {
-        "assessable_count": 9,
-        "assessable_weight": 32,
+        "assessable_count": 11,
+        "assessable_weight": 40,
         "ratio": 1.0,
-        "supported_count": 9,
-        "supported_weight": 32
+        "supported_count": 11,
+        "supported_weight": 40
       },
       "contradicted_claims": {
         "claim_ids": [],
         "count": 0,
         "weight": 0
       },
-      "explanation_sha256": "16b5e4def2a4583529adbfb6974f7870418be7b9b1ccf41ac68cf5d74a618fe7",
+      "explanation_sha256": "a741efebece47fddc4acca74a9dcc0997af8b5d72265abc4658102e0c4d2c72e",
       "gate": null,
       "required_behavior_coverage": {
         "ratio": 1.0,
@@ -215,14 +215,9 @@
       },
       "structural_failure": null,
       "uncertainty_honesty": {
-        "checked": 9,
-        "violation_ids": [
-          "ca-1",
-          "ca-3",
-          "ca-4",
-          "ca-7"
-        ],
-        "violations": 4
+        "checked": 11,
+        "violation_ids": [],
+        "violations": 0
       },
       "unsupported_claims": {
         "claim_ids": [],
@@ -233,7 +228,7 @@
         "ambiguous_unresolvable_claims": 0,
         "item_count": 1,
         "non_semantic_claims": 0,
-        "useful_count": 3
+        "useful_count": 8
       }
     },
     {
@@ -255,26 +250,26 @@
       "audit_status": {
         "actor_type": "agent",
         "adjudicator": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
-        "disagreement_count": 3,
-        "disagreement_rate": 0.3333333333333333,
+        "disagreement_count": 2,
+        "disagreement_rate": 0.25,
         "mode": "dual_audit"
       },
       "candidate_id": "captured_config_b",
       "candidate_kind": "captured_real_run",
       "case_id": "cross-file-validation-edit",
       "claim_factuality": {
-        "assessable_count": 9,
-        "assessable_weight": 35,
+        "assessable_count": 8,
+        "assessable_weight": 34,
         "ratio": 1.0,
-        "supported_count": 9,
-        "supported_weight": 35
+        "supported_count": 8,
+        "supported_weight": 34
       },
       "contradicted_claims": {
         "claim_ids": [],
         "count": 0,
         "weight": 0
       },
-      "explanation_sha256": "c728dceba125a9bfc12dfb9e6df5504ce90ba181d6bd51511c483fa53ffd7a94",
+      "explanation_sha256": "1efdc6a7bcaefaad24225d619319a7e8febf9aaac3709dc71421ce8ed1da79c0",
       "gate": null,
       "required_behavior_coverage": {
         "ratio": 0.6666666666666666,
@@ -296,18 +291,9 @@
       },
       "structural_failure": null,
       "uncertainty_honesty": {
-        "checked": 9,
-        "violation_ids": [
-          "cb-1",
-          "cb-2",
-          "cb-4",
-          "cb-5",
-          "cb-6",
-          "cb-7",
-          "cb-8",
-          "cb-9"
-        ],
-        "violations": 8
+        "checked": 8,
+        "violation_ids": [],
+        "violations": 0
       },
       "unsupported_claims": {
         "claim_ids": [],
@@ -318,7 +304,7 @@
         "ambiguous_unresolvable_claims": 0,
         "item_count": 2,
         "non_semantic_claims": 0,
-        "useful_count": 5
+        "useful_count": 7
       }
     }
   ],

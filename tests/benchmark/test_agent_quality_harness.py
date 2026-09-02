@@ -546,14 +546,12 @@ def test_agent_run_v2_schema_rejects_copilot_task_with_missing_timing_reason() -
 def test_reconstruct_full_prompt_manifest_at_commit_matches_real_capture() -> None:
     """Reconstructing reordering-guard-clause's ENTIRE prompt package (case.json,
     SKILL.md, INSTRUCTIONS.md, and the reconstructed repository) using ONLY
-    files committed at its harness-introduction commit must reproduce a
+    files committed at its recorded benchmark_protocol_commit must reproduce a
     manifest byte-identical to what that case's real capture actually
     recorded -- proving the full committed protocol at that commit, not just
-    case.json, produced this content."""
-    harness_commit = "7b9d99ba6ecfae6dc53620362e87e776655ecb3b"
-    manifest = ah.reconstruct_full_prompt_manifest_at_commit(harness_commit, CASE_ID)
-    assert manifest is not None
-
+    case.json, produced this content. The protocol commit is read from the
+    capture's own agent-run.json (not hardcoded) so this test stays correct
+    across recaptures under a newer frozen protocol revision."""
     agent_run_path = (
         Path(__file__).resolve().parents[2]
         / "benchmarks"
@@ -564,10 +562,13 @@ def test_reconstruct_full_prompt_manifest_at_commit_matches_real_capture() -> No
         / "config-a"
         / "agent-run.json"
     )
-    recorded = sorted(
-        json.loads(agent_run_path.read_text())["prompt_package_manifest"],
-        key=lambda entry: entry["path"],
-    )
+    agent_run = json.loads(agent_run_path.read_text())
+    protocol_commit = agent_run["benchmark_protocol_commit"]["commit"]
+
+    manifest = ah.reconstruct_full_prompt_manifest_at_commit(protocol_commit, CASE_ID)
+    assert manifest is not None
+
+    recorded = sorted(agent_run["prompt_package_manifest"], key=lambda entry: entry["path"])
     reconstructed = sorted(manifest, key=lambda entry: entry["path"])
     assert recorded == reconstructed
 

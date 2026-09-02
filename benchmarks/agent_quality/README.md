@@ -78,19 +78,33 @@ workflow.
   evidence about how a real agent performs, and `gate` is always `null` for
   every `captured_real_run` candidate -- see
   ["Gating" in the methodology doc](../../docs/agent-quality-benchmark-methodology.md#gating).
-- **A capture generated under a leaked prompt package is withdrawn, never
-  edited in place.** If `case.json`'s `category`/`description` are later
-  found to have disclosed a rubric conclusion (this has happened twice in
-  this benchmark's short history), every capture made under that leaked
-  version is contaminated, regardless of whether its own wording happens to
-  echo the leak. It is moved to `invalidated/<case>/` as an
-  `invalidated-answer-leak-v1` record with hash-verified pointers to its
-  original raw response, agent-run provenance, evaluation, and score (see
+- **A capture generated under a leaked prompt package, or generated before
+  its governing protocol was committed, is withdrawn, never edited in
+  place.** If `case.json`'s `category`/`description` are later found to have
+  disclosed a rubric conclusion (this has happened twice in this
+  benchmark's short history), every capture made under that leaked version
+  is contaminated, regardless of whether its own wording happens to echo
+  the leak. Separately, if a capture's `benchmark_protocol_commit` did not
+  exist **before** that capture's own generation (this has also happened,
+  for six captures across three cases -- see
+  ["Protocol freeze and recapture" in the methodology doc](../../docs/agent-quality-benchmark-methodology.md#protocol-freeze-and-recapture)),
+  it is withdrawn for that reason instead, even if its content matches the
+  now-committed protocol byte-for-byte. Either way the withdrawn capture is
+  moved to `invalidated/<case>/` (nested under a distinctly-named
+  subdirectory, e.g. `protocol-not-precommitted/`, whenever a case has more
+  than one withdrawal so the two archive groups can never collide or
+  overwrite each other) as an `invalidated-answer-leak-v1` or
+  `invalidated-protocol-not-precommitted-v1` record (the latter carrying an
+  explicit `reason_code`) with hash-verified pointers to its original raw
+  response, agent-run provenance, evaluation, and score (see
   `validation.py`'s `validate_invalidated_capture`), and a genuinely fresh
-  capture is made under the corrected package. `invalidated/` is outside
-  `cases/` and `auditor/` specifically so `runner.py`'s `case_ids()`/
-  `captured_candidates()` can never accidentally enumerate, score, or
-  publish it as an official result.
+  capture is made under the corrected/frozen package. `invalidated/` is
+  outside `cases/` and `auditor/` specifically so `runner.py`'s
+  `case_ids()`/`captured_candidates()` can never accidentally enumerate,
+  score, or publish it as an official result. This benchmark currently
+  carries eight such archived captures in total (two answer-leak, six
+  protocol-not-precommitted); `test_exactly_eight_archived_captures_with_distinct_reasons`
+  pins this count in CI.
 
 ## Predeclared capture configurations
 
@@ -112,6 +126,20 @@ produced for. Whatever each configuration produces -- including a tie, a
 structural failure, or both configurations performing equally well or poorly
 -- is committed unedited. There is no discard-and-retry for a "better"
 result.
+
+`protocol_registry.json` (schema `protocol-registry-v1`) is the
+machine-readable, committed freeze of exactly this: both configurations'
+provider/model/agent-type/tool/invocation-kind fields, the sha256 of the
+`INSTRUCTIONS` prompt text and bundled `SKILL.md` at freeze time, the
+invocation protocol's non-negotiable invariants (one attempt only, no
+retry, no repair, no fence-stripping), and a `case_revisions` map pinning
+the exact `case.json` version each of `reordering-guard-clause`,
+`context-limited-helper-call`, and `cross-file-validation-edit` must be at.
+It exists specifically so that "this protocol was fixed before generation,
+not selected afterward to match a result" is independently verifiable by a
+third party from Git history alone, not merely asserted -- see "Protocol
+freeze and recapture" in the methodology doc for why this was added on top
+of (not instead of) the pre-existing full-manifest content-equality proof.
 
 ## Dual-audit annotation workflow
 

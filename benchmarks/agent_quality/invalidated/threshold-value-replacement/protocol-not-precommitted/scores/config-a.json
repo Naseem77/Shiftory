@@ -1,0 +1,81 @@
+{
+  "accounting": {
+    "citation_count": 2,
+    "hunk_coverage_ratio": 1.0,
+    "hunk_covered": 1,
+    "hunk_total": 1,
+    "line_coverage_ratio": 1.0,
+    "line_owned": 4,
+    "line_total": 4,
+    "span_coverage_ratio": 1.0,
+    "span_owned": 2,
+    "span_total": 2,
+    "unit_coverage_ratio": 1.0,
+    "unit_covered": 1,
+    "unit_total": 1
+  },
+  "audit_status": {
+    "actor_type": "agent",
+    "adjudicator": "GitHub Copilot CLI (Claude Sonnet 5, orchestrating session)",
+    "disagreement_count": 0,
+    "disagreement_rate": 0.0,
+    "mode": "dual_audit"
+  },
+  "candidate_id": "captured_config_a",
+  "candidate_kind": "captured_real_run",
+  "case_id": "threshold-value-replacement",
+  "claim_factuality": {
+    "assessable_count": 4,
+    "assessable_weight": 18,
+    "ratio": 1.0,
+    "supported_count": 4,
+    "supported_weight": 18
+  },
+  "contradicted_claims": {
+    "claim_ids": [],
+    "count": 0,
+    "weight": 0
+  },
+  "explanation_sha256": "6f21534b33ecce21fe07fad31ef8da58ff603171c4d39203f0afbc88e2953557",
+  "gate": null,
+  "required_behavior_coverage": {
+    "ratio": 0.6666666666666666,
+    "satisfied_count": 2,
+    "satisfied_ids": [
+      "attempts-increased",
+      "timeout-shortened"
+    ],
+    "total_count": 3
+  },
+  "rubric_match_heuristic": null,
+  "schema": "shiftory.benchmark-agent-quality-score/v1",
+  "semantic_omissions": {
+    "missed_count": 1,
+    "missed_ids": [
+      "worst-case-latency-implication"
+    ],
+    "missed_weight": 3
+  },
+  "structural_failure": null,
+  "uncertainty_honesty": {
+    "checked": 4,
+    "violation_ids": [
+      "ca-1",
+      "ca-2",
+      "ca-3",
+      "ca-4"
+    ],
+    "violations": 4
+  },
+  "unsupported_claims": {
+    "claim_ids": [],
+    "count": 0,
+    "weight": 0
+  },
+  "usefulness_relevance": {
+    "ambiguous_unresolvable_claims": 0,
+    "item_count": 1,
+    "non_semantic_claims": 0,
+    "useful_count": 4
+  }
+}

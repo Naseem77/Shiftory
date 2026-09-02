@@ -1,0 +1,27 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-invalidated-capture/v1",
+  "status": "invalidated-protocol-not-precommitted-v1",
+  "reason_code": "protocol-config-not-precommitted",
+  "config_id": "config-b",
+  "original_case_id": "binary-asset-replacement",
+  "corrected_case_id": "binary-asset-replacement",
+  "reason": "This capture's benchmark_protocol_commit references 7b9d99ba6ecfae6dc53620362e87e776655ecb3b, the earliest commit at which both this case's content and the capture harness (agent_harness.py) were simultaneously present in this repository's history. A later, stricter independent review found that agent_harness.recompute_benchmark_protocol_commit_verification only ever checked full prompt-package content-equality, never whether the referenced commit also carried benchmarks/agent_quality/protocol_registry.json (the predeclared config-a/config-b registry) -- so a capture's provider/model/agent-type/tool/invocation-kind was never actually cross-checked against a committed configuration, only its prompt bytes. protocol_registry.json did not exist at all until the protocol-freeze commit 5c7289b, strictly after this capture was generated and ingested. Content-equality with the currently-committed protocol still holds (verified independently), but the registry/config was not itself committed before this capture, so it fails the strengthened verification. Withdrawn and replaced with a fresh capture generated after 5c7289b, which does carry a committed protocol_registry.json.",
+  "discovered_by": {
+    "actor_type": "agent",
+    "actor": "GitHub Copilot CLI (parent coordinating session)",
+    "method": "Review of recompute_benchmark_protocol_commit_verification's implementation found it never loaded or checked protocol_registry.json at the referenced commit, only the prompt-package manifest; re-running the strengthened check against this capture's referenced commit confirmed no registry existed there.",
+    "timestamp": "2026-09-02T07:00:00Z"
+  },
+  "original_prompt_package_digest": "24e885ea889c12cf78c1d5c761e78fe33378eef46e08931f201ad503c35ccad2",
+  "archived_raw_response_sha256": "fc66c224c0b353d991c10912d05e3a13d4f889f84ccf562bbfaaf975883383d0",
+  "archived_raw_response_bytes": 809,
+  "archived_explanation_sha256": "fc66c224c0b353d991c10912d05e3a13d4f889f84ccf562bbfaaf975883383d0",
+  "archived_agent_run_sha256": "2088f0e432b950b7eea3249ace91cfbdd904f6404d935ce0624a41dd397129c6",
+  "archived_evaluation_sha256": "73b74c8a7a19bbff7e721f8dc5a37c7e75b7f597414a43e2f1d3d2a3aecea434",
+  "archived_score_sha256": "916a4ca6b7fb0844000013e731aef61b9808cd1d679dc7a66e0ea7d5d1dc42c1",
+  "replacement_capture": {
+    "case_id": "binary-asset-replacement",
+    "config_id": "config-b",
+    "path": "benchmarks/agent_quality/cases/binary-asset-replacement/captured/config-b"
+  }
+}

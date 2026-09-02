@@ -460,27 +460,43 @@ def test_withdrawn_captures_are_hash_verified_and_never_officially_enumerated(
     assert not str(INVALIDATED_DIR).startswith(str(CASES_DIR) + "/")
 
 
-def test_exactly_eight_archived_captures_with_distinct_reasons() -> None:
-    """Enforces the full-archive invariant: exactly 8 withdrawn captures exist
-    in total (2 answer-leak withdrawals for cross-file-validation-edit's
-    original delete-add-not-a-rename captures, plus 6
-    protocol-not-precommitted withdrawals for reordering-guard-clause,
-    context-limited-helper-call, and cross-file-validation-edit's
-    once-official-but-not-precommitted captures), each with a distinct,
-    machine-readable status/reason_code -- never silently merged, deduplicated,
-    or miscounted."""
+def test_exactly_fourteen_archived_captures_with_distinct_reasons() -> None:
+    """Enforces the full-archive invariant: exactly 14 withdrawn captures
+    exist in total --
+    2 answer-leak withdrawals (cross-file-validation-edit's original
+    delete-add-not-a-rename captures) plus 12 protocol-not-precommitted
+    withdrawals across four distinct reason codes: 2 each for
+    reordering-guard-clause (protocol-not-predeclared-before-generation),
+    context-limited-helper-call (prompt-fix-not-committed-before-generation),
+    cross-file-validation-edit's first freeze-era replacement pair
+    (neutral-prompt-not-committed-before-generation), and 2 each for
+    error-swallow-to-raise, threshold-value-replacement, and
+    binary-asset-replacement (protocol-config-not-precommitted, once the
+    protocol-commit verifier was strengthened to also check the committed
+    config registry, not just prompt-package content-equality) -- never
+    silently merged, deduplicated, or miscounted."""
     total = 0
     by_status: dict[str, int] = {}
+    by_reason_code: dict[str, int] = {}
     for group_root in ARCHIVE_GROUPS:
         for config in ("config-a", "config-b"):
             record = v.validate_invalidated_capture(group_root, config)
             total += 1
             by_status[record["status"]] = by_status.get(record["status"], 0) + 1
-    assert total == 8, f"expected exactly 8 archived captures, found {total}"
+            reason_code = record.get("reason_code")
+            if reason_code is not None:
+                by_reason_code[reason_code] = by_reason_code.get(reason_code, 0) + 1
+    assert total == 14, f"expected exactly 14 archived captures, found {total}"
     assert by_status == {
         "invalidated-answer-leak-v1": 2,
-        "invalidated-protocol-not-precommitted-v1": 6,
+        "invalidated-protocol-not-precommitted-v1": 12,
     }, by_status
+    assert by_reason_code == {
+        "protocol-not-predeclared-before-generation": 2,
+        "prompt-fix-not-committed-before-generation": 2,
+        "neutral-prompt-not-committed-before-generation": 2,
+        "protocol-config-not-precommitted": 6,
+    }, by_reason_code
 
 
 PROTOCOL_REGISTRY_PATH = CASES_DIR.parent / "protocol_registry.json"

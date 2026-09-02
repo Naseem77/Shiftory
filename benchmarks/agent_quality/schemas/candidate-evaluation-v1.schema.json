@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shiftory.dev/schemas/benchmark-agent-quality-candidate-evaluation-v1.json",
+  "title": "Shiftory agent-quality candidate evaluation",
+  "description": "The auditor's full annotation of one candidate explanation.json against one rubric version. Either 'claims'+'audit_coverage' (a usable candidate) or 'invalid_candidate' (a structural failure) is populated, never both. Exhaustiveness note: audit_coverage records that decomposition was asserted complete for every material field; validation.py checks that assertion's structural consistency (claim ids referenced actually exist, spans hash-match the real candidate) but cannot verify that no proposition was missed -- that remains a human/agent judgment call, stated here explicitly rather than implied by automation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "case_id", "rubric_version", "candidate_id", "candidate_kind"],
+  "properties": {
+    "schema": {"const": "shiftory.benchmark-agent-quality-candidate-evaluation/v1"},
+    "case_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"},
+    "rubric_version": {"type": "integer", "minimum": 1},
+    "candidate_id": {"type": "string", "minLength": 1, "maxLength": 80},
+    "candidate_kind": {
+      "enum": ["captured_real_run", "synthetic_baseline", "synthetic_adversarial"]
+    },
+    "explanation_sha256": {"type": ["string", "null"], "pattern": "^([0-9a-f]{64})$"},
+    "claims": {
+      "type": "array",
+      "maxItems": 200,
+      "items": {"type": "object"},
+      "default": []
+    },
+    "audit_coverage": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["field", "claim_ids", "decomposition_complete"],
+        "properties": {
+          "field": {
+            "type": "string",
+            "pattern": "^/(summary|items/[0-9]+/(title|statement|before|after))$"
+          },
+          "claim_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "decomposition_complete": {"const": true},
+          "non_claim_rationale": {"type": ["string", "null"], "maxLength": 2000}
+        }
+      },
+      "default": []
+    },
+    "annotation_passes": {
+      "description": "One entry per independent annotation pass, for dual-audit records. Each pass's own claims/audit_coverage are recorded under a pass-scoped key elsewhere in the audit workflow; this array records only provenance and summary notes for the passes that fed the adjudicated claims/audit_coverage above.",
+      "type": "array",
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["annotation_provenance"],
+        "properties": {
+          "annotation_provenance": {"$ref": "#/$defs/annotation_provenance"},
+          "notes": {"type": ["string", "null"], "maxLength": 2000}
+        }
+      },
+      "default": []
+    },
+    "adjudication": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "rationale": {"type": "string", "minLength": 1, "maxLength": 4000},
+        "annotation_provenance": {"$ref": "#/$defs/annotation_provenance"},
+        "overridden_claim_ids": {"type": "array", "items": {"type": "string"}}
+      },
+      "required": ["rationale", "annotation_provenance"]
+    },
+    "invalid_candidate": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "reason": {"type": "string", "minLength": 1, "maxLength": 2000},
+        "raw_response_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "protocol_violation": {"type": "string", "minLength": 1, "maxLength": 500}
+      },
+      "required": ["reason", "raw_response_sha256", "protocol_violation"]
+    }
+  },
+  "$defs": {
+    "annotation_provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actor_type", "actor", "method", "timestamp"],
+      "properties": {
+        "actor_type": {"enum": ["human", "agent"]},
+        "actor": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name"],
+          "properties": {
+            "name": {"type": "string", "minLength": 1},
+            "organization": {"type": ["string", "null"]},
+            "model": {"type": ["string", "null"]},
+            "tool": {"type": ["string", "null"]},
+            "version": {"type": ["string", "null"]}
+          }
+        },
+        "method": {"type": "string", "minLength": 1},
+        "timestamp": {"type": "string", "format": "date-time"}
+      }
+    }
+  }
+}

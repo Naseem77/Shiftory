@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shiftory.dev/schemas/benchmark-agent-quality-claim-record-v1.json",
+  "title": "Shiftory agent-quality audited claim record",
+  "description": "One auditor-classified material claim decomposed from a candidate explanation.json. The excerpt_sha256/start/end anchor is recomputed and checked against the actual candidate bytes by validation.py: this proves the claim points at real text in the real candidate. It does NOT prove the auditor noticed every proposition in the field -- that is asserted, not provable, via the sibling audit_coverage record (see candidate-evaluation-v1).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "claim_id", "source_item_id", "field", "start", "end", "excerpt_sha256",
+    "verdict", "materiality", "evidence_anchor_cited", "confidence_expressed",
+    "confidence_appropriate", "rationale", "annotation_provenance"
+  ],
+  "properties": {
+    "claim_id": {"type": "string", "minLength": 1, "maxLength": 80},
+    "source_item_id": {"type": "string", "minLength": 1, "maxLength": 200},
+    "field": {
+      "description": "A json-pointer-style path into the candidate explanation, e.g. /items/2/statement or /summary.",
+      "type": "string",
+      "pattern": "^/(summary|items/[0-9]+/(title|statement|before|after))$"
+    },
+    "start": {"type": "integer", "minimum": 0},
+    "end": {"type": "integer", "minimum": 0},
+    "excerpt_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "overlaps_with": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "default": []
+    },
+    "maps_to_required_fact_id": {"type": ["string", "null"]},
+    "verdict": {
+      "description": "supported_correct: the claim is true and well-grounded, including a claim that correctly and honestly describes a fact as ambiguous/unresolvable from the evidence. unsupported: not grounded in evidence. contradicted: actively asserts the wrong thing. ambiguous_unresolvable: the AUDITOR could not decide how to grade this specific claim at all (a rare fallback, distinct from a claim that itself correctly describes ambiguity, which is supported_correct). non_semantic: not a material behavioral assertion (e.g. a label or restatement).",
+      "enum": [
+        "supported_correct",
+        "unsupported",
+        "contradicted",
+        "ambiguous_unresolvable",
+        "non_semantic"
+      ]
+    },
+    "materiality": {
+      "description": "Auditor-assigned impact of this claim if wrong, 1 (trivial) to 5 (central).",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5
+    },
+    "evidence_anchor_cited": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "maxItems": 20
+    },
+    "confidence_expressed": {
+      "enum": ["extracted", "inferred", "ambiguous", "unresolved", "unavailable"]
+    },
+    "confidence_appropriate": {
+      "description": "Auditor judgment: does confidence_expressed match what the evidence actually supports for this specific claim?",
+      "type": "boolean"
+    },
+    "rationale": {"type": "string", "minLength": 1, "maxLength": 2000},
+    "annotation_provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actor_type", "actor", "method", "timestamp"],
+      "properties": {
+        "actor_type": {"enum": ["human", "agent"]},
+        "actor": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name"],
+          "properties": {
+            "name": {"type": "string", "minLength": 1},
+            "organization": {"type": ["string", "null"]},
+            "model": {"type": ["string", "null"]},
+            "tool": {"type": ["string", "null"]},
+            "version": {"type": ["string", "null"]}
+          }
+        },
+        "method": {"type": "string", "minLength": 1},
+        "timestamp": {"type": "string", "format": "date-time"}
+      }
+    }
+  }
+}

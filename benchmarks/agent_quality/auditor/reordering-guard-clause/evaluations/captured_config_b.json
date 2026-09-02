@@ -1,0 +1,12 @@
+{
+  "candidate_id": "captured_config_b",
+  "candidate_kind": "captured_real_run",
+  "case_id": "reordering-guard-clause",
+  "invalid_candidate": {
+    "protocol_violation": "raw response cites evidence ids that do not exist in the real evidence for this diff",
+    "raw_response_sha256": "8627e70a2b232421efd0b177c41ac2e9660be19817db5d8aad45de3405695538",
+    "reason": "The raw response is valid shiftory.explanation/v1-shaped JSON (passes the shallow schema check agent_harness.capture_result performs), but fails the real shiftory.explain.validator.validate_explanation structural check: its citations array references evidence ids (e.g. fact_* identifiers) that do not exist anywhere in this case's real, deterministically-generated evidence -- the model fabricated citation ids that look plausible but were never actually produced by shiftory analyze for this diff. This is a genuine accounting-level structural failure discovered by running the real validator, not a repair-worthy formatting issue; per protocol, the raw response and agent-run provenance are preserved exactly as first received, and no semantic score is synthesized for this candidate."
+  },
+  "rubric_version": 1,
+  "schema": "shiftory.benchmark-agent-quality-candidate-evaluation/v1"
+}

@@ -1,0 +1,22 @@
+{
+  "schema": "shiftory.offline-git-fixture/v1",
+  "id": "error-swallow-to-raise",
+  "description": "A config-loading function's except clause changes from swallowing a parse error to re-raising it.",
+  "history": "history.fast-import",
+  "import_ref": "refs/heads/main",
+  "marks": {
+    "base": 1,
+    "head": 2
+  },
+  "expected_commits": {
+    "base": "c58b1fedc46efd0cc10a098df085f44bfc714efe",
+    "head": "06ff7ff3f9730a50fbe1c58d5bcd462be1cf6cd5"
+  },
+  "expected_inventory": {
+    "files": 1,
+    "hunks": 1,
+    "added_lines": 1,
+    "deleted_lines": 1
+  },
+  "network_required": false
+}

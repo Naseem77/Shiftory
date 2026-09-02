@@ -1,0 +1,19 @@
+{
+  "schema": "shiftory.offline-git-fixture/v1",
+  "id": "reordering-guard-clause",
+  "description": "A single Python function's two leading statements are reordered between base and head.",
+  "history": "history.fast-import",
+  "import_ref": "refs/heads/main",
+  "marks": {"base": 1, "head": 2},
+  "expected_commits": {
+    "base": "f9b6fff58a8bc6d70e476488866aedb584e5f95a",
+    "head": "db65cc590d87f2ef1ef92ccb68999567ee45686d"
+  },
+  "expected_inventory": {
+    "files": 1,
+    "hunks": 1,
+    "added_lines": 1,
+    "deleted_lines": 1
+  },
+  "network_required": false
+}

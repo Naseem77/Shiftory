@@ -1,0 +1,37 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "The user_id-is-None guard clause was moved to run after the lookup(user_id) call instead of before it; whether that changes observable behavior for a missing id depends on lookup's own handling of None, which is not shown in this diff.",
+  "items": [
+    {
+      "id": "guard-reordered",
+      "kind": "behavioral",
+      "title": "Guard clause now runs after the lookup call",
+      "before": "get_active_user checked user_id is None and returned before calling lookup.",
+      "after": "get_active_user calls lookup(user_id) first, then checks user_id is None.",
+      "statement": "The guard clause that returns None for a missing user id was moved after the lookup(user_id) call, so lookup now runs unconditionally before that check runs.",
+      "confidence": "extracted",
+      "citations": ["conceptual-hunk:app.py#1"]
+    },
+    {
+      "id": "lookup-none-uncertain",
+      "kind": "ambiguity",
+      "title": "Effect of calling lookup with a None id is unclear",
+      "statement": "Whether calling lookup(None) now raises an error or has a side effect cannot be determined from this diff alone, because lookup's implementation is not defined or shown anywhere in this change.",
+      "confidence": "ambiguous",
+      "citations": ["conceptual-hunk:app.py#1"]
+    },
+    {
+      "id": "return-contract-same",
+      "kind": "behavioral",
+      "title": "Return value contract for resolved lookups is unchanged",
+      "before": "A resolved lookup returned None for an inactive or missing record and the record otherwise, after the guard and validity checks.",
+      "after": "A resolved lookup still returns None for an inactive or missing record and the record otherwise; only the order of the two leading statements changed.",
+      "statement": "For any user_id where lookup completes without raising, the final return contract is unchanged: only the order of the two leading statements changed, not the trailing checks or return statements.",
+      "confidence": "extracted",
+      "citations": ["conceptual-hunk:app.py#1"]
+    }
+  ],
+  "coverage_owners": [
+    {"evidence_id": "conceptual-hunk:app.py#1", "owner_id": "guard-reordered"}
+  ]
+}

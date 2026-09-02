@@ -1,0 +1,37 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "This change fixes a subtle bug so that user lookups are always performed consistently, improving reliability for all callers.",
+  "items": [
+    {
+      "id": "guard-still-first",
+      "kind": "behavioral",
+      "title": "The None check still runs before the lookup",
+      "before": "get_active_user checked user_id is None and returned before calling lookup.",
+      "after": "get_active_user still checks user_id is None before calling lookup, guaranteeing lookup is never invoked for a missing id.",
+      "statement": "The None-check guard clause still runs before lookup(user_id) is called, so lookup is never invoked for a missing user id.",
+      "confidence": "extracted",
+      "citations": ["conceptual-hunk:app.py#1"]
+    },
+    {
+      "id": "lookup-safe-for-none",
+      "kind": "behavioral",
+      "title": "Calling lookup with None is safe",
+      "before": "Not applicable.",
+      "after": "lookup(None) safely returns an empty record with no side effects, so this reorder introduces no new failure mode.",
+      "statement": "Calling lookup with a None id is safe and simply returns an empty record, so no new failure mode is introduced by this change.",
+      "confidence": "extracted",
+      "citations": ["conceptual-hunk:app.py#1"]
+    },
+    {
+      "id": "padding-note",
+      "kind": "structural",
+      "title": "General module context",
+      "statement": "This function lives within the broader user management module, which is responsible for many aspects of the user lifecycle across the codebase in a modular, maintainable, and well-organized fashion that supports the team's long-term engineering goals.",
+      "confidence": "extracted",
+      "citations": ["conceptual-hunk:app.py#1"]
+    }
+  ],
+  "coverage_owners": [
+    {"evidence_id": "conceptual-hunk:app.py#1", "owner_id": "guard-still-first"}
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "load_config no longer swallows a JSON parse error into an empty dict; it now re-raises the exception, and the effect on existing callers is not shown in this diff.",
+  "items": [
+    {
+      "id": "config-raises",
+      "kind": "behavioral",
+      "title": "Malformed config now raises instead of returning {}",
+      "before": "A ValueError from json.loads was caught and replaced with an empty dict.",
+      "after": "A ValueError from json.loads propagates to the caller unchanged.",
+      "statement": "load_config no longer swallows a ValueError from parsing malformed JSON; it now re-raises the exception instead of returning an empty dict.",
+      "confidence": "extracted",
+      "citations": [
+        "conceptual-hunk:config.py#1"
+      ]
+    },
+    {
+      "id": "callers-impact-unclear",
+      "kind": "unresolved",
+      "title": "Impact on existing callers is not shown here",
+      "statement": "Whether any caller currently depends on receiving {} for malformed config, and how such a caller would behave if a ValueError now propagates instead, cannot be determined from this diff alone.",
+      "confidence": "unresolved",
+      "citations": [
+        "conceptual-hunk:config.py#1"
+      ]
+    },
+    {
+      "id": "success-path-same",
+      "kind": "behavioral",
+      "title": "Successful parses are unaffected",
+      "before": "json.loads(read_file(path)) was returned directly on a successful parse.",
+      "after": "json.loads(read_file(path)) is still returned directly on a successful parse.",
+      "statement": "When the file contents parse successfully, load_config still returns the parsed value exactly as before; only the exception-handling path changed.",
+      "confidence": "extracted",
+      "citations": [
+        "conceptual-hunk:config.py#1"
+      ]
+    }
+  ],
+  "coverage_owners": [
+    {
+      "evidence_id": "conceptual-hunk:config.py#1",
+      "owner_id": "config-raises"
+    }
+  ]
+}

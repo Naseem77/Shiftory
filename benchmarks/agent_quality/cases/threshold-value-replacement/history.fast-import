@@ -1,0 +1,48 @@
+commit refs/heads/main
+mark :1
+author Shiftory Fixture <fixture@shiftory.invalid> 1707091200 +0000
+committer Shiftory Fixture <fixture@shiftory.invalid> 1707091200 +0000
+data <<BASE_MESSAGE
+threshold-value-replacement base
+BASE_MESSAGE
+M 100644 inline client.py
+data <<BASE_FILE
+import time
+
+
+def fetch_with_retry(session, url):
+    timeout_seconds = 30
+    max_attempts = 1
+    for attempt in range(max_attempts):
+        try:
+            return session.get(url, timeout=timeout_seconds)
+        except TimeoutError:
+            time.sleep(1)
+    raise TimeoutError(f"giving up on {url}")
+BASE_FILE
+
+commit refs/heads/main
+mark :2
+author Shiftory Fixture <fixture@shiftory.invalid> 1707177600 +0000
+committer Shiftory Fixture <fixture@shiftory.invalid> 1707177600 +0000
+data <<HEAD_MESSAGE
+threshold-value-replacement head
+HEAD_MESSAGE
+from :1
+M 100644 inline client.py
+data <<HEAD_FILE
+import time
+
+
+def fetch_with_retry(session, url):
+    timeout_seconds = 5
+    max_attempts = 4
+    for attempt in range(max_attempts):
+        try:
+            return session.get(url, timeout=timeout_seconds)
+        except TimeoutError:
+            time.sleep(1)
+    raise TimeoutError(f"giving up on {url}")
+HEAD_FILE
+
+done

@@ -1,0 +1,34 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "This change improves configuration handling by making sure errors are always caught gracefully so the application never crashes on bad config.",
+  "items": [
+    {
+      "id": "config-still-safe",
+      "kind": "behavioral",
+      "title": "Config loading remains crash-safe",
+      "before": "A ValueError from json.loads was caught and replaced with an empty dict.",
+      "after": "A ValueError from json.loads is still caught internally and the application continues running safely with default configuration.",
+      "statement": "load_config still catches JSON parsing errors internally and continues running safely with a default configuration, so callers are unaffected by malformed config files.",
+      "confidence": "extracted",
+      "citations": [
+        "conceptual-hunk:config.py#1"
+      ]
+    },
+    {
+      "id": "padding-note",
+      "kind": "structural",
+      "title": "Configuration module overview",
+      "statement": "This module is responsible for loading, parsing, validating, and caching configuration data used throughout the application in a clean and extensible way that the team can build on going forward.",
+      "confidence": "extracted",
+      "citations": [
+        "conceptual-hunk:config.py#1"
+      ]
+    }
+  ],
+  "coverage_owners": [
+    {
+      "evidence_id": "conceptual-hunk:config.py#1",
+      "owner_id": "config-still-safe"
+    }
+  ]
+}

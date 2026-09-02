@@ -1,0 +1,171 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-candidate-evaluation/v1",
+  "case_id": "error-swallow-to-raise",
+  "rubric_version": 1,
+  "candidate_id": "synthetic_baseline",
+  "candidate_kind": "synthetic_baseline",
+  "explanation_sha256": "4d3351b7cfda866f2a3246ef3a801585ec04eb74302cf20494bd22db8fd1e520",
+  "claims": [
+    {
+      "overlaps_with": [],
+      "evidence_anchor_cited": [
+        "conceptual-hunk:config.py#1"
+      ],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Manual single-pass authoring while implementing this benchmark layer; provisional until independently re-reviewed.",
+        "timestamp": "2026-09-02T00:00:00Z"
+      },
+      "claim_id": "c-config-raises",
+      "source_item_id": "config-raises",
+      "field": "/items/0/statement",
+      "maps_to_required_fact_id": "malformed-config-now-raises",
+      "verdict": "supported_correct",
+      "materiality": 5,
+      "confidence_expressed": "extracted",
+      "confidence_appropriate": true,
+      "rationale": "Matches the diff exactly: 'return {}' was replaced with a bare 'raise' in the except clause.",
+      "start": 0,
+      "end": 139,
+      "excerpt_sha256": "93c21a333bcb330bb3067f3f9b0a2fd31ab1db9f5d63e5afd8e1218e32eb2f2d"
+    },
+    {
+      "overlaps_with": [],
+      "evidence_anchor_cited": [
+        "conceptual-hunk:config.py#1"
+      ],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Manual single-pass authoring while implementing this benchmark layer; provisional until independently re-reviewed.",
+        "timestamp": "2026-09-02T00:00:00Z"
+      },
+      "claim_id": "c-callers-impact-unclear",
+      "source_item_id": "callers-impact-unclear",
+      "field": "/items/1/statement",
+      "maps_to_required_fact_id": "callers-impact-unclear",
+      "verdict": "supported_correct",
+      "materiality": 4,
+      "confidence_expressed": "unresolved",
+      "confidence_appropriate": true,
+      "rationale": "No caller of load_config appears anywhere in this fixture; the claim correctly declines to guess at caller impact.",
+      "start": 150,
+      "end": 191,
+      "excerpt_sha256": "18a3751e83d59d7ff5df5f77b0d6b1f003c1ceb83c4ef831e2003f4c530e3120"
+    },
+    {
+      "overlaps_with": [],
+      "evidence_anchor_cited": [
+        "conceptual-hunk:config.py#1"
+      ],
+      "annotation_provenance": {
+        "actor_type": "agent",
+        "actor": {
+          "name": "GitHub Copilot CLI (Claude Sonnet 5)",
+          "organization": "GitHub",
+          "model": "claude-sonnet-5",
+          "tool": "copilot-cli",
+          "version": "1.0.80"
+        },
+        "method": "Manual single-pass authoring while implementing this benchmark layer; provisional until independently re-reviewed.",
+        "timestamp": "2026-09-02T00:00:00Z"
+      },
+      "claim_id": "c-success-path-same",
+      "source_item_id": "success-path-same",
+      "field": "/items/2/statement",
+      "maps_to_required_fact_id": "success-path-unchanged",
+      "verdict": "supported_correct",
+      "materiality": 2,
+      "confidence_expressed": "extracted",
+      "confidence_appropriate": true,
+      "rationale": "The try block's success line is byte-identical between base and head.",
+      "start": 105,
+      "end": 145,
+      "excerpt_sha256": "204b0606480e6bbdb13d2aaf4f2d74da2f86c960511537cd2438564857b7afc4"
+    }
+  ],
+  "audit_coverage": [
+    {
+      "field": "/summary",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates or labels a material claim already recorded elsewhere for this item; not an independently material assertion."
+    },
+    {
+      "field": "/items/0/title",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates or labels a material claim already recorded elsewhere for this item; not an independently material assertion."
+    },
+    {
+      "field": "/items/0/before",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates or labels a material claim already recorded elsewhere for this item; not an independently material assertion."
+    },
+    {
+      "field": "/items/0/after",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates or labels a material claim already recorded elsewhere for this item; not an independently material assertion."
+    },
+    {
+      "field": "/items/0/statement",
+      "claim_ids": [
+        "c-config-raises"
+      ],
+      "decomposition_complete": true
+    },
+    {
+      "field": "/items/1/title",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates or labels a material claim already recorded elsewhere for this item; not an independently material assertion."
+    },
+    {
+      "field": "/items/1/statement",
+      "claim_ids": [
+        "c-callers-impact-unclear"
+      ],
+      "decomposition_complete": true
+    },
+    {
+      "field": "/items/2/title",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates or labels a material claim already recorded elsewhere for this item; not an independently material assertion."
+    },
+    {
+      "field": "/items/2/before",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates or labels a material claim already recorded elsewhere for this item; not an independently material assertion."
+    },
+    {
+      "field": "/items/2/after",
+      "claim_ids": [],
+      "decomposition_complete": true,
+      "non_claim_rationale": "Restates or labels a material claim already recorded elsewhere for this item; not an independently material assertion."
+    },
+    {
+      "field": "/items/2/statement",
+      "claim_ids": [
+        "c-success-path-same"
+      ],
+      "decomposition_complete": true
+    }
+  ]
+}

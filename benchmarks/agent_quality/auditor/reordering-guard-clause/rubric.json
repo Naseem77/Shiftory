@@ -1,0 +1,41 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-rubric/v1",
+  "case_id": "reordering-guard-clause",
+  "version": 1,
+  "rubric_provenance": {
+    "actor_type": "agent",
+    "actor": {
+      "name": "GitHub Copilot CLI (Claude Sonnet 5)",
+      "organization": "GitHub",
+      "model": "claude-sonnet-5",
+      "tool": "copilot-cli",
+      "version": "1.0.80"
+    },
+    "method": "Manual single-pass authoring while implementing this benchmark layer. This rubric has not been reviewed by a second independent actor or a human domain expert; treat it as provisional until re-reviewed.",
+    "timestamp": "2026-09-02T00:00:00Z"
+  },
+  "required_facts": [
+    {
+      "id": "guard-moved-after-lookup",
+      "description": "The 'user_id is None' early-return guard clause now executes after lookup(user_id) is called, instead of before it. This is the single reordering that defines the change.",
+      "importance": 5,
+      "evidence_anchors": ["conceptual-hunk:app.py#1"],
+      "truth_status": "extractable",
+      "heuristic_aliases": ["moved after", "reordered", "guard clause", "lookup(user_id) first"]
+    },
+    {
+      "id": "lookup-none-implication-uncertain",
+      "description": "Because lookup's handling of a None argument is not shown anywhere in this diff (it is called but not defined here), whether the reorder introduces a new error or side effect for user_id=None cannot be confirmed from the visible change alone. A well-calibrated answer should flag this as an open question rather than assert a specific new failure mode with full confidence.",
+      "importance": 4,
+      "evidence_anchors": ["conceptual-hunk:app.py#1"],
+      "truth_status": "ambiguous_unresolvable"
+    },
+    {
+      "id": "return-contract-unchanged-for-resolved-lookups",
+      "description": "For any user_id where lookup(user_id) completes without raising, the function's final return value contract is unchanged: None for a missing/inactive record, the record otherwise. Only the order of the two leading statements changed, not the trailing checks or return statements.",
+      "importance": 2,
+      "evidence_anchors": ["conceptual-hunk:app.py#1"],
+      "truth_status": "extractable"
+    }
+  ]
+}

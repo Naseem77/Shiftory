@@ -1,0 +1,56 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-rubric/v1",
+  "case_id": "threshold-value-replacement",
+  "version": 1,
+  "rubric_provenance": {
+    "actor_type": "agent",
+    "actor": {
+      "name": "GitHub Copilot CLI (Claude Sonnet 5)",
+      "organization": "GitHub",
+      "model": "claude-sonnet-5",
+      "tool": "copilot-cli",
+      "version": "1.0.80"
+    },
+    "method": "Manual single-pass authoring while implementing this benchmark layer; provisional until independently re-reviewed.",
+    "timestamp": "2026-09-02T00:00:00Z"
+  },
+  "required_facts": [
+    {
+      "id": "timeout-shortened",
+      "description": "The per-attempt request timeout passed to session.get changes from 30 seconds to 5 seconds.",
+      "importance": 4,
+      "evidence_anchors": [
+        "conceptual-hunk:client.py#1"
+      ],
+      "truth_status": "extractable",
+      "heuristic_aliases": [
+        "30",
+        "5",
+        "timeout"
+      ]
+    },
+    {
+      "id": "attempts-increased",
+      "description": "max_attempts changes from 1 (no retry) to 4, so the loop now retries the request up to three additional times after a TimeoutError before giving up.",
+      "importance": 5,
+      "evidence_anchors": [
+        "conceptual-hunk:client.py#1"
+      ],
+      "truth_status": "extractable",
+      "heuristic_aliases": [
+        "retries",
+        "up to 4",
+        "no longer just one attempt"
+      ]
+    },
+    {
+      "id": "worst-case-latency-implication",
+      "description": "Combining the shorter per-attempt timeout with more attempts and a fixed 1-second sleep between attempts changes the worst-case total time before fetch_with_retry raises TimeoutError: previously up to about 30s (1 attempt), now up to about 5*4 + 1*3 = 23s across four attempts. This numeric implication follows directly from the two changed constants and the unchanged loop/sleep structure.",
+      "importance": 3,
+      "evidence_anchors": [
+        "conceptual-hunk:client.py#1"
+      ],
+      "truth_status": "inferred_from_context"
+    }
+  ]
+}

@@ -15,10 +15,14 @@
     "configured_model": "gpt-5.3-codex",
     "tool": "copilot-cli",
     "tool_version": "1.0.80",
-    "task_id": null,
     "generation_started_at_utc": null,
     "generation_finished_at_utc": null,
-    "generation_timing_unavailable_reason": "The orchestrating session does not receive the sub-agent's internal start/end timestamps from the task tool API; only completion order and this function's own ingestion time are observed."
+    "generation_timing_unavailable_reason": "The orchestrating session does not receive the sub-agent's internal start/end timestamps from the task tool API; only completion order and this function's own ingestion time are observed.",
+    "orchestrator_agent_handle": {
+      "value": "freeze-cap-context-a",
+      "provenance": "caller_supplied_task_name_returned_as_runtime_handle",
+      "externally_verifiable": false
+    }
   },
   "capture_ingested_at_utc": "2026-09-02T06:00:03.337316+00:00",
   "prompt_package_manifest": [
@@ -48,9 +52,9 @@
   },
   "benchmark_protocol_commit": {
     "commit": "5c7289bd8e540317ce45d4407044c5c846698ecb",
-    "verification_method": "prompt_manifest_hash_match",
+    "verification_method": "full_manifest_and_protocol_registry_match",
     "verified": true,
-    "note": "Generated after commit 5c7289bd8e540317ce45d4407044c5c846698ecb (benchmarks/agent_quality/protocol_registry.json, case revision bump) was committed to this repository -- both content-equality (full-manifest reconstruction) and precommitment (this capture's own capture_ingested_at_utc postdates that commit's committer date) hold."
+    "note": "Verified: commit 5c7289bd8e540317ce45d4407044c5c846698ecb's full committed protocol -- case.json, SKILL.md, INSTRUCTIONS.md text, the reconstructed fixture repository, AND protocol_registry.json's config/case-revision/digest declarations -- reconstructs content that matches this capture's own recorded prompt_package_manifest and declared provider/model/agent-type/tool/invocation-kind path-for-path and field-for-field. This is the protocol-freeze commit committed before this capture was generated (see docs/agent-quality-benchmark-methodology.md's 'Protocol freeze and recapture'), independent of any wall-clock ordering claim (see verify_protocol_precommitment for that separate, complementary check)."
   },
   "generator_access_profile": {
     "repository_access": true,

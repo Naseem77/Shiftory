@@ -3,7 +3,7 @@
   "id": "context-limited-helper-call",
   "version": 1,
   "category": "ambiguous-context-limited",
-  "description": "A call to an externally-defined validate() helper changes its strict keyword argument from False to True; validate's own implementation is not shown anywhere in this fixture.",
+  "description": "A call to a helper function named validate() changes one of its keyword arguments from False to True.",
   "fixture": {
     "history": "history.fast-import",
     "metadata": "metadata.json"

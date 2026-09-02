@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shiftory.dev/schemas/benchmark-agent-quality-agent-run-v2.json",
+  "title": "Shiftory agent-quality captured agent run provenance (v2)",
+  "description": "Full provenance for one real agent capture. Supersedes v1, which conflated 'when capture_result read/ingested RAW_RESPONSE' with 'when the generating agent actually ran' -- for every capture in this repository generated via a copilot-cli task sub-agent (invocation.kind == 'copilot_task'), v1's started_at_utc/finished_at_utc were in fact microseconds apart, because they were only ever set around the bookkeeping read of an already-completed RAW_RESPONSE file, never around the actual generation, which took tens of seconds to minutes in a separate process this harness does not control or observe. v2 makes this honest: capture_ingested_at_utc is always the (accurately labeled) bookkeeping time; invocation.generation_started_at_utc/generation_finished_at_utc are only ever populated when genuinely observed (true only for invocation.kind == 'local_process', where this harness itself started and waited on the subprocess), and are null with a required reason otherwise -- never fabricated or silently defaulted to the ingestion time. isolation_method='protocol' means the generating agent's blindness to the rubric relies on the prompt package's contents and instructions, not on a sandbox that prevents reading the repository -- this schema forces that statement to be recorded explicitly rather than implied.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "case_id", "candidate_id", "provider", "model", "agent_tool_version",
+    "evaluation_protocol", "invocation", "capture_ingested_at_utc",
+    "prompt_package_manifest", "prompt_package_digest", "evidence_sha256",
+    "engine_identity", "benchmark_protocol_commit", "generator_access_profile",
+    "isolation_method", "raw_response_sha256", "raw_response_bytes", "truncated"
+  ],
+  "properties": {
+    "schema": {"const": "shiftory.benchmark-agent-quality-agent-run/v2"},
+    "case_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"},
+    "candidate_id": {"type": "string", "minLength": 1, "maxLength": 80},
+    "provider": {"type": "string", "minLength": 1},
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1}
+      }
+    },
+    "agent_tool_version": {"type": "string", "minLength": 1},
+    "evaluation_protocol": {"type": "string", "minLength": 1, "maxLength": 4000},
+    "invocation": {
+      "description": "A tagged union. 'local_process' means this harness itself started and waited on a subprocess (agent_harness.run_capped_subprocess): argv/env/exit/stdout/stderr and real generation timing are all directly observed and required. 'copilot_task' means the generating agent ran as a Copilot CLI task sub-agent in a separate orchestrating conversation this harness never controlled or streamed output from: only what was actually configured/observed for that invocation is recorded, and real generation timing is null with an explicit reason unless it was genuinely captured from that sub-agent's own reported elapsed time.",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind", "command_argv", "env_allowlist", "exit_status",
+            "generation_started_at_utc", "generation_finished_at_utc",
+            "timed_out", "stdout_sha256", "stderr_sha256"
+          ],
+          "properties": {
+            "kind": {"const": "local_process"},
+            "command_argv": {"type": "array", "minItems": 1, "items": {"type": "string"}, "maxItems": 64},
+            "env_allowlist": {"type": "array", "items": {"type": "string"}, "maxItems": 64},
+            "exit_status": {"type": ["integer", "null"]},
+            "generation_started_at_utc": {"type": "string", "format": "date-time"},
+            "generation_finished_at_utc": {"type": "string", "format": "date-time"},
+            "timed_out": {"type": "boolean"},
+            "stdout_sha256": {"type": ["string", "null"], "pattern": "^([0-9a-f]{64})?$"},
+            "stderr_sha256": {"type": ["string", "null"], "pattern": "^([0-9a-f]{64})?$"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind", "agent_type", "configured_model", "tool", "tool_version",
+            "task_id", "generation_started_at_utc", "generation_finished_at_utc"
+          ],
+          "properties": {
+            "kind": {"const": "copilot_task"},
+            "agent_type": {"type": "string", "minLength": 1},
+            "configured_model": {"type": "string", "minLength": 1},
+            "tool": {"type": "string", "minLength": 1},
+            "tool_version": {"type": "string", "minLength": 1},
+            "task_id": {"type": ["string", "null"]},
+            "generation_started_at_utc": {"type": ["string", "null"], "format": "date-time"},
+            "generation_finished_at_utc": {"type": ["string", "null"], "format": "date-time"},
+            "generation_timing_unavailable_reason": {"type": ["string", "null"], "minLength": 1, "maxLength": 500}
+          },
+          "if": {
+            "properties": {"generation_started_at_utc": {"const": null}}
+          },
+          "then": {
+            "required": ["generation_timing_unavailable_reason"]
+          }
+        }
+      ]
+    },
+    "capture_ingested_at_utc": {
+      "description": "When agent_harness.capture_result actually read RAW_RESPONSE and wrote this record -- always known, always distinct from generation timing, never presented as the latter.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "prompt_package_manifest": {
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "sha256"],
+        "properties": {
+          "path": {"type": "string", "minLength": 1},
+          "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+        }
+      }
+    },
+    "prompt_package_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "evidence_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "engine_identity": {
+      "description": "What ran shiftory analyze/explain to produce the evidence this capture is based on. Never fabricated: verification_method states exactly how 'value' was established, and value is the literal string 'unknown' when it cannot honestly be determined.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["component", "verification_method", "value"],
+      "properties": {
+        "component": {"const": "shiftory"},
+        "verification_method": {"enum": ["git_commit", "source_tree_digest", "unknown"]},
+        "value": {"type": "string", "minLength": 1}
+      }
+    },
+    "benchmark_protocol_commit": {
+      "description": "The repository commit whose committed benchmarks/agent_quality/ tree defines the exact case/rubric/harness protocol this capture was generated under. 'verified' is true only when prompt_package_manifest's own recorded case.json sha256 (already hash-anchored to the real materialized package) is cross-checked by code against that commit's actual committed case.json bytes -- a cryptographic proof that the capture used the protocol version this commit defines, independent of and strictly stronger than any wall-clock ordering between the commit's timestamp and this capture's timestamps. When commit is null or verification cannot be performed, verified is false and note explains why.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commit", "verification_method", "verified", "note"],
+      "properties": {
+        "commit": {"type": ["string", "null"], "pattern": "^([0-9a-f]{40})?$"},
+        "verification_method": {"enum": ["prompt_manifest_hash_match", "unverified"]},
+        "verified": {"type": "boolean"},
+        "note": {"type": "string", "minLength": 1, "maxLength": 1000}
+      }
+    },
+    "generator_access_profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository_access", "filesystem_scope", "network_access", "tool_access"],
+      "properties": {
+        "repository_access": {"type": "boolean"},
+        "filesystem_scope": {"type": "string", "minLength": 1},
+        "network_access": {"type": "boolean"},
+        "tool_access": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "isolation_method": {"enum": ["protocol", "sandboxed"]},
+    "raw_response_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "raw_response_bytes": {"type": "integer", "minimum": 0, "maximum": 262144},
+    "truncated": {"type": "boolean"},
+    "migrated_from_v1_sha256": {
+      "description": "When this record was migrated from a v1 agent-run.json rather than produced fresh, the sha256 of that original v1 JSON bytes, so provenance history remains auditable across the schema migration.",
+      "type": ["string", "null"],
+      "pattern": "^([0-9a-f]{64})?$"
+    }
+  }
+}

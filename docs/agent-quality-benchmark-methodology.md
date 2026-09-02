@@ -389,7 +389,7 @@ fresh captures were generated for these three cases against the same
 frozen commit `5c7289b` (which does carry a committed
 `protocol_registry.json`, and independently verifies for both content and
 config match). All 12 official captures now reference this single shared
-commit. Of these six new captures, one config-a
+commit. Of these six new captures, one config-b
 (`error-swallow-to-raise`) and both `binary-asset-replacement` captures
 turned out to also be genuine structural failures with fabricated
 citations -- see "Real captured-run results" below; this benchmark's

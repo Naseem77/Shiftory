@@ -396,3 +396,21 @@ def validate_invalidated_capture(case_root: Path, config_id: str) -> dict[str, A
         raise AgentQualityError(f"{score_path}: does not hash-match its archived digest")
 
     return cast(dict[str, Any], record)
+
+
+def validate_protocol_registry(registry: dict[str, Any], cases_dir: Path) -> None:
+    """Validate a protocol-registry-v1 document against its schema and check
+    that every ``case_revisions`` entry matches the actual committed
+    ``case.json`` ``version`` for that case -- so the registry can never
+    silently drift from the case content it claims to freeze."""
+    validate_against_schema(registry, "protocol-registry-v1")
+    for case_id, expected_version in registry["case_revisions"].items():
+        case_path = cases_dir / case_id / "case.json"
+        if not case_path.is_file():
+            raise AgentQualityError(f"protocol_registry.json references unknown case {case_id!r}")
+        case = load_json_strict(case_path)
+        if case["version"] != expected_version:
+            raise AgentQualityError(
+                f"protocol_registry.json says {case_id!r} is at revision {expected_version}, "
+                f"but its committed case.json is at version {case['version']}"
+            )

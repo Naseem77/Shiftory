@@ -256,6 +256,48 @@ def recompute_benchmark_protocol_commit_verification(agent_run: dict[str, Any]) 
     return recorded == reconstructed
 
 
+def get_commit_committer_date(commit: str) -> datetime | None:
+    """The real, actual committer date of ``commit`` in this repository (not
+    the author date, which is trivially forgeable by the committer), parsed
+    as a timezone-aware UTC datetime. ``None`` if the commit does not exist.
+    """
+    result = subprocess.run(
+        ["git", "show", "-s", "--format=%cI", commit],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return None
+    text = result.stdout.decode("utf-8").strip()
+    if not text:
+        return None
+    return datetime.fromisoformat(text).astimezone(timezone.utc)
+
+
+def verify_protocol_precommitment(agent_run: dict[str, Any]) -> bool:
+    """Verify that ``benchmark_protocol_commit.commit`` was actually
+    committed to this repository strictly BEFORE this capture's own
+    ``capture_ingested_at_utc`` -- the chronological, precommitment half of
+    protocol integrity, complementing (not replacing)
+    ``recompute_benchmark_protocol_commit_verification``'s content-equality
+    proof. Returns ``False`` if the commit does not exist, or if its
+    committer date is not strictly earlier than the capture's own ingestion
+    timestamp.
+    """
+    protocol = agent_run["benchmark_protocol_commit"]
+    commit = protocol.get("commit")
+    if commit is None:
+        return False
+    commit_time = get_commit_committer_date(commit)
+    if commit_time is None:
+        return False
+    ingested_at = datetime.fromisoformat(agent_run["capture_ingested_at_utc"]).astimezone(
+        timezone.utc
+    )
+    return commit_time < ingested_at
+
+
 def build_allowlisted_env(extra: tuple[str, ...] = ()) -> dict[str, str]:
     names = set(DEFAULT_ENV_ALLOWLIST) | set(extra)
     return {name: os.environ[name] for name in names if name in os.environ}

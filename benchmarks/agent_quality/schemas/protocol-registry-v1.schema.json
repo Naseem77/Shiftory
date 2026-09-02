@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shiftory.dev/schemas/benchmark-agent-quality-protocol-registry-v1.json",
+  "title": "Shiftory agent-quality capture protocol registry",
+  "description": "A machine-readable, versioned freeze of the exact capture protocol (predeclared configurations, prompt-package digests, and invocation/output/access rules) committed BEFORE any capture generation it governs. A capture's agent-run-v2.benchmark_protocol_commit records the commit that added or last matched this file; agent_harness.recompute_benchmark_protocol_commit_verification independently reconstructs and checks the full prompt package against that commit, and a capture's own capture_ingested_at_utc must be later than that commit's committer date (checked by validate_protocol_precommitment), so the freeze is provably both content-correct and chronologically prior to generation -- not merely selected afterward to match a result.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "registry_version", "configs", "instructions_sha256", "skill_path",
+    "skill_sha256", "invocation_protocol", "case_revisions"
+  ],
+  "properties": {
+    "schema": {"const": "shiftory.benchmark-agent-quality-protocol-registry/v1"},
+    "registry_version": {"type": "integer", "minimum": 1},
+    "configs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["config-a", "config-b"],
+      "properties": {
+        "config-a": {"$ref": "#/$defs/config"},
+        "config-b": {"$ref": "#/$defs/config"}
+      }
+    },
+    "instructions_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "skill_path": {"type": "string", "minLength": 1},
+    "skill_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "invocation_protocol": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "isolation_method", "one_attempt_only", "no_retry", "no_repair",
+        "no_fence_stripping", "no_cherry_picking", "raw_response_filename",
+        "fresh_stateless_generator_per_invocation"
+      ],
+      "properties": {
+        "isolation_method": {"const": "protocol"},
+        "one_attempt_only": {"const": true},
+        "no_retry": {"const": true},
+        "no_repair": {"const": true},
+        "no_fence_stripping": {"const": true},
+        "no_cherry_picking": {"const": true},
+        "raw_response_filename": {"const": "RAW_RESPONSE"},
+        "fresh_stateless_generator_per_invocation": {"const": true}
+      }
+    },
+    "case_revisions": {
+      "description": "case_id -> the case.json 'version' a capture must be generated against for it to be considered governed by this registry revision.",
+      "type": "object",
+      "additionalProperties": {"type": "integer", "minimum": 1},
+      "minProperties": 1
+    }
+  },
+  "$defs": {
+    "config": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "model_name", "agent_type", "tool", "invocation_kind"],
+      "properties": {
+        "provider": {"type": "string", "minLength": 1},
+        "model_name": {"type": "string", "minLength": 1},
+        "agent_type": {"type": "string", "minLength": 1},
+        "tool": {"type": "string", "minLength": 1},
+        "invocation_kind": {"enum": ["local_process", "copilot_task"]}
+      }
+    }
+  }
+}

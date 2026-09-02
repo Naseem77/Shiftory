@@ -1,7 +1,7 @@
 {
   "schema": "shiftory.benchmark-agent-quality-case/v1",
   "id": "reordering-guard-clause",
-  "version": 1,
+  "version": 2,
   "category": "ordering-control-flow",
   "description": "A single Python function's two leading statements -- an early-return None-check and a lookup call -- are reordered between base and head.",
   "fixture": {

@@ -1,0 +1,41 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-protocol-registry/v1",
+  "registry_version": 2,
+  "configs": {
+    "config-a": {
+      "provider": "openai (via GitHub Copilot CLI sub-agent)",
+      "model_name": "gpt-5.3-codex",
+      "agent_type": "general-purpose",
+      "tool": "copilot-cli",
+      "invocation_kind": "copilot_task"
+    },
+    "config-b": {
+      "provider": "google (via GitHub Copilot CLI sub-agent)",
+      "model_name": "gemini-3.7-flash",
+      "agent_type": "general-purpose",
+      "tool": "copilot-cli",
+      "invocation_kind": "copilot_task"
+    }
+  },
+  "instructions_sha256": "fcaedece84911bea6217bea59923cf5a85f0861897d3f74d4c998e8317908fa9",
+  "skill_path": "src/shiftory/skills/shiftory/SKILL.md",
+  "skill_sha256": "0f7ddbe349e93b68924c2665f06e015114130083841702ce14c8c650b99c5be0",
+  "invocation_protocol": {
+    "isolation_method": "protocol",
+    "one_attempt_only": true,
+    "no_retry": true,
+    "no_repair": true,
+    "no_fence_stripping": true,
+    "no_cherry_picking": true,
+    "raw_response_filename": "RAW_RESPONSE",
+    "fresh_stateless_generator_per_invocation": true
+  },
+  "case_revisions": {
+    "reordering-guard-clause": 2,
+    "context-limited-helper-call": 2,
+    "cross-file-validation-edit": 3,
+    "error-swallow-to-raise": 1,
+    "threshold-value-replacement": 1,
+    "binary-asset-replacement": 1
+  }
+}

@@ -166,20 +166,20 @@ def _extract_instructions_constant(harness_source: bytes) -> str | None:
     return None
 
 
-def reconstruct_full_prompt_manifest_at_commit(
-    commit: str, case_id: str
-) -> list[dict[str, str]] | None:
-    """Reconstruct the ENTIRE prompt package -- case.json, SKILL.md,
-    INSTRUCTIONS.md, and the reconstructed fixture repository -- using ONLY
-    files as committed at ``commit`` (never the current working tree), and
-    return its manifest. Returns ``None`` if any required file cannot be
-    extracted from that commit (an honest verification failure, not a
-    fabricated pass).
-
-    This is strictly stronger than checking case.json alone: it proves the
-    full committed protocol at that commit -- case content, the bundled
-    SKILL.md, and the harness's own INSTRUCTIONS text -- reproduces
-    byte-identical prompt-package content, not just that one file matches.
+def _reconstruct_prompt_package_state_at_commit(commit: str, case_id: str) -> dict[str, Any] | None:
+    """Internal: reconstruct everything needed to verify BOTH the full
+    prompt-package manifest and the protocol registry's config/case-revision
+    claims, using ONLY files as committed at ``commit`` (never the current
+    working tree). Returns a dict with ``manifest`` (the
+    ``{path, sha256}`` list), ``case`` (the parsed ``case.json`` dict, so
+    callers can check its ``version`` without a second ``git show``), and
+    ``instructions_sha256``/``skill_sha256`` (of the exact bytes that went
+    into the manifest). Returns ``None`` if any required file cannot be
+    extracted or parsed from that commit -- an honest verification failure,
+    not a fabricated pass. Shared by ``reconstruct_full_prompt_manifest_at_commit``
+    and ``recompute_benchmark_protocol_commit_verification`` so both use
+    identically-reconstructed content and this repository is not asked to
+    run ``git show``/fixture reconstruction twice per verification.
     """
     case_json_bytes = _git_show(commit, f"benchmarks/agent_quality/cases/{case_id}/case.json")
     metadata_bytes = _git_show(commit, f"benchmarks/agent_quality/cases/{case_id}/metadata.json")
@@ -222,7 +222,98 @@ def reconstruct_full_prompt_manifest_at_commit(
         (out_dir / "SKILL.md").write_bytes(skill_bytes)
         (out_dir / "INSTRUCTIONS.md").write_text(instructions_text, encoding="utf-8")
 
-        return _manifest_for_dir(out_dir)
+        return {
+            "manifest": _manifest_for_dir(out_dir),
+            "case": case,
+            "instructions_sha256": v.sha256_bytes(instructions_text.encode("utf-8")),
+            "skill_sha256": v.sha256_bytes(skill_bytes),
+        }
+
+
+def reconstruct_full_prompt_manifest_at_commit(
+    commit: str, case_id: str
+) -> list[dict[str, str]] | None:
+    """Reconstruct the ENTIRE prompt package -- case.json, SKILL.md,
+    INSTRUCTIONS.md, and the reconstructed fixture repository -- using ONLY
+    files as committed at ``commit`` (never the current working tree), and
+    return its manifest. Returns ``None`` if any required file cannot be
+    extracted from that commit (an honest verification failure, not a
+    fabricated pass).
+
+    This is strictly stronger than checking case.json alone: it proves the
+    full committed protocol at that commit -- case content, the bundled
+    SKILL.md, and the harness's own INSTRUCTIONS text -- reproduces
+    byte-identical prompt-package content, not just that one file matches.
+    """
+    state = _reconstruct_prompt_package_state_at_commit(commit, case_id)
+    return state["manifest"] if state is not None else None
+
+
+def reconstruct_protocol_registry_at_commit(commit: str) -> dict[str, Any] | None:
+    """Load and schema-validate ``protocol_registry.json`` as committed at
+    ``commit`` -- never the current working tree. Returns ``None`` if the
+    file is absent, unparsable, or schema-invalid at that commit: an absent
+    or malformed registry is an honest verification failure, never a
+    silent pass. This is what makes ``benchmark_protocol_commit`` mean "a
+    commit that actually carries the config/prompt-digest/invocation-rule
+    registry", not merely "a commit whose case.json happens to match"."""
+    registry_bytes = _git_show(commit, "benchmarks/agent_quality/protocol_registry.json")
+    if registry_bytes is None:
+        return None
+    try:
+        registry = v.parse_json_text(registry_bytes.decode("utf-8"))
+        v.validate_against_schema(registry, "protocol-registry-v1")
+    except (v.AgentQualityError, UnicodeDecodeError):
+        return None
+    return registry
+
+
+def _config_id_for_candidate(candidate_id: str) -> str | None:
+    """``'captured_config_a'`` -> ``'config-a'``; ``None`` for any
+    candidate id that does not follow this benchmark's fixed naming
+    convention (e.g. ``synthetic_baseline``), which have no registry
+    config to check against."""
+    prefix = "captured_config_"
+    if not candidate_id.startswith(prefix):
+        return None
+    suffix = candidate_id[len(prefix) :]
+    if suffix not in ("a", "b"):
+        return None
+    return f"config-{suffix}"
+
+
+def verify_config_registry_match(agent_run: dict[str, Any], registry: dict[str, Any]) -> bool:
+    """Check that ``agent_run`` was actually generated under the
+    predeclared config (provider/model/agent-type/tool/invocation-kind)
+    that ``registry["configs"]`` declares for this capture's config id
+    (derived from ``candidate_id``), and that the case revision the
+    registry freezes for this ``case_id`` matches. This is what proves a
+    capture used the *registered configuration*, not merely that its
+    prompt bytes happen to match -- a capture could in principle
+    reconstruct byte-identical prompt content while actually having been
+    generated by an undeclared model/tool, and this check is what rules
+    that out for every officially-verified capture.
+    """
+    config_id = _config_id_for_candidate(agent_run.get("candidate_id", ""))
+    if config_id is None:
+        return False
+    config = registry.get("configs", {}).get(config_id)
+    if config is None:
+        return False
+    if agent_run.get("provider") != config["provider"]:
+        return False
+    model = agent_run.get("model", {})
+    if not isinstance(model, dict) or model.get("name") != config["model_name"]:
+        return False
+    invocation = agent_run.get("invocation", {})
+    if not isinstance(invocation, dict) or invocation.get("kind") != config["invocation_kind"]:
+        return False
+    if config["invocation_kind"] == "copilot_task":
+        if invocation.get("agent_type") != config["agent_type"]:
+            return False
+        if invocation.get("tool") != config["tool"]:
+            return False
+    return True
 
 
 def recompute_benchmark_protocol_commit_verification(agent_run: dict[str, Any]) -> bool:
@@ -230,30 +321,62 @@ def recompute_benchmark_protocol_commit_verification(agent_run: dict[str, Any]) 
     ``verified: true`` claim is actually true, rather than trusting the
     self-reported flag a migration or capture script wrote.
 
-    Reconstructs the ENTIRE prompt package (case.json, SKILL.md,
-    INSTRUCTIONS.md, and the reconstructed fixture repository) from ONLY
-    files as committed at ``benchmark_protocol_commit.commit`` (via
-    ``reconstruct_full_prompt_manifest_at_commit``), and compares the
-    complete resulting manifest, path-for-path, against this same capture's
-    own recorded ``prompt_package_manifest``. Returns ``True`` only on an
-    exact match. This proves the referenced commit's committed protocol --
-    not just its case.json -- reproduces byte-identical prompt-package
-    content; it does not, and cannot, prove anything about the ordering
-    between that commit's timestamp and this capture's own timestamps (see
-    the methodology doc's "Provenance" section for why content-equality,
-    not wall-clock ordering, is what this benchmark treats as the load-bearing
-    integrity property).
+    This check has two independent halves, and BOTH must hold:
+
+    1. **Full prompt-package content-equality**: reconstructs the ENTIRE
+       prompt package (case.json, SKILL.md, INSTRUCTIONS.md, and the
+       reconstructed fixture repository) from ONLY files as committed at
+       ``benchmark_protocol_commit.commit``, and compares the complete
+       resulting manifest, path-for-path, against this same capture's own
+       recorded ``prompt_package_manifest``.
+    2. **Committed config/registry match**: loads
+       ``protocol_registry.json`` as committed at that same commit (never
+       the working tree; see ``reconstruct_protocol_registry_at_commit``),
+       confirms it is schema-valid, confirms its ``case_revisions`` entry
+       for this capture's case matches the ``version`` actually reconstructed
+       from that commit's ``case.json``, and confirms this capture's
+       provider/model/agent-type/tool/invocation-kind match the registry's
+       declared config for this capture's config id (see
+       ``verify_config_registry_match``).
+
+    Returns ``True`` only when both halves hold. A commit whose case.json
+    happens to match but which has no committed ``protocol_registry.json``
+    at all (e.g. a commit predating this registry's introduction) fails
+    here -- this is deliberate: proving byte-identical prompt content is
+    not the same as proving the predeclared configuration was actually
+    used, and this benchmark no longer conflates the two. This does not,
+    and cannot, prove anything about the ordering between that commit's
+    timestamp and this capture's own timestamps -- see
+    ``verify_protocol_precommitment`` for that complementary, chronological
+    check, and the methodology doc's "Provenance" section for why both
+    checks, together, are what this benchmark treats as the load-bearing
+    integrity property.
     """
     protocol = agent_run["benchmark_protocol_commit"]
     commit = protocol.get("commit")
     if commit is None:
         return False
-    manifest = reconstruct_full_prompt_manifest_at_commit(commit, agent_run["case_id"])
-    if manifest is None:
+
+    state = _reconstruct_prompt_package_state_at_commit(commit, agent_run["case_id"])
+    if state is None:
         return False
     recorded = sorted(agent_run["prompt_package_manifest"], key=lambda entry: entry["path"])
-    reconstructed = sorted(manifest, key=lambda entry: entry["path"])
-    return recorded == reconstructed
+    reconstructed = sorted(state["manifest"], key=lambda entry: entry["path"])
+    if recorded != reconstructed:
+        return False
+
+    registry = reconstruct_protocol_registry_at_commit(commit)
+    if registry is None:
+        return False
+    expected_version = registry.get("case_revisions", {}).get(agent_run["case_id"])
+    if expected_version is None or state["case"].get("version") != expected_version:
+        return False
+    if registry.get("instructions_sha256") != state["instructions_sha256"]:
+        return False
+    if registry.get("skill_sha256") != state["skill_sha256"]:
+        return False
+
+    return verify_config_registry_match(agent_run, registry)
 
 
 def get_commit_committer_date(commit: str) -> datetime | None:

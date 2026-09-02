@@ -56,7 +56,7 @@
           "additionalProperties": false,
           "required": [
             "kind", "agent_type", "configured_model", "tool", "tool_version",
-            "task_id", "generation_started_at_utc", "generation_finished_at_utc"
+            "orchestrator_agent_handle", "generation_started_at_utc", "generation_finished_at_utc"
           ],
           "properties": {
             "kind": {"const": "copilot_task"},
@@ -64,7 +64,35 @@
             "configured_model": {"type": "string", "minLength": 1},
             "tool": {"type": "string", "minLength": 1},
             "tool_version": {"type": "string", "minLength": 1},
-            "task_id": {"type": ["string", "null"]},
+            "orchestrator_agent_handle": {
+              "description": "The caller-supplied name given to the orchestrating session's own sub-agent-launch tool when this capture's generating agent was invoked, echoed back by that tool's own session/agent registry as this sub-agent's runtime handle. This is NOT an identifier issued or attested by the model provider or by any Copilot platform component: it is chosen by the orchestrator itself before the call, so it proves internal record-keeping consistency across this benchmark's own history only. It aids traceability (e.g. confirming which sub-agent produced which raw response during a review) but cannot prove, on its own, that a given invocation was distinct from another, that no retry occurred, or that generation actually happened at any particular time -- those remain protocol attestations (see protocol_registry.json's invocation_protocol), not cryptographic proof. `externally_verifiable` is always `false` for exactly this reason. Required (non-null `value`) for every official capture generated after this field was introduced; `value: null` with `provenance: \"unavailable\"` only for earlier records where no handle was ever recorded.",
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["value", "provenance", "externally_verifiable"],
+              "properties": {
+                "value": {"type": ["string", "null"], "minLength": 1, "maxLength": 200},
+                "provenance": {
+                  "enum": ["caller_supplied_task_name_returned_as_runtime_handle", "unavailable"]
+                },
+                "externally_verifiable": {"const": false}
+              },
+              "allOf": [
+                {
+                  "if": {"properties": {"provenance": {"const": "unavailable"}}},
+                  "then": {"properties": {"value": {"const": null}}}
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "provenance": {
+                        "const": "caller_supplied_task_name_returned_as_runtime_handle"
+                      }
+                    }
+                  },
+                  "then": {"properties": {"value": {"type": "string"}}}
+                }
+              ]
+            },
             "generation_started_at_utc": {"type": ["string", "null"], "format": "date-time"},
             "generation_finished_at_utc": {"type": ["string", "null"], "format": "date-time"},
             "generation_timing_unavailable_reason": {"type": ["string", "null"], "minLength": 1, "maxLength": 500}
@@ -110,13 +138,19 @@
       }
     },
     "benchmark_protocol_commit": {
-      "description": "The repository commit whose committed prompt-package-defining files (case.json, metadata.json, history.fast-import, the bundled SKILL.md, and agent_harness.py's INSTRUCTIONS text) define the exact protocol this capture was generated under. 'verified' is true only when agent_harness.reconstruct_full_prompt_manifest_at_commit reconstructs the ENTIRE prompt package using ONLY files as committed at this commit (never the current working tree) and the resulting manifest matches this same capture's own recorded prompt_package_manifest path-for-path -- not merely that one file (e.g. case.json) matches. This is a cryptographic proof that the capture used the protocol version this commit defines, independent of and strictly stronger than any wall-clock ordering between the commit's timestamp and this capture's timestamps. When commit is null or reconstruction/verification cannot be performed, verified is false and note explains why.",
+      "description": "The repository commit whose committed files define the exact protocol this capture was generated under: case.json, metadata.json, history.fast-import, the bundled SKILL.md, agent_harness.py's INSTRUCTIONS text, AND protocol_registry.json (the predeclared config-a/config-b registry, INSTRUCTIONS/SKILL digests, invocation-protocol invariants, and case-revision pins). 'verified' is true only when agent_harness.recompute_benchmark_protocol_commit_verification both (1) reconstructs the ENTIRE prompt package using ONLY files as committed at this commit (never the current working tree) and finds it matches this capture's own recorded prompt_package_manifest path-for-path, AND (2) loads protocol_registry.json as committed at this same commit, confirms it is schema-valid, confirms its case_revisions entry for this capture's case matches, and confirms this capture's provider/model/agent-type/tool/invocation-kind match the registry's declared config for this capture's config id. A commit whose case.json happens to match but which carries no protocol_registry.json at all fails this check -- content-equality alone is not sufficient. This is independent of, and does not by itself prove, anything about wall-clock ordering between this commit and the capture's own timestamps (see verify_protocol_precommitment for that separate, complementary check). When commit is null or verification cannot be performed, verified is false and note explains why.",
       "type": "object",
       "additionalProperties": false,
       "required": ["commit", "verification_method", "verified", "note"],
       "properties": {
         "commit": {"type": ["string", "null"], "pattern": "^([0-9a-f]{40})?$"},
-        "verification_method": {"enum": ["prompt_manifest_hash_match", "unverified"]},
+        "verification_method": {
+          "enum": [
+            "full_manifest_and_protocol_registry_match",
+            "prompt_manifest_hash_match",
+            "unverified"
+          ]
+        },
         "verified": {"type": "boolean"},
         "note": {"type": "string", "minLength": 1, "maxLength": 1000}
       }

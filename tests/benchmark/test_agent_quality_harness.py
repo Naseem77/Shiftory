@@ -234,7 +234,11 @@ def _base_capture_kwargs(prompt_dir: Path, out_dir: Path) -> dict:
             "configured_model": "test-model",
             "tool": "copilot-cli",
             "tool_version": "1.0.0",
-            "task_id": None,
+            "orchestrator_agent_handle": {
+                "value": None,
+                "provenance": "unavailable",
+                "externally_verifiable": False,
+            },
             "generation_started_at_utc": None,
             "generation_finished_at_utc": None,
             "generation_timing_unavailable_reason": (
@@ -513,7 +517,11 @@ def test_agent_run_v2_schema_rejects_copilot_task_with_missing_timing_reason() -
             "configured_model": "test-model",
             "tool": "copilot-cli",
             "tool_version": "1.0.0",
-            "task_id": None,
+            "orchestrator_agent_handle": {
+                "value": None,
+                "provenance": "unavailable",
+                "externally_verifiable": False,
+            },
             "generation_started_at_utc": None,
             "generation_finished_at_utc": None,
             # generation_timing_unavailable_reason deliberately omitted

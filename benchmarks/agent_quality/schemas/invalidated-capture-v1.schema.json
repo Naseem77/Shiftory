@@ -22,7 +22,8 @@
       "enum": [
         "protocol-not-predeclared-before-generation",
         "prompt-fix-not-committed-before-generation",
-        "neutral-prompt-not-committed-before-generation"
+        "neutral-prompt-not-committed-before-generation",
+        "protocol-config-not-precommitted"
       ]
     },
     "config_id": {"enum": ["config-a", "config-b"]},

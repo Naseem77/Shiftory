@@ -1,0 +1,31 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "In `get_active_user`, the `lookup(user_id)` call was moved before the `if user_id is None` guard clause, causing `lookup(user_id)` to execute unconditionally upon function entry.",
+  "items": [
+    {
+      "id": "item_lookup_reordered",
+      "kind": "behavioral",
+      "title": "Lookup call moved before None guard clause in get_active_user",
+      "confidence": "inferred",
+      "citations": [
+        "source_47367c0a1408b9af64026e06",
+        "source_3f8b438b4293abc650f2981e",
+        "fact_55bc48a88302a581c0e2984c",
+        "fact_702f3e9dd68446566fe3d866"
+      ],
+      "before": "In `get_active_user`, if `user_id` is `None`, the function immediately returns `None` without calling `lookup(user_id)`. `lookup(user_id)` is only invoked when `user_id` is not `None`.",
+      "after": "In `get_active_user`, `lookup(user_id)` is invoked unconditionally before checking whether `user_id` is `None`. When `user_id` is `None`, `lookup(None)` is now executed before the function checks and returns `None`.",
+      "absence": null
+    }
+  ],
+  "coverage_owners": [
+    {
+      "evidence_id": "line_c8df1ee0c532a1578df4aaaa",
+      "owner_id": "item_lookup_reordered"
+    },
+    {
+      "evidence_id": "line_7f36f904827cbea0090230d5",
+      "owner_id": "item_lookup_reordered"
+    }
+  ]
+}

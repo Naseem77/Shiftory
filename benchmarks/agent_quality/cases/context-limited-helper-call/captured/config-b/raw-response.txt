@@ -1,0 +1,43 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "Enables strict mode validation in process_order by changing strict=False to strict=True in the validate() call.",
+  "items": [
+    {
+      "id": "item_process_order_strict_validation",
+      "kind": "behavioral",
+      "title": "Pass strict=True to validate() in process_order()",
+      "confidence": "extracted",
+      "before": "process_order(order) calls validate(order, strict=False) before submitting the order.",
+      "after": "process_order(order) calls validate(order, strict=True) before submitting the order.",
+      "citations": [
+        "source_971437523f603da69aad4ba2",
+        "source_476edeb5af7e94fc7f4f28ec",
+        "fact_038da75199fbdcd0ba98d145",
+        "fact_792e1fe7709de1884692c25d",
+        "fact_0320176b3790ee73360d75f6",
+        "fact_20219917c93aac5550c2744c"
+      ]
+    },
+    {
+      "id": "item_validate_implementation_ambiguity",
+      "kind": "ambiguity",
+      "title": "Downstream behavior and error handling of validate(order, strict=True) are undefined in repository",
+      "confidence": "ambiguous",
+      "statement": "The implementation and specification of validate() are not defined within the repository, so the exact validation rules, error handling, or failure modes introduced by strict=True cannot be determined from the available source code.",
+      "citations": [
+        "source_971437523f603da69aad4ba2",
+        "source_476edeb5af7e94fc7f4f28ec"
+      ]
+    }
+  ],
+  "coverage_owners": [
+    {
+      "evidence_id": "line_64f66366b63e75ecfb5c4355",
+      "owner_id": "item_process_order_strict_validation"
+    },
+    {
+      "evidence_id": "line_e632edd98ca6bad6e0e380f1",
+      "owner_id": "item_process_order_strict_validation"
+    }
+  ]
+}

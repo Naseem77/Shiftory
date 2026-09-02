@@ -1,0 +1,72 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-agent-run/v2",
+  "case_id": "reordering-guard-clause",
+  "candidate_id": "captured_config_a",
+  "provider": "openai (via GitHub Copilot CLI sub-agent)",
+  "model": {
+    "name": "gpt-5.3-codex",
+    "version": "unknown"
+  },
+  "agent_tool_version": "copilot-cli-1.0.80",
+  "evaluation_protocol": "Fresh, stateless GitHub Copilot CLI sub-agent (task tool, agent_type=general-purpose) given only this materialized prompt package directory (reconstructed from the committed protocol freeze) and instructed to run shiftory explain --graphora off against the fixture repository, follow SKILL.md, and write its final verified explanation verbatim to RAW_RESPONSE. Generated after commit 5c7289bd8e540317ce45d4407044c5c846698ecb (benchmarks/agent_quality/protocol_registry.json) was committed.",
+  "invocation": {
+    "kind": "copilot_task",
+    "agent_type": "general-purpose",
+    "configured_model": "gpt-5.3-codex",
+    "tool": "copilot-cli",
+    "tool_version": "1.0.80",
+    "task_id": null,
+    "generation_started_at_utc": null,
+    "generation_finished_at_utc": null,
+    "generation_timing_unavailable_reason": "The orchestrating session does not receive the sub-agent's internal start/end timestamps from the task tool API; only completion order and this function's own ingestion time are observed."
+  },
+  "capture_ingested_at_utc": "2026-09-02T06:00:03.012777+00:00",
+  "prompt_package_manifest": [
+    {
+      "path": "INSTRUCTIONS.md",
+      "sha256": "fcaedece84911bea6217bea59923cf5a85f0861897d3f74d4c998e8317908fa9"
+    },
+    {
+      "path": "SKILL.md",
+      "sha256": "0f7ddbe349e93b68924c2665f06e015114130083841702ce14c8c650b99c5be0"
+    },
+    {
+      "path": "case.json",
+      "sha256": "0387f8dccd4d6be76e705df4759d0fa82815d9beeacd6765dc33c5be19bb1ce9"
+    },
+    {
+      "path": "repository/app.py",
+      "sha256": "347c40f05d43f0b86240fb820953a192cbf635970cfa31eca11b8aab1311e1da"
+    }
+  ],
+  "prompt_package_digest": "ee094c4c4fed14e55d3f589caeda55348a3e1fb21cfa373b876db99537bebf05",
+  "evidence_sha256": "ff94d41714b897a965810768c5d6f96edb44d1ddf9634e82e91ef5c7f08f2224",
+  "engine_identity": {
+    "component": "shiftory",
+    "verification_method": "git_commit",
+    "value": "4d312b6bbe6300262e80ee8eb24e3cd7d7edf36b"
+  },
+  "benchmark_protocol_commit": {
+    "commit": "5c7289bd8e540317ce45d4407044c5c846698ecb",
+    "verification_method": "prompt_manifest_hash_match",
+    "verified": true,
+    "note": "Generated after commit 5c7289bd8e540317ce45d4407044c5c846698ecb (benchmarks/agent_quality/protocol_registry.json, case revision bump) was committed to this repository -- both content-equality (full-manifest reconstruction) and precommitment (this capture's own capture_ingested_at_utc postdates that commit's committer date) hold."
+  },
+  "generator_access_profile": {
+    "repository_access": true,
+    "filesystem_scope": "Runs in the same Copilot CLI environment as the orchestrating session; has general bash/file-system tool access and was instructed, but not sandboxed, to stay within the prompt package directory.",
+    "network_access": false,
+    "tool_access": [
+      "bash",
+      "view",
+      "edit",
+      "grep",
+      "glob"
+    ]
+  },
+  "isolation_method": "protocol",
+  "raw_response_sha256": "e7cd052a887652348d7287e277213c9e9b462b83782276b75873b884c2d28e4f",
+  "raw_response_bytes": 853,
+  "truncated": false,
+  "migrated_from_v1_sha256": null
+}

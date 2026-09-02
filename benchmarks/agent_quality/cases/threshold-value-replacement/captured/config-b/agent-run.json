@@ -1,0 +1,57 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-agent-run/v1",
+  "case_id": "threshold-value-replacement",
+  "candidate_id": "captured_config_b",
+  "provider": "google (via GitHub Copilot CLI sub-agent)",
+  "model": {
+    "name": "gemini-3.7-flash",
+    "version": "unknown"
+  },
+  "agent_tool_version": "copilot-cli-1.0.80",
+  "evaluation_protocol": "Fresh, stateless GitHub Copilot CLI sub-agent (task tool, agent_type=general-purpose) given only this materialized prompt package directory and instructed to run shiftory explain --graphora off against the fixture repository, follow SKILL.md, and write its final verified explanation verbatim to RAW_RESPONSE.",
+  "prompt_package_manifest": [
+    {
+      "path": "INSTRUCTIONS.md",
+      "sha256": "fcaedece84911bea6217bea59923cf5a85f0861897d3f74d4c998e8317908fa9"
+    },
+    {
+      "path": "SKILL.md",
+      "sha256": "0f7ddbe349e93b68924c2665f06e015114130083841702ce14c8c650b99c5be0"
+    },
+    {
+      "path": "case.json",
+      "sha256": "b0a1ebb66a57b9182b3b81a4c1d65f0b9bbe515608512d60d80e644fbb81057c"
+    },
+    {
+      "path": "repository/client.py",
+      "sha256": "dcd2cf58f88efbd2075afc7506bf3419448176fdd07a910e71739b36c7a4da2b"
+    }
+  ],
+  "prompt_package_digest": "b786f75c4a5eb8676db072240849a509574ba0011023ced06618015086fc1247",
+  "evidence_sha256": "c072915fd965b7a6777a3644b2f012a7b77524ad01d39e9e3eca5af9d6fcde61",
+  "shiftory_commit": "f4e1a03630bb650be1c6477837a733a4f9f6420e",
+  "command_argv": [],
+  "env_allowlist": [],
+  "generator_access_profile": {
+    "repository_access": true,
+    "filesystem_scope": "Runs in the same Copilot CLI environment as the orchestrating session; has general bash/file-system tool access and was instructed, but not sandboxed, to stay within the prompt package directory.",
+    "network_access": false,
+    "tool_access": [
+      "bash",
+      "view",
+      "edit",
+      "grep",
+      "glob"
+    ]
+  },
+  "isolation_method": "protocol",
+  "raw_response_sha256": "34bf100d9c84fc0aa799c502a67f0a733357d6c1181247acbf5cdc1b1cfd5db1",
+  "raw_response_bytes": 1370,
+  "stdout_sha256": null,
+  "stderr_sha256": null,
+  "truncated": false,
+  "timed_out": false,
+  "exit_status": null,
+  "started_at_utc": "2026-09-02T02:28:29.139088+00:00",
+  "finished_at_utc": "2026-09-02T02:28:29.139092+00:00"
+}

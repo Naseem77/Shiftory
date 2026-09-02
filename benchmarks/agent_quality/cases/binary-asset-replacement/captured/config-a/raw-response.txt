@@ -1,0 +1,49 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "The change replaces the binary contents of icon.dat, so consumers now read a different asset payload while the specific semantic/visual effect is not derivable from the provided binary-only evidence.",
+  "items": [
+    {
+      "id": "item-icon-binary-replaced",
+      "kind": "structural",
+      "title": "icon.dat binary payload was replaced",
+      "confidence": "extracted",
+      "statement": "The file icon.dat is modified as a binary unit, with its blob changing from 85025d98693fe77b700bcf818dfd8fcd13c4e961 to 4bf941a61efbd197352e63126c8b27701fe8ff3c.",
+      "citations": [
+        {
+          "id": "unit_522aa1f2f4bedd75c4d3005e"
+        }
+      ]
+    },
+    {
+      "id": "item-icon-consumer-observed-data-change",
+      "kind": "behavioral",
+      "title": "Readers of icon.dat now receive different bytes",
+      "confidence": "inferred",
+      "before": "Any code or process reading icon.dat received the previous binary payload.",
+      "after": "Any code or process reading icon.dat receives the new binary payload from the replacement blob.",
+      "citations": [
+        {
+          "id": "unit_522aa1f2f4bedd75c4d3005e"
+        }
+      ]
+    },
+    {
+      "id": "item-icon-semantic-effect-undetermined",
+      "kind": "unresolved",
+      "title": "Specific semantic or visual effect cannot be determined from this evidence",
+      "confidence": "unavailable",
+      "statement": "Because the evidence exposes only a binary unit without decoded content, the exact user-visible or semantic meaning of the asset change is not directly derivable here.",
+      "citations": [
+        {
+          "id": "unit_522aa1f2f4bedd75c4d3005e"
+        }
+      ]
+    }
+  ],
+  "coverage_owners": [
+    {
+      "evidence_id": "unit_522aa1f2f4bedd75c4d3005e",
+      "owner_id": "item-icon-binary-replaced"
+    }
+  ]
+}

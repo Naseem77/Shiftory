@@ -1,0 +1,57 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-agent-run/v1",
+  "case_id": "binary-asset-replacement",
+  "candidate_id": "captured_config_a",
+  "provider": "openai (via GitHub Copilot CLI sub-agent)",
+  "model": {
+    "name": "gpt-5.3-codex",
+    "version": "unknown"
+  },
+  "agent_tool_version": "copilot-cli-1.0.80",
+  "evaluation_protocol": "Fresh, stateless GitHub Copilot CLI sub-agent (task tool, agent_type=general-purpose) given only this materialized prompt package directory and instructed to run shiftory explain --graphora off against the fixture repository, follow SKILL.md, and write its final verified explanation verbatim to RAW_RESPONSE.",
+  "prompt_package_manifest": [
+    {
+      "path": "INSTRUCTIONS.md",
+      "sha256": "fcaedece84911bea6217bea59923cf5a85f0861897d3f74d4c998e8317908fa9"
+    },
+    {
+      "path": "SKILL.md",
+      "sha256": "0f7ddbe349e93b68924c2665f06e015114130083841702ce14c8c650b99c5be0"
+    },
+    {
+      "path": "case.json",
+      "sha256": "02b07a40e52b1e65f97331f6b493909e87503113eb3b21183c096ea6b23c81f3"
+    },
+    {
+      "path": "repository/icon.dat",
+      "sha256": "bc2ae48e004de7c6243ae5a7e03d3be9bab48cfe0d1da0e9af1b580b7b3f3748"
+    }
+  ],
+  "prompt_package_digest": "24e885ea889c12cf78c1d5c761e78fe33378eef46e08931f201ad503c35ccad2",
+  "evidence_sha256": "12b65f73af72a7bd15fb63336685ea8720e4021e20805067ff171eba3d95ee25",
+  "shiftory_commit": "f4e1a03630bb650be1c6477837a733a4f9f6420e",
+  "command_argv": [],
+  "env_allowlist": [],
+  "generator_access_profile": {
+    "repository_access": true,
+    "filesystem_scope": "Runs in the same Copilot CLI environment as the orchestrating session; has general bash/file-system tool access and was instructed, but not sandboxed, to stay within the prompt package directory.",
+    "network_access": false,
+    "tool_access": [
+      "bash",
+      "view",
+      "edit",
+      "grep",
+      "glob"
+    ]
+  },
+  "isolation_method": "protocol",
+  "raw_response_sha256": "0b36dfefc2a5a920c5b420aa5cc0546e7fbecd04821f8940591da0ac7f66a7e5",
+  "raw_response_bytes": 1875,
+  "stdout_sha256": null,
+  "stderr_sha256": null,
+  "truncated": false,
+  "timed_out": false,
+  "exit_status": null,
+  "started_at_utc": "2026-09-02T02:28:29.515636+00:00",
+  "finished_at_utc": "2026-09-02T02:28:29.515646+00:00"
+}

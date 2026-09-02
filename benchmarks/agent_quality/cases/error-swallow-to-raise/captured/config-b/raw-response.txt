@@ -1,0 +1,28 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "When loading configuration encounters a ValueError during JSON parsing, load_config now re-raises the exception instead of returning an empty dictionary.",
+  "items": [
+    {
+      "id": "item-reraise-value-error-on-invalid-config",
+      "kind": "behavioral",
+      "title": "Re-raise ValueError on invalid config JSON instead of swallowing it",
+      "confidence": "inferred",
+      "before": "When json.loads raises a ValueError during config loading, load_config catches the exception and returns an empty dictionary {}.",
+      "after": "When json.loads raises a ValueError during config loading, load_config catches the exception and re-raises it.",
+      "citations": [
+        "source_ee7cb38bbed948a647aba5aa",
+        "source_5cb3053b457d61a9c9068ba7"
+      ]
+    }
+  ],
+  "coverage_owners": [
+    {
+      "evidence_id": "line_d94bfbaf4c43679f1686eea4",
+      "owner_id": "item-reraise-value-error-on-invalid-config"
+    },
+    {
+      "evidence_id": "line_0786ea28854b2ac24f35bfd0",
+      "owner_id": "item-reraise-value-error-on-invalid-config"
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "schema": "shiftory.benchmark-agent-quality-agent-run/v1",
+  "case_id": "delete-add-not-a-rename",
+  "candidate_id": "captured_config_b",
+  "provider": "google (via GitHub Copilot CLI sub-agent)",
+  "model": {
+    "name": "gemini-3.7-flash",
+    "version": "unknown"
+  },
+  "agent_tool_version": "copilot-cli-1.0.80",
+  "evaluation_protocol": "Fresh, stateless GitHub Copilot CLI sub-agent (task tool, agent_type=general-purpose) given only this materialized prompt package directory and instructed to run shiftory explain --graphora off against the fixture repository, follow SKILL.md, and write its final verified explanation verbatim to RAW_RESPONSE.",
+  "prompt_package_manifest": [
+    {
+      "path": "INSTRUCTIONS.md",
+      "sha256": "fcaedece84911bea6217bea59923cf5a85f0861897d3f74d4c998e8317908fa9"
+    },
+    {
+      "path": "SKILL.md",
+      "sha256": "0f7ddbe349e93b68924c2665f06e015114130083841702ce14c8c650b99c5be0"
+    },
+    {
+      "path": "case.json",
+      "sha256": "25efda89e627fa99778473c15fb7842e2e5c988cdc3d90739d4125b873df7a07"
+    },
+    {
+      "path": "repository/utils.py",
+      "sha256": "b9d433bb05d2c399a892b1d33423bf64d14fdf97448a8a88e2d95cfd7f01df92"
+    },
+    {
+      "path": "repository/validators.py",
+      "sha256": "a830333312c4c9c2233bb02762bd498203b1c3bf0527614735693b4b79f6d167"
+    }
+  ],
+  "prompt_package_digest": "3e46a931b7564e481523f60ad5f20adb8ea07857ea9b6eeaef69daa7220493b7",
+  "evidence_sha256": "b25bdab099c94efdb948a1d780436aeea67e66963c45570b42c6ebe90a9ebe19",
+  "shiftory_commit": "f4e1a03630bb650be1c6477837a733a4f9f6420e",
+  "command_argv": [],
+  "env_allowlist": [],
+  "generator_access_profile": {
+    "repository_access": true,
+    "filesystem_scope": "Runs in the same Copilot CLI environment as the orchestrating session; has general bash/file-system tool access and was instructed, but not sandboxed, to stay within the prompt package directory.",
+    "network_access": false,
+    "tool_access": [
+      "bash",
+      "view",
+      "edit",
+      "grep",
+      "glob"
+    ]
+  },
+  "isolation_method": "protocol",
+  "raw_response_sha256": "e9d293f025f28e937c3737134a62ad45d3245e0853179a54e8fc872e8c89d5a1",
+  "raw_response_bytes": 2210,
+  "stdout_sha256": null,
+  "stderr_sha256": null,
+  "truncated": false,
+  "timed_out": false,
+  "exit_status": null,
+  "started_at_utc": "2026-09-02T02:28:29.337425+00:00",
+  "finished_at_utc": "2026-09-02T02:28:29.337429+00:00"
+}

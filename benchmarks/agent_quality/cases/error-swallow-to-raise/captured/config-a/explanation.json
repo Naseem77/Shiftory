@@ -1,0 +1,32 @@
+{
+  "schema": "shiftory.explanation/v1",
+  "summary": "load_config no longer swallows parse failures; it now propagates the parse exception to callers.",
+  "items": [
+    {
+      "id": "item_load_config_parse_error_propagates",
+      "kind": "behavioral",
+      "title": "Parse failures now propagate from load_config",
+      "confidence": "inferred",
+      "citations": [
+        {
+          "id": "source_ee7cb38bbed948a647aba5aa"
+        },
+        {
+          "id": "source_5cb3053b457d61a9c9068ba7"
+        }
+      ],
+      "before": "If parsing raised inside load_config, the except branch returned an empty dictionary, hiding the parse error from callers.",
+      "after": "If parsing raises inside load_config, the except branch re-raises the exception, so callers receive the parse error instead of {}."
+    }
+  ],
+  "coverage_owners": [
+    {
+      "evidence_id": "line_d94bfbaf4c43679f1686eea4",
+      "owner_id": "item_load_config_parse_error_propagates"
+    },
+    {
+      "evidence_id": "line_0786ea28854b2ac24f35bfd0",
+      "owner_id": "item_load_config_parse_error_propagates"
+    }
+  ]
+}

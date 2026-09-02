@@ -649,3 +649,85 @@ def test_recompute_benchmark_protocol_commit_verification_rejects_nonexistent_co
         agent_run["benchmark_protocol_commit"], commit="f" * 40
     )
     assert ah.recompute_benchmark_protocol_commit_verification(agent_run) is False
+
+
+# -- directory-exclusivity invariants (registry_version 3) -------------------
+
+
+def test_prepare_prompt_package_refuses_a_preexisting_directory(tmp_path: Path) -> None:
+    """Reproduces the exact defect that produced six unrecoverable lost
+    generation attempts: materializing one prompt-package directory shared
+    across two invocations for the same case (e.g. config-a and config-b)
+    let both write RAW_RESPONSE to the same path, silently overwriting one.
+    A second call targeting the same out_dir must now fail loudly, before
+    any generator is ever pointed at it, rather than silently deleting and
+    recreating the directory out from under a concurrent or subsequent
+    invocation."""
+    case_dir = Path(__file__).resolve().parents[2] / "benchmarks" / "agent_quality" / "cases"
+    out_dir = tmp_path / "shared"
+    ah.prepare_prompt_package(case_dir / CASE_ID, out_dir, CASE_ID, config_id="config-a")
+    assert (out_dir / "case.json").is_file()
+
+    with pytest.raises(v.AgentQualityError, match="already exists"):
+        ah.prepare_prompt_package(case_dir / CASE_ID, out_dir, CASE_ID, config_id="config-b")
+
+
+def test_prepare_prompt_package_records_an_exclusivity_claim_sentinel(tmp_path: Path) -> None:
+    """The claim sentinel lives beside, never inside, the prompt directory
+    -- it must never appear in the manifest a generating agent could read,
+    and it records which case/config/registry revision claimed this
+    directory, for audit."""
+    case_dir = Path(__file__).resolve().parents[2] / "benchmarks" / "agent_quality" / "cases"
+    out_dir = tmp_path / "prompt"
+    result = ah.prepare_prompt_package(
+        case_dir / CASE_ID, out_dir, CASE_ID, config_id="config-a", protocol_registry_version=3
+    )
+    claim_path = tmp_path / ".prompt.invocation-claim.json"
+    assert claim_path.is_file()
+    claim = json.loads(claim_path.read_text())
+    assert claim["case_id"] == CASE_ID
+    assert claim["config_id"] == "config-a"
+    assert claim["protocol_registry_version"] == 3
+    manifest_paths = {entry["path"] for entry in result["prompt_package_manifest"]}
+    assert not any("invocation-claim" in path for path in manifest_paths)
+
+
+def test_capture_result_refuses_a_preexisting_out_dir(tmp_path: Path) -> None:
+    """A second capture_result call into an out_dir that already holds a
+    prior invocation's recorded output must fail loudly, never silently
+    overwrite the earlier record -- the output-side half of the same
+    exclusivity invariant prepare_prompt_package enforces on the input
+    side."""
+    prompt_dir = tmp_path / "prompt"
+    prompt_dir.mkdir()
+    out_dir = tmp_path / "out"
+    document = _explanation_document()
+    (prompt_dir / "RAW_RESPONSE").write_bytes(json.dumps(document).encode("utf-8"))
+    ah.capture_result(**_base_capture_kwargs(prompt_dir, out_dir))
+
+    with pytest.raises(v.AgentQualityError, match="already exists"):
+        ah.capture_result(**_base_capture_kwargs(prompt_dir, out_dir))
+
+    # An explicit, visible opt-in still works for deliberate corrections.
+    ah.capture_result(**_base_capture_kwargs(prompt_dir, out_dir), allow_existing_out_dir=True)
+
+
+def test_protocol_registry_v3_declares_directory_isolation_invariants() -> None:
+    """The committed protocol_registry.json (registry_version >= 3) must
+    declare all three directory-isolation invariants as true -- proving the
+    registry's own claim about this benchmark's execution discipline is
+    schema/cross-check-verified, not merely asserted in prose."""
+    registry_path = (
+        Path(__file__).resolve().parents[2]
+        / "benchmarks"
+        / "agent_quality"
+        / "protocol_registry.json"
+    )
+    registry = json.loads(registry_path.read_text())
+    assert registry["registry_version"] >= 3
+    for key in (
+        "unique_prompt_directory_per_invocation",
+        "output_directory_must_not_preexist",
+        "exclusive_directory_creation",
+    ):
+        assert registry["invocation_protocol"][key] is True, key

@@ -18,6 +18,8 @@ SCHEMA_NAMES = [
     "agent-run-v1",
     "agent-run-v2",
     "invalidated-capture-v1",
+    "invalidated-generation-attempt-v1",
+    "protocol-registry-v1",
     "score-v1",
     "scores-v1",
 ]

@@ -1,7 +1,7 @@
 {
   "schema": "shiftory.benchmark-agent-quality-case/v1",
   "id": "error-swallow-to-raise",
-  "version": 1,
+  "version": 2,
   "category": "state-error-handling",
   "description": "A config-loading function's except clause changes from swallowing a parse error to re-raising it.",
   "fixture": {

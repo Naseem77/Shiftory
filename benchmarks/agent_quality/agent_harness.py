@@ -98,15 +98,62 @@ def _manifest_for_dir(out_dir: Path) -> list[dict[str, str]]:
     return manifest
 
 
-def prepare_prompt_package(case_dir: Path, out_dir: Path, case_id: str) -> dict[str, Any]:
+def claim_exclusive_directory(directory: Path, *, claim: dict[str, Any]) -> None:
+    """Atomically create ``directory``, which must not already exist, and
+    record a sibling JSON sentinel (never inside ``directory`` itself, so it
+    can never leak into agent-visible prompt-package content) describing
+    what this invocation claims it for. Raises ``AgentQualityError`` --
+    never silently reuses, merges into, or overwrites an existing directory
+    -- if it already exists. This closes the exact defect that let two
+    invocations for the same case share one directory and silently
+    overwrite each other's ``RAW_RESPONSE`` (see ``protocol_registry.json``'s
+    ``registry_version`` 3 ``prior_incidents`` entry and the
+    ``invalidated-generation-attempt-v1`` records for the resulting
+    unrecoverable lost attempts).
+    """
+    try:
+        directory.mkdir(parents=True, exist_ok=False)
+    except FileExistsError as error:
+        raise v.AgentQualityError(
+            f"{directory} already exists -- refusing to reuse or overwrite an "
+            "existing invocation directory (exclusive_directory_creation invariant)"
+        ) from error
+    claim_path = directory.parent / f".{directory.name}.invocation-claim.json"
+    claim_path.write_text(json.dumps(claim, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def prepare_prompt_package(
+    case_dir: Path,
+    out_dir: Path,
+    case_id: str,
+    *,
+    config_id: str | None = None,
+    protocol_registry_version: int | None = None,
+) -> dict[str, Any]:
     """Materialize an isolated prompt-package directory for one case.
+
+    ``out_dir`` must not already exist: this function claims it exclusively
+    via ``claim_exclusive_directory`` rather than silently deleting and
+    recreating it, so a caller that accidentally reuses a directory across
+    two different invocations (e.g. two configs of the same case sharing
+    one directory) fails loudly before either invocation's output can
+    overwrite the other's, instead of one silently clobbering the other.
+    When ``config_id``/``protocol_registry_version`` are given, they are
+    recorded in the exclusivity sentinel for audit; both are optional so
+    existing single-directory-per-test callers are unaffected.
 
     Returns a ``prompt_package_manifest``-shaped list of ``{path, sha256}``
     entries plus a combined digest, suitable for recording in ``agent-run-v2``.
     """
-    if out_dir.exists():
-        shutil.rmtree(out_dir)
-    out_dir.mkdir(parents=True)
+    claim_exclusive_directory(
+        out_dir,
+        claim={
+            "case_id": case_id,
+            "config_id": config_id,
+            "protocol_registry_version": protocol_registry_version,
+            "claimed_at_utc": datetime.now(timezone.utc).isoformat(),
+        },
+    )
 
     repository, resolved = fx.reconstruct_fixture(case_dir, out_dir, "repository")
     case = v.load_json_strict(case_dir / "case.json")
@@ -553,6 +600,7 @@ def capture_result(
     timeout: float = 120.0,
     max_output_bytes: int = v.MAX_RAW_RESPONSE_BYTES,
     copilot_task_info: dict[str, Any] | None = None,
+    allow_existing_out_dir: bool = False,
 ) -> dict[str, Any]:
     """Run (optionally) a configured agent command, then read and validate
     whatever raw response it (or a prior manual/interactive run) left at
@@ -560,6 +608,15 @@ def capture_result(
     ``.bin``), ``out_dir/agent-run.json``, and ``out_dir/explanation.json``
     only if the raw response is strictly valid per the protocol above.
     Returns the written ``agent-run-v2`` record.
+
+    ``out_dir`` must not already exist unless the caller explicitly passes
+    ``allow_existing_out_dir=True`` -- a deliberate, visible opt-in for
+    legitimate maintenance (e.g. correcting a previously-recorded capture),
+    never for silently retrying or overwriting a fresh generation attempt.
+    The default strict behavior is what prevents two invocations for the
+    same case/config from silently overwriting each other's recorded
+    output, matching ``protocol_registry.json``'s
+    ``output_directory_must_not_preexist`` invariant.
 
     Exactly one of two invocation shapes applies:
 
@@ -584,6 +641,13 @@ def capture_result(
             "capture_result requires copilot_task_info when command_argv is not given"
         )
 
+    if out_dir.exists() and not allow_existing_out_dir:
+        raise v.AgentQualityError(
+            f"{out_dir} already exists -- refusing to reuse or overwrite an existing "
+            "output directory (output_directory_must_not_preexist invariant); pass "
+            "allow_existing_out_dir=True only for a deliberate, visible correction, "
+            "never to silently retry or overwrite a fresh generation attempt"
+        )
     out_dir.mkdir(parents=True, exist_ok=True)
 
     stdout = b""

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shiftory.dev/schemas/benchmark-agent-quality-invalidated-generation-attempt-v1.json",
+  "title": "Shiftory agent-quality lost/unrecoverable generation attempt",
+  "description": "A record of a generation attempt whose raw output bytes were never recoverable at all -- distinct from invalidated-capture-v1, which archives an ACTUAL, hash-verified raw response that was later withdrawn. This schema exists specifically for the registry_version 2 shared-prompt-directory defect: two invocations (config-a and config-b of the same case) were pointed at one shared directory, both wrote RAW_RESPONSE to the same path, and one silently overwrote the other before either byte stream was ever read by agent_harness.capture_result -- so there is no raw response, no sha256, and no explanation to preserve for the overwritten invocation. This record exists so the incident is honestly represented as structured, machine-readable data (never merely prose disclosure), while being explicit that it cannot be audited the way a real capture archive can: there are no bytes to hash-verify. Fields that were never genuinely observed are null with an explicit reason, never fabricated.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "case_id", "config_id", "model_name", "orchestrator_agent_handle",
+    "protocol_commit", "protocol_registry_version", "cause", "raw_response_status",
+    "provenance_limitation", "orchestrator_reported_metadata", "discovered_by"
+  ],
+  "properties": {
+    "schema": {"const": "shiftory.benchmark-agent-quality-invalidated-generation-attempt/v1"},
+    "case_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"},
+    "config_id": {"enum": ["config-a", "config-b"]},
+    "model_name": {"type": "string", "minLength": 1},
+    "orchestrator_agent_handle": {
+      "description": "The caller-supplied name given to the orchestrating session's own sub-agent-launch tool for this specific invocation -- recoverable from the orchestrator's own still-idle agent registry after the incident, and thus real, though (like agent-run-v2's orchestrator_agent_handle) never provider- or platform-issued attestation.",
+      "type": "string",
+      "minLength": 1
+    },
+    "protocol_commit": {
+      "description": "The benchmark_protocol_commit this invocation was generated under -- the commit that was current when the invocation was launched, not the later commit that superseded it.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "protocol_registry_version": {"type": "integer", "minimum": 1},
+    "cause": {"const": "shared-prompt-directory-raw-response-collision"},
+    "raw_response_status": {"const": "unrecoverable_overwritten"},
+    "provenance_limitation": {
+      "description": "An explicit statement of exactly what is, and is not, known about this attempt -- never implying the raw bytes were inspected, scored, or ruled out as a cherry-pick candidate.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "orchestrator_reported_metadata": {
+      "description": "Whatever the orchestrator's own tooling reports about this invocation after the fact (elapsed time since launch, turn count) -- explicitly labeled as orchestrator-tool-reported bookkeeping, never provider-confirmed generation timing or duration.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["elapsed_seconds_at_discovery", "total_turns", "provenance"],
+      "properties": {
+        "elapsed_seconds_at_discovery": {"type": ["number", "null"]},
+        "total_turns": {"type": ["integer", "null"]},
+        "provenance": {"const": "orchestrator_tool_reported_not_provider_attested"}
+      }
+    },
+    "discovered_by": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actor_type", "actor", "method", "timestamp"],
+      "properties": {
+        "actor_type": {"enum": ["agent", "human"]},
+        "actor": {"type": "string", "minLength": 1},
+        "method": {"type": "string", "minLength": 1, "maxLength": 2000},
+        "timestamp": {"type": "string", "format": "date-time"}
+      }
+    }
+  }
+}

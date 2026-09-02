@@ -402,7 +402,20 @@ def validate_protocol_registry(registry: dict[str, Any], cases_dir: Path) -> Non
     """Validate a protocol-registry-v1 document against its schema and check
     that every ``case_revisions`` entry matches the actual committed
     ``case.json`` ``version`` for that case -- so the registry can never
-    silently drift from the case content it claims to freeze."""
+    silently drift from the case content it claims to freeze.
+
+    Additionally, ``registry_version >= 3`` must declare the stricter
+    directory-isolation invariants (``unique_prompt_directory_per_invocation``,
+    ``output_directory_must_not_preexist``, ``exclusive_directory_creation``,
+    all ``const: true``) introduced after registry_version 2's shared-directory
+    RAW_RESPONSE collision produced six unrecoverable lost generation attempts
+    (see ``invalidated-generation-attempt-v1`` records). This is enforced here,
+    not in the JSON schema itself, so historical registry_version 2 content
+    (which predates these fields and is still the referenced protocol for
+    unaffected cases) continues to validate honestly as what it always was,
+    rather than being retroactively required to satisfy a rule it never
+    claimed to meet.
+    """
     validate_against_schema(registry, "protocol-registry-v1")
     for case_id, expected_version in registry["case_revisions"].items():
         case_path = cases_dir / case_id / "case.json"
@@ -414,3 +427,33 @@ def validate_protocol_registry(registry: dict[str, Any], cases_dir: Path) -> Non
                 f"protocol_registry.json says {case_id!r} is at revision {expected_version}, "
                 f"but its committed case.json is at version {case['version']}"
             )
+    if registry["registry_version"] >= 3:
+        directory_invariants = (
+            "unique_prompt_directory_per_invocation",
+            "output_directory_must_not_preexist",
+            "exclusive_directory_creation",
+        )
+        for key in directory_invariants:
+            if registry["invocation_protocol"].get(key) is not True:
+                raise AgentQualityError(
+                    f"protocol_registry.json is registry_version "
+                    f"{registry['registry_version']} (>= 3) but invocation_protocol.{key} "
+                    "is not true -- registry_version 3+ must declare the directory-isolation "
+                    "invariants introduced after registry_version 2's shared-directory "
+                    "collision incident"
+                )
+
+
+def validate_invalidated_generation_attempt(record_path: Path) -> dict[str, Any]:
+    """Full structural validation of one lost-generation-attempt incident
+    record (``invalidated-generation-attempt-v1``) -- a generation attempt
+    whose raw output bytes were never recoverable at all, distinct from
+    ``invalidated-capture-v1`` (which archives actual, hash-verified raw
+    bytes that were later withdrawn). There are no bytes to hash-verify
+    here; this function only confirms the record itself is schema-valid and
+    honest about that limitation (``raw_response_status`` is a hard
+    ``const``, so a record can never claim anything other than
+    ``unrecoverable_overwritten`` under this schema)."""
+    record = load_json_strict(record_path)
+    validate_against_schema(record, "invalidated-generation-attempt-v1")
+    return record

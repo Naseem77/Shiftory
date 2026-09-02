@@ -1378,3 +1378,99 @@ def test_grams_are_built_only_when_a_residual_check_needs_them() -> None:
     result = validate_explanation(packet, manifest, require_grounding=True)
     assert result.grounding is not None
     assert result.grounding.claim_total == 1
+
+
+def repeated_line_packet(pairs: int) -> dict[str, Any]:
+    """Every changed line is identical, as in a lockfile diff."""
+    lines: list[dict[str, Any]] = []
+    spans: list[dict[str, Any]] = []
+    span_ids: list[str] = []
+    for side, prefix in (("before", "b"), ("after", "a")):
+        for index in range(pairs):
+            lines.append({"id": f"{prefix}{index}", "side": side, "content": '      "dev": true,'})
+            spans.append(
+                {
+                    "id": f"s{prefix}{index}",
+                    "side": side,
+                    "start_line": index + 1,
+                    "end_line": index + 1,
+                    "line_ids": [f"{prefix}{index}"],
+                    "replacement_span_id": None,
+                }
+            )
+            span_ids.append(f"s{prefix}{index}")
+    return {
+        "schema": "shiftory.evidence/v1",
+        "comparison": {"identity": "identity"},
+        "files": [
+            {
+                "old_path": "lock.json",
+                "new_path": "lock.json",
+                "units": [{"id": "u", "kind": "text", "hunk_ids": ["h1"], "metadata": {}}],
+                "hunks": [{"id": "h1", "span_ids": span_ids, "lines": lines}],
+                "spans": spans,
+                "citations": [],
+            }
+        ],
+        "graph": {"status": "disabled", "facts": []},
+    }
+
+
+def test_a_rejected_residual_names_a_bounded_number_of_lines() -> None:
+    """A file of identical lines must not produce a diagnostic per line."""
+    pairs = 200
+    packet = repeated_line_packet(pairs)
+    manifest: dict[str, Any] = {
+        "schema": "shiftory.explanation/v1",
+        "summary": "Lock entries change.",
+        "items": [
+            {
+                "id": "solo",
+                "kind": "structural",
+                "title": "Solo",
+                "confidence": "extracted",
+                "citations": [],
+                "grounding": {
+                    "claims": [
+                        {
+                            "id": "added",
+                            "type": "addition",
+                            "support_level": "verified",
+                            "support": ["sa0"],
+                            "literal": '"dev": true,',
+                        }
+                    ]
+                },
+            }
+        ],
+        "coverage_owners": [
+            {"evidence_id": f"a{index}", "owner_id": "solo"} for index in range(pairs)
+        ]
+        + [{"evidence_id": f"b{index}", "owner_id": "solo"} for index in range(pairs)],
+    }
+    with pytest.raises(ValidationError) as error:
+        validate_explanation(packet, manifest, require_grounding=True)
+    entries = error.value.details["errors"]
+    assert [entry["code"] for entry in entries] == ["grounding.absence_violated"]
+    message = entries[0]["message"]
+    assert message.endswith("so it is moved or retained rather than added")
+    assert message.count("b") >= 1
+    assert " and more)" in message
+    # Five named ids plus the marker, never one per matching line.
+    assert len(message) < 300
+
+
+def test_residual_collection_stops_at_the_reporting_limit() -> None:
+    packet = repeated_line_packet(50)
+    index = grounding.index_evidence(packet)
+    regions = index.supports["sa0"].regions
+    matches = grounding._residual_lines(regions, index, "before", '"dev": true,')
+    assert len(matches) == grounding.RESIDUAL_REPORT_LIMIT + 1
+
+
+def test_a_small_residual_is_reported_in_full() -> None:
+    packet = repeated_line_packet(2)
+    index = grounding.index_evidence(packet)
+    regions = index.supports["sa0"].regions
+    matches = grounding._residual_lines(regions, index, "before", '"dev": true,')
+    assert matches == ["b0", "b1"]

@@ -23,6 +23,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from itertools import islice
 from typing import Any
 
 CLAIM_TYPES = (
@@ -51,6 +52,7 @@ SIDES = ("before", "after")
 MAX_CLAIMS_PER_ITEM = 32
 MAX_SUPPORT_PER_CLAIM = 32
 MAX_LITERAL_LENGTH = 512
+RESIDUAL_REPORT_LIMIT = 5
 
 _LEVEL_STRENGTH = {
     "verified": 4,
@@ -1633,12 +1635,14 @@ def _sided_presence(
         return proof
     residual = _residual_lines(regions, index, other, literal)
     if residual:
+        named = ", ".join(residual[:RESIDUAL_REPORT_LIMIT])
+        extra = " and more" if len(residual) > RESIDUAL_REPORT_LIMIT else ""
         diagnostics.add(
             "grounding.absence_violated",
             f"{path}.literal",
             (
                 f"{literal!r} also appears in changed {other} line(s) of the same file "
-                f"({', '.join(residual)}), so it is moved or retained rather than {verb}"
+                f"({named}{extra}), so it is moved or retained rather than {verb}"
             ),
         )
     return proof
@@ -1655,6 +1659,11 @@ def _residual_lines(
     The scope is every changed file the claim's support touches, not only the
     lines this item owns, so narrow ownership cannot manufacture a verified
     addition or deletion for text that merely moved.
+
+    The caller needs to know that a residual exists and to name a few examples,
+    so collection stops just past the reporting limit. A file of identical lines
+    would otherwise make both the search and the resulting message grow with the
+    comparison for every rejected claim.
     """
     found: list[str] = []
     for file_index in sorted(
@@ -1678,9 +1687,14 @@ def _residual_lines(
             key, ""
         ):
             matches = tuple(
-                record.id
-                for record in index.lines_by_file_side.get(key, ())
-                if literal in record.content
+                islice(
+                    (
+                        record.id
+                        for record in index.lines_by_file_side.get(key, ())
+                        if literal in record.content
+                    ),
+                    RESIDUAL_REPORT_LIMIT + 1,
+                )
             )
         index.residual_matches[memo_key] = matches
         found.extend(matches)

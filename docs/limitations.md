@@ -196,6 +196,21 @@ and Markdown output and significant Graphora indexing work.
 
 The byte metrics are serialized byte counts, not model-token estimates.
 
+## Grounding cost
+
+Validation is linear in the comparison for every shape we measure, including
+many explanation items that each declare many claims. Support binding and
+narrowing are decided once per item and coarse reference and read whichever side
+is smaller; each evidence id resolves to one immutable record with the index; and
+an addition or deletion rejects an absent literal by testing its own text windows
+against the opposite side, without searching that side.
+
+One case remains proportional to distinct literals times the size of the
+opposite side: an `addition` or `deletion` claim whose literal genuinely does
+occur on the other side. Those claims are false by construction and are always
+rejected. The rejection itself is bounded — the search stops once it has enough
+lines to name, and the diagnostic names at most five.
+
 ## Privacy and retention
 
 Git analysis and Graphora enrichment run locally. `--pr` uses `gh pr view` and
